@@ -1,0 +1,248 @@
+name: wapeB
+version: '1.0.0'
+main: dev.azuyo.wapeB.WapeB
+api-version: '1.21'
+authors: [ resonancehu ]
+description: A comprehensive punishment plugin.
+prefix: wapeB
+
+commands:
+  ban:
+    description: Bans a player.
+    usage: /ban <player> [time] [reason] [-s]
+    aliases: [b]
+  banip:
+    description: Bans a player's IP address.
+    usage: /banip <player/ip> [time] [reason] [-s]
+    aliases: [bi, ipban]
+  tempban:
+    description: Temporarily bans a player.
+    usage: /tempban <player> <time> [reason] [-s]
+    aliases: [tb]
+  tempbanip:
+    description: Temporarily bans a player's IP address.
+    usage: /tempbanip <player/ip> <time> [reason] [-s]
+    aliases: [tbi]
+  mute:
+    description: Mutes a player.
+    usage: /mute <player> [time] [reason] [-s]
+    aliases: [m]
+  tempmute:
+    description: Temporarily mutes a player.
+    usage: /tempmute <player> <time> [reason] [-s]
+    aliases: [tm]
+  muteip:
+    description: Mutes a player's IP address.
+    usage: /muteip <player/ip> [time] [reason] [-s]
+    aliases: [mi, ipmute]
+  tempmuteip:
+    description: Temporarily mutes a player's IP address.
+    usage: /tempmuteip <player/ip> <time> [reason] [-s]
+    aliases: [tmi]
+  kick:
+    description: Kicks a player from the server.
+    usage: /kick <player> [reason] [-s]
+    aliases: [k]
+  kickall:
+    description: Kicks all players from the server.
+    usage: /kickall [reason]
+    aliases: [ka]
+  warn:
+    description: Warns a player.
+    usage: /warn <player> <reason> [-s]
+    aliases: [w]
+  unwarn:
+    description: Removes a warning from a player.
+    usage: /unwarn <player> <id> [-s]
+    aliases: [uw]
+  unban:
+    description: Unbans a player or IP address.
+    usage: /unban <player/ip> [reason] [-s]
+    aliases: [ub]
+  unmute:
+    description: Unmutes a player or IP address.
+    usage: /unmute <player/ip> [reason] [-s]
+    aliases: [um]
+  warnings:
+    description: Shows a player's warnings.
+    usage: /warnings <player>
+    aliases: [warns]
+  history:
+    description: Shows a player's punishment history.
+    usage: /history <player>
+    aliases: [hist, h]
+  checkban:
+    description: Checks a player's active ban.
+    usage: /checkban <player>
+    aliases: [cb]
+  checkmute:
+    description: Checks a player's active mute.
+    usage: /checkmute <player>
+    aliases: [cm]
+  freeze:
+    description: Freezes a player.
+    usage: /freeze <player> [reason]
+    aliases: [ss]
+  unfreeze:
+    description: Unfreezes a player.
+    usage: /unfreeze <player>
+    aliases: [unss]
+  alts:
+    description: Shows a player's alts based on IP address.
+    usage: /alts <player>
+    aliases: [duplicates, altslist]
+  banlist:
+    description: Lists all active bans.
+    usage: /banlist
+    aliases: [blist]
+  staffhistory:
+    description: Shows a staff member's punishment history.
+    usage: /staffhistory <staff_name>
+    aliases: [shist, sh]
+  lockdown:
+    description: Manages the server lockdown state.
+    usage: /lockdown <on|off|reason>
+    aliases: [ld]
+  wapeb:
+    description: Main command for the wapeB plugin.
+    usage: /wapeb <reload>
+    aliases: [wb]
+  globalunban:
+    description: Removes all active bans from the server.
+    usage: /globalunban
+    aliases: [gunban]
+  punish:
+    description: Opens the Punishment GUI for a player.
+    usage: /punish <player>
+    aliases: [p]
+  punish-rollback:
+    description: Undoes a specific punishment by ID.
+    usage: /punish-rollback <id>
+    aliases: [pundo, rollback]
+
+permissions:
+  wapeb.*:
+    description: Gives access to all wapeB commands and features.
+    default: op
+    children:
+      wapeb.ban: true
+      wapeb.banip: true
+      wapeb.mute: true
+      wapeb.muteip: true
+      wapeb.kick: true
+      wapeb.kickall: true
+      wapeb.kickall.bypass: true
+      wapeb.warn: true
+      wapeb.unwarn: true
+      wapeb.unban: true
+      wapeb.unmute: true
+      wapeb.warnings: true
+      wapeb.history: true
+      wapeb.checkban: true
+      wapeb.checkmute: true
+      wapeb.freeze: true
+      wapeb.unfreeze: true
+      wapeb.alts: true
+      wapeb.banlist: true
+      wapeb.staffhistory: true
+      wapeb.lockdown: true
+      wapeb.lockdown.bypass: true
+      wapeb.reload: true
+      wapeb.unlink: true
+      wapeb.punish.gui: true
+      wapeb.rollback: true
+      wapeb.notify: true
+      wapeb.notify.punishment: true
+      wapeb.alts.notify: true
+      wapeb.sentinel.bypass: true
+
+  wapeb.ban:
+    description: Allows banning players.
+    default: op
+  wapeb.banip:
+    description: Allows IP banning players.
+    default: op
+  wapeb.mute:
+    description: Allows muting players.
+    default: op
+  wapeb.muteip:
+    description: Allows IP muting players.
+    default: op
+  wapeb.kick:
+    description: Allows kicking players.
+    default: op
+  wapeb.kickall:
+    description: Allows kicking all players.
+    default: op
+  wapeb.kickall.bypass:
+    description: Bypasses being kicked by /kickall.
+    default: op
+  wapeb.warn:
+    description: Allows warning players.
+    default: op
+  wapeb.unwarn:
+    description: Allows removing warnings.
+    default: op
+  wapeb.unban:
+    description: Allows unbanning players or IPs.
+    default: op
+  wapeb.unmute:
+    description: Allows unmuting players or IPs.
+    default: op
+  wapeb.warnings:
+    description: Allows viewing a player's warnings.
+    default: op
+  wapeb.history:
+    description: Allows viewing a player's punishment history.
+    default: op
+  wapeb.checkban:
+    description: Allows checking a player's active ban.
+    default: op
+  wapeb.checkmute:
+    description: Allows checking a player's active mute.
+    default: op
+  wapeb.freeze:
+    description: Allows freezing players.
+    default: op
+  wapeb.unfreeze:
+    description: Allows unfreezing players.
+    default: op
+  wapeb.alts:
+    description: Allows viewing a player's alts.
+    default: op
+  wapeb.banlist:
+    description: Allows listing all active bans.
+    default: op
+  wapeb.staffhistory:
+    description: Allows viewing a staff member's punishment history.
+    default: op
+  wapeb.lockdown:
+    description: Allows managing the server lockdown state.
+    default: op
+  wapeb.lockdown.bypass:
+    description: Bypasses the server lockdown.
+    default: op
+  wapeb.reload:
+    description: Allows reloading the plugin configuration.
+    default: op
+  wapeb.unlink:
+    description: Allows unlinking the web API account.
+    default: op
+  wapeb.punish.gui:
+    description: Allows opening the Punishment GUI.
+    default: op
+  wapeb.rollback:
+    description: Allows rolling back a specific punishment.
+    default: op
+  wapeb.notify:
+    description: Receives punishment notifications.
+    default: op
+  wapeb.notify.punishment:
+    description: Receives punishment notifications (configurable).
+    default: op
+  wapeb.alts.notify:
+    description: Receives notifications when alts join.
+    default: op
+  wapeb.sentinel.bypass:
+    description: Bypasses Sentinel anti-cheat detection.
+    default: op

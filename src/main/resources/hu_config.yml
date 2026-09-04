@@ -1,0 +1,297 @@
+# wapeB Büntetés Plugin Konfiguráció
+
+# --- Általános Beállítások ---
+storage-method: "yaml" # Elérhető: yaml, sqlite
+prefix: "§x§F§F§0§0§D§9w§x§E§C§0§0§E§3a§x§D§9§0§0§E§Cp§x§C§6§0§0§F§6e§x§B§3§0§0§F§FB §8|"
+console-name: "Sentinel" # Konzol neve Sentinelre változtatva
+
+# --- Üzenetek ---
+messages:
+  no-permission: "%prefix% §cNincs jogosultságod ehhez a parancshoz."
+  player-not-found: "%prefix% §cEz a játékos nem található."
+  invalid-ip: "%prefix% §cÉrvénytelen IP cím formátum."
+  no-ip-history: "%prefix% §cNincs rögzített IP címe %player% offline játékosnak."
+  not-banned: "%prefix% §cEz a játékos nincs kitiltva."
+  not-muted: "%prefix% §cEz a játékos nincs némítva."
+  invalid-punishment-id: "%prefix% §cÉrvénytelen büntetés ID."
+  no-warnings: "%prefix% §aEnnek a játékosnak nincs figyelmeztetése."
+  no-history: "%prefix% §aEnnek a játékosnak nincs büntetési előzménye."
+  no-active-ban: "%prefix% §aEnnek a játékosnak nincs aktív kitiltása."
+  no-active-mute: "%prefix% §aEnnek a játékosnak nincs aktív némítása."
+  no-alts-found: "%prefix% §aNincs alt fiók találat %player% számára."
+  no-active-bans: "%prefix% §aNincsenek aktív kitiltások."
+  no-staff-history: "%prefix% §aNincs büntetési előzmény %executor% staff tag számára."
+
+  punishment-notification:
+    permission: "wapeb.notify.punishment"
+    ban-attempt: "%prefix% §c%player% §fpróbált csatlakozni, de ki van tiltva §c%duration%§f ideig."
+    mute-attempt: "%prefix% §e%player% §fpróbált írni, de némítva van §e%duration%§f ideig."
+
+  ban:
+    usage: "%prefix% §fBan használata: §c/ban (játékos) [idő] [indok] [-s]"
+    default-reason: "A ban kalapács meglendült!"
+    success: "%prefix% §fSikeresen kitiltottad §a%player%§f játékost."
+    broadcast: "%prefix% §x§F§F§0§0§D§9%executor% §fkitiltotta §x§F§F§0§0§D§9%player%§f játékost. §r\n§fVégrehajtó: §x§F§F§0§0§D§9%executor%\n§fJátékos: §x§F§F§0§0§D§9%player%\n§fIndok: §x§F§F§0§0§D§9%reason%\n§fLejárat: §x§F§F§0§0§D§9%duration%\n§fLejárati dátum: §x§F§F§0§0§D§9%end_date%"
+    silent:
+      prefix: "§7(Néma) "
+    kick-screen:
+      - "%mid% §x§F§F§0§0§D§9wapeB §8| §c§lKITILTÁS"
+      - "§r"
+      - "%mid% Végrehajtó: §x§F§F§0§0§D§9%executor%"
+      - "%mid% Indok: §x§F§F§0§0§D§9%reason%"
+      - "%mid% Lejárat: §x§F§F§0§0§D§9%duration%"
+      - "%mid% Lejárati dátum: §x§F§F§0§0§D§9%end_date%"
+      - "%mid% Büntetés ID: §x§F§F§0§0§D§9%punishment_id%"
+      - "§r"
+      - "%mid% §fAmennyiben nem érzed jogosnak a kitíltásodat §c3 §fperced van ticketet nyitni a discord szerverünkön."
+      - "%mid% §fwapeB.discord.ezalink"
+
+  kick:
+    usage: "%prefix% §fKick használata: §c/kick (játékos) [indok] [-s]"
+    default-reason: "Ki lettél rúgva a szerverről."
+    success: "%prefix% §fSikeresen kirúgtad §a%player%§f játékost."
+    broadcast: "%prefix% §x§F§F§0§0§D§9%executor% §fkirúgta §x§F§F§0§0§D§9%player%§f játékost. §r\n§fVégrehajtó: §x§F§F§0§0§D§9%executor%\n§fJátékos: §x§F§F§0§0§D§9%player%\n§fIndok: §x§F§F§0§0§D§9%reason%"
+    silent:
+      prefix: "§7(Néma) "
+    kick-screen:
+      - "%mid% §x§F§F§0§0§D§9wapeB §8| §c§lKIRÚGÁS"
+      - "§r"
+      - "%mid% Végrehajtó: §x§F§F§0§0§D§9%executor%"
+      - "%mid% Indok: §x§F§F§0§0§D§9%reason%"
+      - "%mid% §fVissza tudsz csatlakozni a szerverre."
+
+  mute:
+    usage: "%prefix% §fMute használata: §c/mute (játékos) [idő] [indok] [-s]"
+    default-reason: "Némítva lettél."
+    success: "%prefix% §fSikeresen némítottad §a%player%§f játékost."
+    broadcast: "%prefix% §x§F§F§0§0§D§9%executor% §fnémította §x§F§F§0§0§D§9%player%§f játékost. §r\n§fVégrehajtó: §x§F§F§0§0§D§9%executor%\n§fJátékos: §x§F§F§0§0§D§9%player%\n§fIndok: §x§F§F§0§0§D§9%reason%\n§fLejárat: §x§F§F§0§0§D§9%duration%\n§fLejárati dátum: §x§F§F§0§0§D§9%end_date%"
+    silent:
+      prefix: "§7(Néma) "
+    player-is-muted: "%prefix% §cJelenleg némítva vagy! \n§cIndok: %reason% \n§cLejárat: %duration%"
+
+  unban:
+    usage: "%prefix% §fUnban használata: §c/unban (játékos) [indok] [-s]"
+    success: "%prefix% §fSikeresen feloldottad §a%player%§f kitiltását."
+    broadcast: "%prefix% §x§F§F§0§0§D§9%executor% §ffeloldotta §x§F§F§0§0§D§9%player%§f kitiltását."
+    silent:
+      prefix: "§7(Néma) "
+
+  unmute:
+    usage: "%prefix% §fUnmute használata: §c/unmute (játékos) [indok] [-s]"
+    success: "%prefix% §fSikeresen feloldottad §a%player%§f némítását."
+    broadcast: "%prefix% §x§F§F§0§0§D§9%executor% §ffeloldotta §x§F§F§0§0§D§9%player%§f némítását."
+    silent:
+      prefix: "§7(Néma) "
+      
+  banip:
+    usage: "%prefix% §fIP-Ban használata: §c/banip (játékos/ip) [idő] [indok] [-s]"
+    success: "%prefix% §fSikeresen IP-kitiltottad §a%player%§f játékost."
+    broadcast: "%prefix% §x§F§F§0§0§D§9%executor% §fIP-kitiltotta §x§F§F§0§0§D§9%player%§f játékost. §r\n§fVégrehajtó: §x§F§F§0§0§D§9%executor%\n§fJátékos/IP: §x§F§F§0§0§D§9%player%\n§fIndok: §x§F§F§0§0§D§9%reason%\n§fLejárat: §x§F§F§0§0§D§9%duration%\n§fLejárati dátum: §x§F§F§0§0§D§9%end_date%"
+    silent:
+      prefix: "§7(Néma) "
+
+  muteip:
+    usage: "%prefix% §fIP-Mute használata: §c/muteip (játékos/ip) [idő] [indok] [-s]"
+    success: "%prefix% §fSikeresen IP-némítottad §a%player%§f játékost."
+    broadcast: "%prefix% §x§F§F§0§0§D§9%executor% §fIP-némította §x§F§F§0§0§D§9%player%§f játékost. §r\n§fVégrehajtó: §x§F§F§0§0§D§9%executor%\n§fJátékos/IP: §x§F§F§0§0§D§9%player%\n§fIndok: §x§F§F§0§0§D§9%reason%\n§fLejárat: §x§F§F§0§0§D§9%duration%\n§fLejárati dátum: §x§F§F§0§0§D§9%end_date%"
+    silent:
+      prefix: "§7(Néma) "
+
+  warn:
+    usage: "%prefix% §fWarn használata: §c/warn (játékos) [indok] [-s]"
+    success: "%prefix% §fSikeresen figyelmeztetted §a%player%§f játékost."
+    player-warned: "%prefix% §cFigyelmeztetést kaptál %executor% játékostól: %reason%"
+    broadcast: "%prefix% §x§F§F§0§0§D§9%executor% §ffigyelmeztette §x§F§F§0§0§D§9%player%§f játékost. §r\n§fVégrehajtó: §x§F§F§0§0§D§9%executor%\n§fJátékos: §x§F§F§0§0§D§9%player%\n§fIndok: §x§F§F§0§0§D§9%reason%"
+    silent:
+      prefix: "§7(Néma) "
+
+  unwarn:
+    usage: "%prefix% §fUnwarn használata: §c/unwarn (játékos) (büntetés-id) [-s]"
+    success: "%prefix% §fSikeresen eltávolítottad a §a%punishment_id%§f figyelmeztetést §a%player%§f játékostól."
+    broadcast: "%prefix% §x§F§F§0§0§D§9%executor% §feltávolított egy figyelmeztetést §x§F§F§0§0§D§9%player%§f játékostól."
+    silent:
+      prefix: "§7(Néma) "
+      
+  kickall:
+    usage: "%prefix% §fKickall használata: §c/kickall [indok]"
+    default-reason: "Minden játékos ki lett rúgva a szerverről."
+    success: "%prefix% §fSikeresen kirúgtad az összes játékost."
+    broadcast: "%prefix% §x§F§F§0§0§D§9%executor% §fkirúgott mindenkit a szerverről. Indok: %reason%"
+    kick-screen:
+      - "%mid% §x§F§F§0§0§D§9wapeB §8| §c§lSZERVER KIRÚGÁS"
+      - "§r"
+      - "%mid% Végrehajtó: §x§F§F§0§0§D§9%executor%"
+      - "%mid% Indok: §x§F§F§0§0§D§9%reason%"
+      - "%mid% §fA szerver jelenleg karbantartás alatt áll."
+      
+  warnings:
+    usage: "%prefix% §fHasználat: §c/warnings (játékos)"
+    header: "§8§m------------------§r §x§F§F§0§0§D§9%player% figyelmeztetései §8§m------------------"
+    line: "§8- §7[%punishment_id%] §fÁltal: §x§F§F§0§0§D§9%executor% §findok: §x§E§C§0§0§E§3%reason% §7(%date%)"
+    footer: "§8§m----------------------------------------------------"
+
+  history:
+    usage: "%prefix% §fHasználat: §c/history (játékos)"
+    header: "§8§m------------------§r §x§F§F§0§0§D§9%player% előzményei §8§m------------------"
+    line: "§8- §7[%punishment_id%] §c%type% §fáltal: §x§F§F§0§0§D§9%executor% §findok: §x§E§C§0§0§E§3%reason% §7(%date%) - Lejárat: %end_date%"
+    footer: "§8§m----------------------------------------------------"
+
+  checkban:
+    usage: "%prefix% §fHasználat: §c/checkban (játékos)"
+    header: "§8§m------------------§r §x§F§F§0§0§D§9%player% aktív kitiltása §8§m------------------"
+    details:
+      - "§fTípus: §x§F§F§0§0§D§9%type%"
+      - "§fVégrehajtó: §x§F§F§0§0§D§9%executor%"
+      - "§fIndok: §x§F§F§0§0§D§9%reason%"
+      - "§fLejárat: §x§F§F§0§0§D§9%duration%"
+      - "§fLejárati dátum: §x§F§F§0§0§D§9%end_date%"
+      - "§fBüntetés ID: §x§F§F§0§0§D§9%punishment_id%"
+      - "§fIP Cím: §x§F§F§0§0§D§9%ip_address%" # Csak IP kitiltás esetén jelenik meg
+    footer: "§8§m----------------------------------------------------"
+
+  checkmute:
+    usage: "%prefix% §fHasználat: §c/checkmute (játékos)"
+    header: "§8§m------------------§r §x§F§F§0§0§D§9%player% aktív némítása §8§m------------------"
+    details:
+      - "§fTípus: §x§F§F§0§0§D§9%type%"
+      - "§fVégrehajtó: §x§F§F§0§0§D§9%executor%"
+      - "§fIndok: §x§F§F§0§0§D§9%reason%"
+      - "§fLejárat: §x§F§F§0§0§D§9%duration%"
+      - "§fLejárati dátum: §x§F§F§0§0§D§9%end_date%"
+      - "§fBüntetés ID: §x§F§F§0§0§D§9%punishment_id%"
+      - "§fIP Cím: §x§F§F§0§0§D§9%ip_address%" # Csak IP némítás esetén jelenik meg
+    footer: "§8§m----------------------------------------------------"
+
+lockdown:
+  enabled: false
+  bypass-permission: "wapeb.lockdown.bypass"
+  kick-reason:
+    - "%mid% §x§F§F§0§0§D§9wapeB §8| §c§lSZERVER ZÁROLVA"
+    - "§r"
+    - "%mid% §fA szerver jelenleg zárolt állapotban van."
+    - "%mid% §fIndok: §x§F§F§0§0§D§9%reason%"
+    - "%mid% §fKérjük, próbálja meg később."
+  messages:
+    enabled: "%prefix% §cA szerver zárolva lett."
+    disabled: "%prefix% §aA szerver zárolása feloldva."
+    reason-set: "%prefix% §aZárolás indoka beállítva: §f%reason%"
+    status: "%prefix% §fZárolás állapota: §x§F§F§0§0§D§9%status% §fIndok: §x§F§F§0§0§D§9%reason%"
+
+freeze:
+  usage: "%prefix% §fFreeze használata: §c/freeze (játékos) [indok]"
+  ban-duration: "7d"
+  ban-reason: "Kilépés befagyasztás alatt."
+  messages:
+    frozen: "%prefix% §cEgy staff tag befagyasztott téged."
+    unfrozen: "%prefix% §aEgy staff tag feloldotta a befagyasztásodat."
+    frozen-success: "%prefix% §aJátékos %player% befagyasztva."
+    unfrozen-success: "%prefix% §aJátékos %player% feloldva."
+    already-frozen: "%prefix% §cEz a játékos már befagyasztva van."
+    not-frozen: "%prefix% §cEz a játékos nincs befagyasztva."
+    logout-ban-broadcast: "%prefix% §x§F§F§0§0§D§9%player% §fki lett tiltva, mert kilépett befagyasztás alatt."
+    freeze-screen:
+      - "%mid% §x§F§F§0§0§D§9wapeB §8| §c§lBEFAGYASZTVA"
+      - "§r"
+      - "%mid% §fEgy staff tag befagyasztott téged."
+      - "%mid% §fNE lépj ki, különben ki leszel tiltva!"
+      - "%mid% §fIndok: §x§F§F§0§0§D§9%reason%"
+      - "%mid% §fKérjük, kövesd a staff utasításait."
+
+alts:
+  usage: "%prefix% §fHasználat: §c/alts (játékos)"
+  header: "§8§m------------------§r §x§F§F§0§0§D§9%player% alt fiókjai §8§m------------------"
+  line: "§8- %alt_player_status% §7%alt_player% §f(Utolsó IP: §x§F§F§0§0§D§9%ip_address%§f)"
+  footer: "§8§m----------------------------------------------------"
+  status-colors:
+    online: "§a[ONLINE]"
+    offline: "§7[OFFLINE]"
+    banned: "§c[KITILTVA]"
+    muted: "§e[NÉMÍTVA]"
+    none: "§f[TISZTA]"
+  login-notification: "%prefix% §c%player% §fbelépett alt fiókokkal! §x§F§F§0§0§D§9%alts_list%. Játékos IP: §x§F§F§0§0§D§9%ip_address%. Alt fiókok: %alts_list_hover%"
+
+banlist:
+  usage: "%prefix% §fHasználat: §c/banlist"
+  header: "§8§m------------------§r §x§F§F§0§0§D§9Aktív kitiltások §8§m------------------"
+  line: "§8- §7%player% §f(%type%) által: §x§F§F§0§0§D§9%executor% §findok: §x§E§C§0§0§E§3%reason% §7(Lejárat: %end_date%)"
+  footer: "§8§m----------------------------------------------------"
+
+staffhistory:
+  usage: "%prefix% §fHasználat: §c/staffhistory (staff_név)"
+  header: "§8§m------------------§r §x§F§F§0§0§D§9%executor% előzményei §8§m------------------"
+  line: "§8- §7[%punishment_id%] §c%type% §f%player% §findok: §x§E§C§0§0§E§3%reason% §7(%date%)"
+  footer: "§8§m----------------------------------------------------"
+
+web-api:
+  enabled: false
+  port: 8080
+  api-key: "WapeB_TEST_API_KEY_2024" # Ezt változtasd meg egy erős, véletlenszerű kulcsra!
+  messages:
+    api-disabled: "A Web API le van tiltva."
+    invalid-api-key: "Érvénytelen API kulcs."
+
+sentinel:
+  enabled: false # Ezt állítsd true-ra, ha engedélyezni szeretnéd a Sentinelt
+  bypass-permission: "wapeb.sentinel.bypass"
+
+  word-filter:
+    enabled: true
+    banned-words:
+      - "fuck"
+      - "shit"
+      - "bitch"
+      - "asshole"
+      - "kurva"
+      - "geci"
+      - "picsa"
+      - "fasz"
+      - "baszd"
+      - "anyád"
+      - "pina"
+      - "szopj"
+      - "fck"
+      - "sh1t"
+      - "b1tch"
+      - "krv"
+      - "gci"
+      - "pina"
+      - "f*ck"
+      - "s*it"
+      - "b*tch"
+    banned-phrases:
+      - "mother fucker"
+      - "son of a bitch"
+      - "go to hell"
+      - "bassza meg"
+      - "anyád picsája"
+      - "szopd le"
+    auto-mute-threshold: 3 # Hány szabálysértés után némítsa automatikusan
+    auto-mute-duration: "30m" # Mennyi időre némítsa (pl. 30s, 5m, 1h, 1d)
+    auto-mute-reason: "Chat helytelen használata"
+
+  spam-flood:
+    enabled: true
+    spam-threshold: 5 # Max üzenet spam-timeframe-en belül
+    spam-timeframe: "5s" # Időkeret spam detektáláshoz
+    flood-threshold: 3 # Hány azonos üzenet flood-timeframe-en belül
+    flood-timeframe: "10s" # Időkeret flood detektáláshoz
+
+  ai:
+    enabled: true # Ezt állítsd true-ra, ha engedélyezni szeretnéd az AI-t
+    name: "Sentinel AI"
+    groq-api-key: "YOUR_GROQ_API_KEY_HERE" # Groq API kulcs
+    groq-model: "llama-3.1-8b-instant" # Groq modell (pl. llama3-8b-8192, mixtral-8x7b-32768)
+    prompt: "Feladatod egy magyar Minecraft chat moderálása. A válaszod KIZÁRÓLAG egy JSON objektum lehet. Csak akkor némíts, ha a szöveg gyűlölködő szerver szidalmazás vagy durva játékos zaklatás. SZABÁLYOK: 1. NÉMÍTÁS KELL: Ha a szöveg 'szar a szerver', 'fos plugin', 'dögölj meg', 'nyomorék geci' és hasonlóan durva. 2. TILOS NÉMÍTANI: Véleményért ('uncsi a szerver', 'nem tetszik a wapeb'), kritikáért ('laggol a pvp'), enyhe sértésért ('béna vagy', 'noob'), és ártalmatlan szavakért ('shawty', 'van bypassed'). A JSON válaszod formátuma: Ha némítani kell: {\"should_mute\": true, \"reason\": \"<rövid magyar indok>\"}. Ha nem kell némítani: {\"should_mute\": false}."
+    max-retries: 5 # Hányszor próbálja újra az AI kérést hiba esetén
+    retry-delay-seconds: 30 # Mennyi ideig várjon az újrapróbálkozások között
+    ai-mute-duration: "1h" # Mennyi időre némítsa az AI által detektált szabálysértés esetén
+    ai-mute-reason-prefix: "Chat helytelen használata - "
+
+  messages:
+    word-filter-blocked: "%prefix% §cAz üzenetedet blokkoltuk nem megfelelő tartalom miatt."
+    spam-blocked: "%prefix% §cAz üzenetedet blokkoltuk spam miatt."
+    flood-blocked: "%prefix% §cAz üzenetedet blokkoltuk flood miatt."
+    auto-muted: "%prefix% §cNémítva lettél %duration% időre chat szabálysértés miatt."
+    ai-muted: "%prefix% §cNémítva lettél %duration% időre AI által detektált chat szabálysértés miatt: %reason%"
+    auto-mute-broadcast: "%prefix% §x§F§F§0§0§D§9%player% §fnémítva lett Sentinel által %duration% időre. Indok: %reason%"
+    ai-mute-broadcast: "%prefix% §x§F§F§0§0§D§9%player% §fnémítva lett %sentinel_ai_name% által %duration% időre. Indok: %reason%"
