@@ -2,12 +2,10 @@ package dev.azuyo.wapeB.commands;
 
 import dev.azuyo.wapeB.WapeB;
 import dev.azuyo.wapeB.managers.ConfigManager;
-import dev.azuyo.wapeB.managers.DataManager;
 import dev.azuyo.wapeB.managers.PlayerDataManager;
 import dev.azuyo.wapeB.utils.MessageUtil;
 import dev.azuyo.wapeB.utils.Punishment;
 import dev.azuyo.wapeB.utils.TimeUtil;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -16,26 +14,19 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.regex.Pattern;
 
 public class MuteIpCommand implements CommandExecutor {
 
     private final WapeB plugin;
-    private final DataManager dataManager;
     private final ConfigManager configManager;
-    private final PlayerDataManager playerDataManager; // Hozzáadva
+    private final PlayerDataManager playerDataManager;
     private static final Pattern IP_PATTERN = Pattern.compile("^(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})$");
-    private final List<Punishment.PunishmentType> ipMuteTypes = Arrays.asList(
-            Punishment.PunishmentType.IPMUTE,
-            Punishment.PunishmentType.TEMPIPMUTE
-    );
 
     public MuteIpCommand(WapeB plugin) {
         this.plugin = plugin;
-        this.dataManager = plugin.getDataManager();
         this.configManager = plugin.getConfigManager();
-        this.playerDataManager = plugin.getPlayerDataManager(); // Hozzáadva
+        this.playerDataManager = plugin.getPlayerDataManager();
     }
 
     @Override
@@ -59,17 +50,15 @@ public class MuteIpCommand implements CommandExecutor {
             targetIp = targetIdentifier;
         } else {
             targetPlayer = Bukkit.getOfflinePlayer(targetIdentifier);
-
             if (!targetPlayer.hasPlayedBefore() && !targetPlayer.isOnline()) {
                 sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.player-not-found", "&cPlayer not found."), null));
                 return true;
             }
 
-            finalTargetName = targetPlayer.getName();
+            finalTargetName = targetPlayer.getName() != null ? targetPlayer.getName() : targetIdentifier;
             if (targetPlayer.isOnline()) {
                 targetIp = targetPlayer.getPlayer().getAddress().getAddress().getHostAddress();
             } else {
-                // A HELYES MEGOLDÁS: PlayerDataManager használata
                 targetIp = playerDataManager.getLastKnownIp(targetPlayer.getUniqueId());
             }
         }
@@ -101,30 +90,13 @@ public class MuteIpCommand implements CommandExecutor {
             reason = configManager.getString("messages.mute.default-reason", "You have been muted.");
         }
 
-        Punishment existingIpMute = dataManager.getActivePunishment(null, targetIp, ipMuteTypes);
-        if (existingIpMute != null) {
-            existingIpMute.setActive(false);
-            dataManager.savePunishment(existingIpMute);
-        }
-
         String executorName = (sender instanceof Player) ? sender.getName() : configManager.getString("console-name", "Console");
-        int punishmentId = dataManager.getNextId();
-        Punishment.PunishmentType type = (duration == -1) ? Punishment.PunishmentType.IPMUTE : Punishment.PunishmentType.TEMPIPMUTE;
 
-        Punishment punishment = new Punishment(punishmentId, targetPlayer != null ? targetPlayer.getUniqueId() : null, finalTargetName, targetIp, type, reason, executorName, System.currentTimeMillis(), duration);
-        dataManager.savePunishment(punishment);
-
-        String broadcastMessageConfig = configManager.getString("messages.muteip.broadcast", "%prefix% %executor% IP-muted %player%.");
-        if (silent) {
-            String silentPrefix = configManager.getString("messages.muteip.silent.prefix", "&7(Silent) ");
-            Component silentBroadcast = MessageUtil.createComponent(silentPrefix + broadcastMessageConfig, punishment);
-            Bukkit.getOnlinePlayers().stream().filter(p -> p.hasPermission("wapeb.notify")).forEach(p -> p.sendMessage(silentBroadcast));
-        } else {
-            Component broadcast = MessageUtil.createComponent(broadcastMessageConfig, punishment);
-            Bukkit.broadcast(broadcast);
+        boolean success = plugin.getApi().mutePlayer(finalTargetName, reason, executorName, duration, silent, true);
+        if (success) {
+            Punishment mute = plugin.getApi().getActiveMute(finalTargetName);
+            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.muteip.success", "&aSuccessfully IP-muted %player%."), mute));
         }
-
-        sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.muteip.success", "&aSuccessfully IP-muted %player%."), punishment));
 
         return true;
     }

@@ -4,8 +4,6 @@ import dev.azuyo.wapeB.WapeB;
 import dev.azuyo.wapeB.managers.ConfigManager;
 import dev.azuyo.wapeB.utils.MessageUtil;
 import dev.azuyo.wapeB.utils.Punishment;
-import dev.azuyo.wapeB.utils.WebhookUtil;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -52,28 +50,11 @@ public class KickCommand implements CommandExecutor {
 
         String executorName = (sender instanceof Player) ? sender.getName() : configManager.getString("console-name", "Console");
 
-        // Create a temporary punishment object for message formatting
-        Punishment tempPunishment = new Punishment(0, target.getUniqueId(), target.getName(), Punishment.PunishmentType.KICK, reason, executorName, System.currentTimeMillis(), 0);
-
-        // Webhook
-        WebhookUtil.sendPunishmentWebhook(tempPunishment);
-
-        // Kick the player
-        Component kickMessage = MessageUtil.formatKickScreen(configManager.getStringList("messages.kick.kick-screen"), tempPunishment);
-        target.kick(kickMessage);
-
-        // Broadcast
-        String broadcastMessageConfig = configManager.getString("messages.kick.broadcast", "%prefix% %executor% kicked %player%.");
-        if (silent) {
-            String silentPrefix = configManager.getString("messages.kick.silent.prefix", "&7(Silent) ");
-            Component silentBroadcast = MessageUtil.createComponent(silentPrefix + broadcastMessageConfig, tempPunishment);
-            Bukkit.broadcast(silentBroadcast, "wapeb.notify");
-        } else {
-            Component broadcast = MessageUtil.createComponent(broadcastMessageConfig, tempPunishment);
-            Bukkit.broadcast(broadcast);
+        boolean success = plugin.getApi().kickPlayer(target.getUniqueId(), reason, executorName, silent);
+        if (success) {
+            Punishment p = new Punishment(0, target.getUniqueId(), target.getName(), Punishment.PunishmentType.KICK, reason, executorName, System.currentTimeMillis(), 0);
+            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.kick.success", "&aSuccessfully kicked %player%."), p));
         }
-
-        sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.kick.success", "&aSuccessfully kicked %player%."), tempPunishment));
 
         return true;
     }

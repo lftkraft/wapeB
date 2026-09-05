@@ -2,11 +2,8 @@ package dev.azuyo.wapeB.commands;
 
 import dev.azuyo.wapeB.WapeB;
 import dev.azuyo.wapeB.managers.ConfigManager;
-import dev.azuyo.wapeB.managers.DataManager;
 import dev.azuyo.wapeB.utils.MessageUtil;
 import dev.azuyo.wapeB.utils.Punishment;
-import dev.azuyo.wapeB.utils.WebhookUtil;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -19,12 +16,10 @@ import java.util.Arrays;
 public class WarnCommand implements CommandExecutor {
 
     private final WapeB plugin;
-    private final DataManager dataManager;
     private final ConfigManager configManager;
 
     public WarnCommand(WapeB plugin) {
         this.plugin = plugin;
-        this.dataManager = plugin.getDataManager();
         this.configManager = plugin.getConfigManager();
     }
 
@@ -55,30 +50,12 @@ public class WarnCommand implements CommandExecutor {
         }
 
         String executorName = (sender instanceof Player) ? sender.getName() : configManager.getString("console-name", "Console");
-        int punishmentId = dataManager.getNextId();
 
-        Punishment punishment = new Punishment(punishmentId, target.getUniqueId(), target.getName(), Punishment.PunishmentType.WARN, reason, executorName, System.currentTimeMillis(), 0);
-        dataManager.savePunishment(punishment);
-
-        // Webhook
-        WebhookUtil.sendPunishmentWebhook(punishment);
-
-        if (target.isOnline()) {
-            target.getPlayer().sendMessage(MessageUtil.createComponent(configManager.getString("messages.warn.player-warned", ""), punishment));
+        boolean success = plugin.getApi().warnPlayer(target.getUniqueId(), reason, executorName, silent);
+        if (success) {
+            Punishment p = new Punishment(-1, target.getUniqueId(), target.getName(), Punishment.PunishmentType.WARN, reason, executorName, System.currentTimeMillis(), -1);
+            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.warn.success", "&aSuccessfully warned %player%."), p));
         }
-
-        // Broadcast
-        String broadcastMessageConfig = configManager.getString("messages.warn.broadcast", "%prefix% %executor% warned %player%.");
-        if (silent) {
-            String silentPrefix = configManager.getString("messages.warn.silent.prefix", "&7(Silent) ");
-            Component silentBroadcast = MessageUtil.createComponent(silentPrefix + broadcastMessageConfig, punishment);
-            Bukkit.broadcast(silentBroadcast, "wapeb.notify");
-        } else {
-            Component broadcast = MessageUtil.createComponent(broadcastMessageConfig, punishment);
-            Bukkit.broadcast(broadcast);
-        }
-
-        sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.warn.success", "&aSuccessfully warned %player%."), punishment));
 
         return true;
     }

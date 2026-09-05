@@ -3,10 +3,9 @@ package dev.azuyo.wapeB.commands;
 import dev.azuyo.wapeB.WapeB;
 import dev.azuyo.wapeB.managers.ConfigManager;
 import dev.azuyo.wapeB.managers.DataManager;
-import dev.azuyo.wapeB.managers.PlayerDataManager; // Hozzáadva
+import dev.azuyo.wapeB.managers.PlayerDataManager;
 import dev.azuyo.wapeB.utils.MessageUtil;
 import dev.azuyo.wapeB.utils.Punishment;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -23,7 +22,7 @@ public class UnmuteCommand implements CommandExecutor {
     private final WapeB plugin;
     private final DataManager dataManager;
     private final ConfigManager configManager;
-    private final PlayerDataManager playerDataManager; // Hozzáadva
+    private final PlayerDataManager playerDataManager;
     private static final Pattern IP_PATTERN = Pattern.compile("^(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})$");
     private final List<Punishment.PunishmentType> muteTypes = Arrays.asList(
             Punishment.PunishmentType.MUTE,
@@ -33,7 +32,7 @@ public class UnmuteCommand implements CommandExecutor {
             Punishment.PunishmentType.SENTINEL_AUTO_MUTE,
             Punishment.PunishmentType.SENTINEL_AI_MUTE
     );
-    private final List<Punishment.PunishmentType> ipMuteTypes = Arrays.asList( // Hozzáadva
+    private final List<Punishment.PunishmentType> ipMuteTypes = Arrays.asList(
             Punishment.PunishmentType.IPMUTE,
             Punishment.PunishmentType.TEMPIPMUTE
     );
@@ -42,7 +41,7 @@ public class UnmuteCommand implements CommandExecutor {
         this.plugin = plugin;
         this.dataManager = plugin.getDataManager();
         this.configManager = plugin.getConfigManager();
-        this.playerDataManager = plugin.getPlayerDataManager(); // Hozzáadva
+        this.playerDataManager = plugin.getPlayerDataManager();
     }
 
     @Override
@@ -74,10 +73,7 @@ public class UnmuteCommand implements CommandExecutor {
                 return true;
             }
 
-            // Try to unmute by player UUID first
             activeMute = dataManager.getActivePunishment(targetPlayer.getUniqueId(), null, muteTypes);
-
-            // If no direct player mute, try to find an IP mute associated with the player's last known IP
             if (activeMute == null) {
                 targetIp = playerDataManager.getLastKnownIp(targetPlayer.getUniqueId());
                 if (targetIp != null) {
@@ -91,9 +87,6 @@ public class UnmuteCommand implements CommandExecutor {
             return true;
         }
 
-        activeMute.setActive(false);
-        dataManager.savePunishment(activeMute);
-
         String executorName = (sender instanceof Player) ? sender.getName() : configManager.getString("console-name", "Console");
         boolean silent = args.length > 1 && args[args.length - 1].equalsIgnoreCase("-s");
         String reason = (args.length > 1 && !silent) ? String.join(" ", Arrays.copyOfRange(args, 1, args.length)) : "Unmuted";
@@ -102,30 +95,21 @@ public class UnmuteCommand implements CommandExecutor {
         }
         if (reason.isEmpty()) reason = "Unmuted";
 
-        Punishment unmutePunishment = new Punishment(
-            activeMute.getId(), 
-            activeMute.getPlayerUuid(), 
-            activeMute.getPlayerName(), 
-            activeMute.getIpAddress(), // Keep the original IP address from the mute
-            activeMute.getType(), 
-            reason, 
-            executorName, 
-            System.currentTimeMillis(), 
-            0 // Duration 0 for unmute
-        );
-
-        // Broadcast
-        String broadcastMessageConfig = configManager.getString("messages.unmute.broadcast", "%prefix% %executor% unmuted %player%.");
-        if (silent) {
-            String silentPrefix = configManager.getString("messages.unmute.silent.prefix", "&7(Silent) ");
-            Component silentBroadcast = MessageUtil.createComponent(silentPrefix + broadcastMessageConfig, unmutePunishment);
-            Bukkit.broadcast(silentBroadcast, "wapeb.notify");
-        } else {
-            Component broadcast = MessageUtil.createComponent(broadcastMessageConfig, unmutePunishment);
-            Bukkit.broadcast(broadcast);
+        boolean success = plugin.getApi().unmutePlayer(activeMute.getPlayerUuid(), reason, executorName);
+        if (success) {
+            Punishment unmutePunishment = new Punishment(
+                activeMute.getId(), 
+                activeMute.getPlayerUuid(), 
+                activeMute.getPlayerName(), 
+                activeMute.getIpAddress(), 
+                activeMute.getType(), 
+                reason, 
+                executorName, 
+                System.currentTimeMillis(), 
+                0
+            );
+            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.unmute.success", "&aSuccessfully unmuted %player%."), unmutePunishment));
         }
-
-        sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.unmute.success", "&aSuccessfully unmuted %player%."), unmutePunishment));
 
         return true;
     }

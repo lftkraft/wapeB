@@ -3,10 +3,9 @@ package dev.azuyo.wapeB.commands;
 import dev.azuyo.wapeB.WapeB;
 import dev.azuyo.wapeB.managers.ConfigManager;
 import dev.azuyo.wapeB.managers.DataManager;
-import dev.azuyo.wapeB.managers.PlayerDataManager; // Hozzáadva
+import dev.azuyo.wapeB.managers.PlayerDataManager;
 import dev.azuyo.wapeB.utils.MessageUtil;
 import dev.azuyo.wapeB.utils.Punishment;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -23,7 +22,7 @@ public class UnbanCommand implements CommandExecutor {
     private final WapeB plugin;
     private final DataManager dataManager;
     private final ConfigManager configManager;
-    private final PlayerDataManager playerDataManager; // Hozzáadva
+    private final PlayerDataManager playerDataManager;
     private static final Pattern IP_PATTERN = Pattern.compile("^(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})$");
     private final List<Punishment.PunishmentType> banTypes = Arrays.asList(
             Punishment.PunishmentType.BAN,
@@ -32,7 +31,7 @@ public class UnbanCommand implements CommandExecutor {
             Punishment.PunishmentType.TEMPIPBAN,
             Punishment.PunishmentType.FREEZE_LOGOUT_BAN
     );
-    private final List<Punishment.PunishmentType> ipBanTypes = Arrays.asList( // Hozzáadva
+    private final List<Punishment.PunishmentType> ipBanTypes = Arrays.asList(
             Punishment.PunishmentType.IPBAN,
             Punishment.PunishmentType.TEMPIPBAN
     );
@@ -41,7 +40,7 @@ public class UnbanCommand implements CommandExecutor {
         this.plugin = plugin;
         this.dataManager = plugin.getDataManager();
         this.configManager = plugin.getConfigManager();
-        this.playerDataManager = plugin.getPlayerDataManager(); // Hozzáadva
+        this.playerDataManager = plugin.getPlayerDataManager();
     }
 
     @Override
@@ -73,10 +72,7 @@ public class UnbanCommand implements CommandExecutor {
                 return true;
             }
 
-            // Try to unban by player UUID first
             activeBan = dataManager.getActivePunishment(targetPlayer.getUniqueId(), null, banTypes);
-
-            // If no direct player ban, try to find an IP ban associated with the player's last known IP
             if (activeBan == null) {
                 targetIp = playerDataManager.getLastKnownIp(targetPlayer.getUniqueId());
                 if (targetIp != null) {
@@ -90,9 +86,6 @@ public class UnbanCommand implements CommandExecutor {
             return true;
         }
 
-        activeBan.setActive(false);
-        dataManager.savePunishment(activeBan);
-
         String executorName = (sender instanceof Player) ? sender.getName() : configManager.getString("console-name", "Console");
         boolean silent = args.length > 1 && args[args.length - 1].equalsIgnoreCase("-s");
         String reason = (args.length > 1 && !silent) ? String.join(" ", Arrays.copyOfRange(args, 1, args.length)) : "Unbanned";
@@ -101,31 +94,21 @@ public class UnbanCommand implements CommandExecutor {
         }
         if (reason.isEmpty()) reason = "Unbanned";
 
-
-        Punishment unbanPunishment = new Punishment(
-            activeBan.getId(), 
-            activeBan.getPlayerUuid(), 
-            activeBan.getPlayerName(), 
-            activeBan.getIpAddress(), // Keep the original IP address from the ban
-            activeBan.getType(), 
-            reason, 
-            executorName, 
-            System.currentTimeMillis(), 
-            0 // Duration 0 for unban
-        );
-
-        // Broadcast
-        String broadcastMessageConfig = configManager.getString("messages.unban.broadcast", "%prefix% %executor% unbanned %player%.");
-        if (silent) {
-            String silentPrefix = configManager.getString("messages.unban.silent.prefix", "&7(Silent) ");
-            Component silentBroadcast = MessageUtil.createComponent(silentPrefix + broadcastMessageConfig, unbanPunishment);
-            Bukkit.broadcast(silentBroadcast, "wapeb.notify");
-        } else {
-            Component broadcast = MessageUtil.createComponent(broadcastMessageConfig, unbanPunishment);
-            Bukkit.broadcast(broadcast);
+        boolean success = plugin.getApi().unbanPlayer(activeBan.getPlayerUuid(), reason, executorName);
+        if (success) {
+            Punishment unbanPunishment = new Punishment(
+                activeBan.getId(), 
+                activeBan.getPlayerUuid(), 
+                activeBan.getPlayerName(), 
+                activeBan.getIpAddress(), 
+                activeBan.getType(), 
+                reason, 
+                executorName, 
+                System.currentTimeMillis(), 
+                0
+            );
+            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.unban.success", "&aSuccessfully unbanned %player%."), unbanPunishment));
         }
-
-        sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.unban.success", "&aSuccessfully unbanned %player%."), unbanPunishment));
 
         return true;
     }
