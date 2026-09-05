@@ -125,6 +125,9 @@ public class MyPunishListener implements Listener {
         if (event.getPlayerName().startsWith("VIP_")) {
             event.setCancelled(true); // Cancel punishment for VIPs
         }
+
+        // Override executor name on the fly
+        event.setExecutor("Custom AntiCheat System");
     }
 
     @EventHandler
