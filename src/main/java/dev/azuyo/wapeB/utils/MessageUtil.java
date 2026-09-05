@@ -94,14 +94,6 @@ public class MessageUtil {
 
         String result = text.replace("%prefix%", WapeB.getInstance().getConfigManager().getString("prefix", ""));
 
-        if (customPlaceholders != null) {
-            for (Map.Entry<String, String> entry : customPlaceholders.entrySet()) {
-                if (entry.getKey() != null && entry.getValue() != null) {
-                    result = result.replace(entry.getKey(), entry.getValue());
-                }
-            }
-        }
-
         if (punishment != null && punishment.getType() != null) {
             String typeName = WapeB.getInstance().getConfigManager().getString("punishment-types." + punishment.getType().name(), punishment.getType().name());
 
@@ -112,20 +104,48 @@ public class MessageUtil {
                 remainingMillis = Math.max(0L, punishment.getEnd() - System.currentTimeMillis());
             }
 
+            String remainingStr = TimeUtil.formatDuration(remainingMillis);
+            String detailedRemainingStr = TimeUtil.formatDetailedDuration(remainingMillis);
+            String originalStr = TimeUtil.formatDuration(punishment.getDuration());
+            String detailedOriginalStr = TimeUtil.formatDetailedDuration(punishment.getDuration());
+
             result = result
+                    .replace("%duration%", remainingStr)
+                    .replace("%remaining%", remainingStr)
+                    .replace("%remaining_duration%", remainingStr)
+                    .replace("%time_left%", remainingStr)
+                    .replace("%expires_in%", remainingStr)
+                    .replace("%detailed_duration%", detailedRemainingStr)
+                    .replace("%detailed_remaining%", detailedRemainingStr)
+                    .replace("%original_duration%", originalStr)
+                    .replace("%total_duration%", originalStr)
+                    .replace("%detailed_original_duration%", detailedOriginalStr)
                     .replace("%player%", punishment.getPlayerName() != null ? punishment.getPlayerName() : "N/A")
                     .replace("%executor%", punishment.getExecutorName() != null ? punishment.getExecutorName() : "N/A")
                     .replace("%reason%", punishment.getReason() != null ? punishment.getReason() : "N/A")
                     .replace("%type%", typeName)
                     .replace("%punishment_id%", String.valueOf(punishment.getId()))
-                    .replace("%duration%", TimeUtil.formatDuration(remainingMillis))
-                    .replace("%original_duration%", TimeUtil.formatDuration(punishment.getDuration()))
-                    .replace("%total_duration%", TimeUtil.formatDuration(punishment.getDuration()))
                     .replace("%date%", DATE_FORMAT.format(new Date(punishment.getDate())))
                     .replace("%end_date%", (punishment.getEnd() == -1) ? "Permanent" : DATE_FORMAT.format(new Date(punishment.getEnd())));
-        } else {
+        }
+
+        if (customPlaceholders != null) {
+            for (Map.Entry<String, String> entry : customPlaceholders.entrySet()) {
+                if (entry.getKey() != null && entry.getValue() != null) {
+                    result = result.replace(entry.getKey(), entry.getValue());
+                }
+            }
+        }
+
+        if (punishment == null) {
             // Replace remaining standard placeholders with empty string if no punishment object
-            String[] placeholders = {"%player%", "%executor%", "%reason%", "%type%", "%punishment_id%", "%duration%", "%original_duration%", "%total_duration%", "%date%", "%end_date%"};
+            String[] placeholders = {
+                    "%player%", "%executor%", "%reason%", "%type%", "%punishment_id%",
+                    "%duration%", "%remaining%", "%remaining_duration%", "%time_left%", "%expires_in%",
+                    "%detailed_duration%", "%detailed_remaining%",
+                    "%original_duration%", "%total_duration%", "%detailed_original_duration%",
+                    "%date%", "%end_date%"
+            };
             for (String p : placeholders) {
                 if (result.contains(p)) result = result.replace(p, "");
             }

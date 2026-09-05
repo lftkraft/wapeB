@@ -85,4 +85,26 @@ public class TimeUtil {
         if (minutes > 0) return minutes + displayMinute;
         return seconds + displaySecond;
     }
+
+    public static String formatDetailedDuration(long millis) {
+        if (millis == -1) {
+            return displayPermanent;
+        }
+
+        long totalSeconds = Math.max(0, millis / 1000);
+        long years = totalSeconds / (365 * 24 * 3600);
+        long days = (totalSeconds % (365 * 24 * 3600)) / (24 * 3600);
+        long hours = (totalSeconds % (24 * 3600)) / 3600;
+        long minutes = (totalSeconds % 3600) / 60;
+        long seconds = totalSeconds % 60;
+
+        StringBuilder sb = new StringBuilder();
+        if (years > 0) sb.append(years).append(displayYear).append(" ");
+        if (days > 0) sb.append(days).append(displayDay).append(" ");
+        if (hours > 0) sb.append(hours).append(displayHour).append(" ");
+        if (minutes > 0) sb.append(minutes).append(displayMinute).append(" ");
+        if (seconds > 0 || sb.length() == 0) sb.append(seconds).append(displaySecond);
+
+        return sb.toString().trim();
+    }
 }
