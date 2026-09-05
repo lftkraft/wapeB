@@ -1,28 +1,28 @@
-# 📚 wapeB API - Teljeskörű Fejlesztői Dokumentáció (v1.0.5)
+# 📚 wapeB API - Complete Developer Documentation (v1.0.5)
 
-Ez a dokumentáció a **wapeB** Minecraft büntetési rendszer **Java API**-jának, **Bukkit Eseménykezelőinek (Events)**, **Parancs-átírási felületének**, valamint **HTTP REST Web API**-jának a teljeskörű és részletes útmutatója.
-
----
-
-## 📑 Tartalomjegyzék
-1. [Projekt Beállítás és Függőségek](#1-projekt-beállítás-és-függőségek)
-2. [Java API Belépési Pontok és Szálbiztonság](#2-java-api-belépési-pontok-és-szálbiztonság)
-3. [Részletes Java API Metódus Referencia](#3-részletes-java-api-metódus-referencia)
-   - [A) Lekérdező Metódusok](#a-lekérdező-metódusok-query-methods)
-   - [B) Szankció Végrehajtó Metódusok](#b-szankció-végrehajtó-metódusok-execution-methods)
-   - [C) Parancs Átírási Metódusok](#c-parancs-átírási-metódusok-command-alias-methods)
-4. [Bukkit Custom Eventek (Eseménykezelés)](#4-bukkit-custom-eventek-eseménykezelés)
-5. [Integrációs Minták és Kódpéldák](#5-integrációs-minták-és-kódpéldák)
-   - [Minta 1: Egyedi Némító Parancs (GMute)](#minta-1-egyedi-némító-parancs-gmute)
-   - [Minta 2: Discord Bot (SyncCord / DiscordSRV) Végrehajtó Átírás](#minta-2-discord-bot-synccord--discordsrv-végrehajtó-átírás)
-   - [Minta 3: Chat Tag & Mute Jelzés](#minta-3-chat-tag--mute-jelzés)
-6. [HTTP REST Web API Referencia](#6-http-rest-web-api-referencia)
+This documentation provides a comprehensive guide to the **wapeB** Minecraft punishment system's **Java API**, **Bukkit Events**, **Dynamic Command Overrides**, and **HTTP REST Web API**.
 
 ---
 
-## 1. Projekt Beállítás és Függőségek
+## 📑 Table of Contents
+1. [Setup & Dependencies](#1-setup--dependencies)
+2. [Java API Access & Thread Safety](#2-java-api-access--thread-safety)
+3. [Detailed Java API Reference](#3-detailed-java-api-reference)
+   - [A) Query Methods](#a-query-methods)
+   - [B) Execution Methods](#b-execution-methods)
+   - [C) Command Alias Methods](#c-command-alias-methods)
+4. [Bukkit Custom Events](#4-bukkit-custom-events)
+5. [Integration Examples & Code Snippets](#5-integration-examples--code-snippets)
+   - [Example 1: Custom Mute Command (GMute)](#example-1-custom-mute-command-gmute)
+   - [Example 2: Discord Bot (SyncCord / DiscordSRV) Executor Override](#example-2-discord-bot-synccord--discordsrv-executor-override)
+   - [Example 3: Chat Listener & Mute Notice](#example-3-chat-listener--mute-notice)
+6. [HTTP REST Web API Reference](#6-http-rest-web-api-reference)
 
-A wapeB API elérhető mind **JitPack** felhős tárolóból, mind helyi Maven (`.m2`) tárolóból.
+---
+
+## 1. Setup & Dependencies
+
+The wapeB API is available via **JitPack** or local Maven repository (`.m2`).
 
 ### 🐘 Gradle (Kotlin DSL - `build.gradle.kts`)
 ```kotlin
@@ -69,177 +69,175 @@ dependencies {
 </dependencies>
 ```
 
-### 📄 `plugin.yml` Beállítás
-A saját pluginod `plugin.yml` fájljában állítsd be a függőséget:
+### 📄 `plugin.yml` Configuration
+In your plugin's `plugin.yml`, declare `wapeB` as a dependency:
 ```yaml
-name: SajatPlugin
+name: MyPlugin
 version: 1.0.0
-main: dev.azuyo.sajatplugin.Main
+main: dev.example.myplugin.Main
 api-version: '1.21'
 
-# Kötelező függőség esetén:
+# Required dependency:
 depend: [wapeB]
 
-# Opcionális függőség esetén:
+# Optional dependency:
 # softdepend: [wapeB]
 ```
 
-#### Opcionális (Softdepend) ellenőrzése kódból:
+#### Checking Softdepend in Code:
 ```java
 if (Bukkit.getPluginManager().isPluginEnabled("wapeB")) {
     WapeBAPI api = WapeB.getApi();
-    // wapeB API használata
+    // Use wapeB API
 }
 ```
 
 ---
 
-## 2. Java API Belépési Pontok és Szálbiztonság
+## 2. Java API Access & Thread Safety
 
-### API Példány Lekérése
+### Obtaining the API Instance
 ```java
 import dev.azuyo.wapeB.WapeB;
 import dev.azuyo.wapeB.api.WapeBAPI;
 import dev.azuyo.wapeB.api.WapeBAPIProvider;
 
-// 1. Elsődleges metódus:
+// Option 1 (Primary):
 WapeBAPI api = WapeB.getApi();
 
-// 2. Szolgáltatón (Provider) keresztüli elérés:
+// Option 2 (Provider):
 WapeBAPI api = WapeBAPIProvider.getAPI();
 ```
 
-### ⚠️ Szálbiztonság (Thread Safety Guidelines)
-- A **lekérdező metódusok** (`isBanned`, `getActiveBan`, `getPunishments`, `getAlts`) szálbiztosak, elágaztathatók aszinkron szálakon is (pl. Discord bot eventekben).
-- A **szankció végrehajtó metódusok** (`banPlayer`, `mutePlayer`, `kickPlayer`, `freezePlayer`) a Bukkit főszálán (Server Main Thread) futnak be biztonságosan, mert Bukkit Eventeket lőnek ki és játékosokat rúgnak ki a szerverről. Ha Discord JDA vagy egyéb aszinkron szálból hívod, csomagold `Bukkit.getScheduler().runTask(plugin, ...)` blokkba!
+### ⚠️ Thread Safety Guidelines
+- **Query Methods** (`isBanned`, `getActiveBan`, `getPunishments`, `getAlts`) are thread-safe and can be queried safely on async threads (e.g., in Discord bot events).
+- **Execution Methods** (`banPlayer`, `mutePlayer`, `kickPlayer`, `freezePlayer`) must run on the Server Main Thread, as they trigger Bukkit events and kick/affect online players. If invoking from a Discord JDA or async thread, wrap execution in `Bukkit.getScheduler().runTask(plugin, ...)`.
 
 ---
 
-## 3. Részletes Java API Metódus Referencia
+## 3. Detailed Java API Reference
 
-### A) Lekérdező Metódusok (Query Methods)
+### A) Query Methods
 
 #### `getPunishments`
-Lekéri a játékos összes eddigi büntetését (aktív és már lejárt/feloldott büntetéseket is).
+Fetches all punishments for a player (both active and expired/revoked).
 - `List<Punishment> getPunishments(UUID playerUuid)`
 - `List<Punishment> getPunishments(String playerName)`
 
 #### `getActiveBan`
-Visszaadja a játékos jelenleg aktív kitiltását (vagy `null`-t, ha nincs kitiltva).
+Returns the currently active ban for a player (or `null` if not banned).
 - `Punishment getActiveBan(UUID playerUuid)`
 - `Punishment getActiveBan(String playerName)`
 - `Punishment getActiveBanByIp(String ipAddress)`
 
 #### `getActiveMute`
-Visszaadja a játékos jelenleg aktív némítását (vagy `null`-t, ha nincs némítva).
+Returns the currently active mute for a player (or `null` if not muted).
 - `Punishment getActiveMute(UUID playerUuid)`
 - `Punishment getActiveMute(String playerName)`
 - `Punishment getActiveMuteByIp(String ipAddress)`
 
 #### `getWarnings`
-Lekéri a játékos jelenleg érvényes figyelmeztetéseit.
+Fetches active warnings for a player.
 - `List<Punishment> getWarnings(UUID playerUuid)`
 - `List<Punishment> getWarnings(String playerName)`
 
 #### `getAlts`
-Visszaadja az egyező IP-cím alapján talált alternatív fiókok (alts) nevének listáját.
+Returns a list of alternative account usernames linked by IP address.
 - `List<String> getAlts(UUID playerUuid)`
 - `List<String> getAlts(String playerName)`
 
-#### Status Checkerek (`boolean`)
-- `boolean isBanned(UUID/String/IP)` – Igaz, ha aktív ban alatt áll.
-- `boolean isMuted(UUID/String/IP)` – Igaz, ha aktív mute alatt áll.
-- `boolean isFrozen(UUID/String)` – Igaz, ha a játékos fagyasztva van (`/freeze`).
-- `boolean isLockdownActive()` – Igaz, ha a szerver zárolva van (`/lockdown`).
-- `String getLockdownReason()` – Visszaadja a zárolás indokát.
+#### Status Checkers (`boolean`)
+- `boolean isBanned(UUID/String/IP)` – `true` if active ban exists.
+- `boolean isMuted(UUID/String/IP)` – `true` if active mute exists.
+- `boolean isFrozen(UUID/String)` – `true` if player is currently frozen (`/freeze`).
+- `boolean isLockdownActive()` – `true` if server lockdown is enabled (`/lockdown`).
+- `String getLockdownReason()` – Returns current lockdown reason.
 
 ---
 
-## 3. Részletes Java API Metódus Referencia
+### B) Execution Methods
 
-### B) Szankció Végrehajtó Metódusok (Execution Methods)
-
-Minden végrehajtó metódus meghívja a wapeB `PlayerPunishEvent` eseményét! Ha egy listener megszakítja az eseményt (`event.setCancelled(true)`), a metódus `false` értékkel tér vissza.
+All execution methods trigger wapeB's `PlayerPunishEvent`. If a listener cancels the event (`event.setCancelled(true)`), the method returns `false`.
 
 #### `banPlayer`
 ```java
 boolean success = api.banPlayer(
-    "JátékosNév",             // Célszemély neve vagy UUID
-    "Csalás / Hacking",        // Indok
-    "Console",                // Végrehajtó neve (tetszőleges szöveg)
-    86400000L,                // Időtartam ms-ben (-1 = Örök kitiltás)
-    false,                    // Silent (néma bejelentés)?
-    false                     // IP-ban is legyen?
+    "PlayerName",             // Target name or UUID
+    "Cheating / Hacking",      // Reason
+    "Console",                // Executor name (custom string)
+    86400000L,                // Duration in ms (-1 = Permanent)
+    false,                    // Silent announcement?
+    false                     // IP ban?
 );
 ```
 
 #### `mutePlayer`
 ```java
 boolean success = api.mutePlayer(
-    "JátékosNév", 
-    "Spam a chaten", 
-    "ywxlol - DISCORD",       // Egyedi végrehajtó név
-    3600000L,                 // Időtartam: 1 óra (ms)
+    "PlayerName", 
+    "Chat Spam", 
+    "ywxlol - DISCORD",       // Custom executor override
+    3600000L,                 // Duration: 1 hour (ms)
     false,                    // Silent
-    false                     // IP-mute
+    false                     // IP mute
 );
 ```
 
 #### `warnPlayer`
 ```java
-boolean success = api.warnPlayer("JátékosNév", "Trágár beszéd", "AdminName", false);
+boolean success = api.warnPlayer("PlayerName", "Swearing", "AdminName", false);
 ```
 
 #### `kickPlayer`
 ```java
-boolean success = api.kickPlayer("JátékosNév", "AFK túl hosszú ideje", "System", false);
+boolean success = api.kickPlayer("PlayerName", "AFK for too long", "System", false);
 ```
 
 #### `freezePlayer` / `unfreezePlayer`
 ```java
-api.freezePlayer("JátékosNév", "Képernyőmegosztás szükséges", "StaffMember");
-api.unfreezePlayer("JátékosNév", "StaffMember");
+api.freezePlayer("PlayerName", "Screenshare required", "StaffMember");
+api.unfreezePlayer("PlayerName", "StaffMember");
 ```
 
 #### `unbanPlayer` / `unmutePlayer` / `revokePunishment`
 ```java
-api.unbanPlayer("JátékosNév", "Téves ban", "Admin");
-api.unmutePlayer("JátékosNév", "Kérelem elfogadva", "Admin");
-api.revokePunishment(105, "Admin"); // Büntetés törlése ID alapján
+api.unbanPlayer("PlayerName", "Appeal accepted", "Admin");
+api.unmutePlayer("PlayerName", "Appeal accepted", "Admin");
+api.revokePunishment(105, "Admin"); // Remove punishment by ID
 ```
 
 ---
 
-### C) Parancs Átírási Metódusok (Command Alias Methods)
+### C) Command Alias Methods
 
-Saját parancs-aliasokat regisztrálhatsz futásidőben:
+Register dynamic command aliases at runtime:
 ```java
-// Hozzáadja a /kitiltas aliast a /ban parancshoz
+// Register '/kitiltas' alias for '/ban'
 api.registerCommandAlias("ban", "kitiltas");
 
-// Lekéri a bejegyzett egyedi aliasokat
+// Get registered custom aliases
 List<String> aliases = api.getCommandAliases("ban");
 ```
 
 ---
 
-## 4. Bukkit Custom Eventek (Eseménykezelés)
+## 4. Bukkit Custom Events
 
-A wapeB Bukkit eseményeket generál a büntetések kiszabása és feloldása előtt.
+wapeB fires custom Bukkit events before enforcing punishments and revocations.
 
 ### 1. `PlayerPunishEvent` (Cancellable)
-Minden szankció kiszabásakor (akár parancsból, akár GUI-ból, akár Web API-ból, akár kódból indították) lefut.
+Fires whenever a punishment is issued (via command, GUI, Web API, or code).
 
-#### Elérhető Metódusok az Eventben:
+#### Available Event Methods:
 - `getPlayerUuid()` / `getPlayerName()` / `getIpAddress()`
-- `getType()` – `PunishmentType` (BAN, TEMPBAN, MUTE, WARN, KICK, stb.)
-- `getReason()` / `setReason(String)` – **Módosítható indok**
-- `getExecutor()` / `setExecutor(String)` – **Módosítható végrehajtó név** *(pl. Discord név felülírásához)*
-- `getDuration()` / `setDuration(long)` – **Módosítható időtartam**
-- `isSilent()` / `setSilent(boolean)` – **Módosítható néma mód**
-- `isCancelled()` / `setCancelled(boolean)` – **Esemény megszakítása**
+- `getType()` – `PunishmentType` (BAN, TEMPBAN, MUTE, WARN, KICK, etc.)
+- `getReason()` / `setReason(String)` – **Modifiable reason**
+- `getExecutor()` / `setExecutor(String)` – **Modifiable executor name** *(useful for Discord bot overrides)*
+- `getDuration()` / `setDuration(long)` – **Modifiable duration**
+- `isSilent()` / `setSilent(boolean)` – **Modifiable silent flag**
+- `isCancelled()` / `setCancelled(boolean)` – **Cancel punishment execution**
 
-#### Példa Listener:
+#### Example Listener:
 ```java
 import dev.azuyo.wapeB.api.events.PlayerPunishEvent;
 import org.bukkit.event.EventHandler;
@@ -250,43 +248,43 @@ public class PunishListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
     public void onPunish(PlayerPunishEvent event) {
-        // VIP védelem példa:
+        // VIP Protection Example:
         if (event.getPlayerName().startsWith("VIP_") && event.getType().name().contains("BAN")) {
             event.setCancelled(true);
             return;
         }
 
-        // Végrehajtó nevének felülbírálása futás közben:
+        // Override executor name dynamically:
         if (event.getExecutor().equalsIgnoreCase("Console")) {
-            event.setExecutor("Automatikus Védelmi Rendszer");
+            event.setExecutor("Automated Protection System");
         }
     }
 }
 ```
 
 ### 2. `PlayerUnpunishEvent` (Cancellable)
-Unban / Unmute / Unwarn esetén fut le:
-- `getPunishment()` – A feloldandó `Punishment` objektum.
-- `getExecutor()` – A feloldást végző személy neve.
+Fires during Unban / Unmute / Unwarn:
+- `getPunishment()` – The `Punishment` object being revoked.
+- `getExecutor()` – The name of the revoking entity/admin.
 
 ---
 
-## 5. Integrációs Minták és Kódpéldák
+## 5. Integration Examples & Code Snippets
 
-### Minta 1: Egyedi Némító Parancs (GMute)
-Egy pehelykönnyű parancs, ami tetszőleges szankcionáló névvel némít:
+### Example 1: Custom Mute Command (GMute)
+A lightweight command that mutes with a custom executor name:
 
 ```java
 public class GMuteCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        // /gmute <játékos> <indok> <végrehajtó>
+        // /gmute <player> <reason> <executor>
         String target = args[0];
         String reason = args[1];
         String executor = args[2];
 
         WapeB.getApi().mutePlayer(target, reason, executor, -1, false, false);
-        sender.sendMessage("§aSikeresen némítva! Végrehajtó: " + executor);
+        sender.sendMessage("§aMuted successfully! Executor: " + executor);
         return true;
     }
 }
@@ -294,21 +292,21 @@ public class GMuteCommand implements CommandExecutor {
 
 ---
 
-### Minta 2: Discord Bot (SyncCord / DiscordSRV) Végrehajtó Átírás
-Ha egy Discord bot ad ki Minecraft parancsot a konzolon keresztül, a `PlayerPunishEvent` segítségével a konzol neve helyett a Discord felhasználó Minecraft neve kerül mentésre:
+### Example 2: Discord Bot (SyncCord / DiscordSRV) Executor Override
+When a Discord bot dispatches a command via console, override the executor name dynamically in `PlayerPunishEvent`:
 
 ```java
-// 1. A parancs kiadásakor a Bukkit főszálán eltároljuk a nevet ThreadLocal-ban:
+// 1. Dispatch command on Bukkit main thread, setting thread local context:
 Bukkit.getScheduler().runTask(plugin, () -> {
     try {
         WapeBHook.setCurrentDiscordExecutor("ywxlol");
-        Bukkit.dispatchCommand(customSender, "mute pistike 1h spam");
+        Bukkit.dispatchCommand(customSender, "mute player123 1h spam");
     } finally {
         WapeBHook.clearCurrentDiscordExecutor();
     }
 });
 
-// 2. A Listener felülírja a végrehajtó nevét a wapeB eseményében:
+// 2. Listener overrides executor name in wapeB event:
 @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
 public void onPlayerPunish(PlayerPunishEvent event) {
     String discordExecutor = WapeBHook.getActiveDiscordExecutor();
@@ -320,8 +318,8 @@ public void onPlayerPunish(PlayerPunishEvent event) {
 
 ---
 
-### Minta 3: Chat Tag & Mute Jelzés
-Annak megjelenítése a chaten vagy Discordon, ha egy játékos némítva van:
+### Example 3: Chat Listener & Mute Notice
+Check if a player is muted when attempting to chat:
 
 ```java
 @EventHandler
@@ -329,9 +327,9 @@ public void onChat(AsyncPlayerChatEvent event) {
     WapeBAPI api = WapeB.getApi();
     if (api != null && api.isMuted(event.getPlayer().getUniqueId())) {
         Punishment mute = api.getActiveMute(event.getPlayer().getUniqueId());
-        String reason = (mute != null) ? mute.getReason() : "Némítva";
+        String reason = (mute != null) ? mute.getReason() : "Muted";
         
-        event.getPlayer().sendMessage("§cNem tudsz írni, mert némítva vagy! Indok: " + reason);
+        event.getPlayer().sendMessage("§cYou cannot speak because you are muted! Reason: " + reason);
         event.setCancelled(true);
     }
 }
@@ -339,27 +337,27 @@ public void onChat(AsyncPlayerChatEvent event) {
 
 ---
 
-## 6. HTTP REST Web API Referencia
+## 6. HTTP REST Web API Reference
 
-A wapeB beépített HTTP webszerverrel rendelkezik a távoli kezeléshez (pl. Web Dashboard, Discord botok).
+wapeB includes a built-in HTTP REST server for remote management (e.g., Web Dashboards, Discord bots).
 
-- **Fejléc**: `X-API-Key: YOUR_API_KEY_HERE`
+- **Header**: `X-API-Key: YOUR_API_KEY_HERE`
 
-### Végpontok Összefoglalója:
+### Endpoints Overview:
 
-| Végpont | Metódus | Paraméterek | Leírás |
+| Endpoint | Method | Parameters | Description |
 |---|---|---|---|
-| `/api/player/punishments` | GET | `player=Név` | Játékos összes büntetésének lekérése JSON tömbként |
-| `/api/player/checkban` | GET | `player=Név` | Aktív ban státusz és részletek |
-| `/api/player/checkmute` | GET | `player=Név` | Aktív mute státusz és részletek |
-| `/api/commands/list` | GET | - | Parancsok és beállított aliasok listázása |
-| `/api/punish/execute` | GET/POST | `target=Név&type=BAN&reason=Indok&duration=1d` | Szankció kiszabása Web API-n át |
-| `/api/punish/remove` | GET/POST | `id=105` | Szankció törlése ID alapján |
-| `/api/stats` | GET | - | Napi és órás szankció statisztikák |
-| `/api/lockdown` | GET/POST | `action=on&reason=Karbantartás` | Szerver zárolás kezelése |
+| `/api/player/punishments` | GET | `player=Name` | Fetch all punishments for a player as JSON array |
+| `/api/player/checkban` | GET | `player=Name` | Active ban status and details |
+| `/api/player/checkmute` | GET | `player=Name` | Active mute status and details |
+| `/api/commands/list` | GET | - | List registered commands and aliases |
+| `/api/punish/execute` | GET/POST | `target=Name&type=BAN&reason=Reason&duration=1d` | Issue punishment via REST |
+| `/api/punish/remove` | GET/POST | `id=105` | Remove punishment by ID |
+| `/api/stats` | GET | - | Daily and hourly punishment statistics |
+| `/api/lockdown` | GET/POST | `action=on&reason=Maintenance` | Manage server lockdown state |
 
 ---
 
-## 📜 Licenc és Támogatás
-Készült Spigot / Paper 1.18.2 - 1.21.x Minecraft szerverekhez.
+## 📜 License & Support
+Developed for Spigot / Paper 1.18.2 - 1.21.x Minecraft servers.  
 GitHub Repository: [https://github.com/lftkraft/wapeB](https://github.com/lftkraft/wapeB)
