@@ -2,113 +2,120 @@ package dev.azuyo.wapeB.commands;
 
 import dev.azuyo.wapeB.WapeB;
 import dev.azuyo.wapeB.managers.ConfigManager;
-import dev.azuyo.wapeB.managers.DataManager;
 import dev.azuyo.wapeB.managers.PlayerDataManager;
+import dev.azuyo.wapeB.utils.AltInfo;
 import dev.azuyo.wapeB.utils.MessageUtil;
 import dev.azuyo.wapeB.utils.Punishment;
+import dev.azuyo.wapeB.utils.TimeUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
-import java.util.Arrays;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
-import java.util.UUID;
+import java.util.Map;
 
 public class AltsCommand implements CommandExecutor {
 
     private final WapeB plugin;
     private final ConfigManager configManager;
-    private final DataManager dataManager;
     private final PlayerDataManager playerDataManager;
-    private final List<Punishment.PunishmentType> banTypes = Arrays.asList(
-            Punishment.PunishmentType.BAN,
-            Punishment.PunishmentType.TEMPBAN,
-            Punishment.PunishmentType.IPBAN,
-            Punishment.PunishmentType.TEMPIPBAN,
-            Punishment.PunishmentType.FREEZE_LOGOUT_BAN
-    );
-    private final List<Punishment.PunishmentType> muteTypes = Arrays.asList(
-            Punishment.PunishmentType.MUTE,
-            Punishment.PunishmentType.TEMPMUTE,
-            Punishment.PunishmentType.IPMUTE,
-            Punishment.PunishmentType.TEMPIPMUTE
-    );
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd HH:mm");
 
     public AltsCommand(WapeB plugin) {
         this.plugin = plugin;
         this.configManager = plugin.getConfigManager();
-        this.dataManager = plugin.getDataManager();
         this.playerDataManager = plugin.getPlayerDataManager();
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!sender.hasPermission("wapeb.alts")) {
-            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.no-permission", ""), null));
+            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.no-permission", "&cYou don't have permission."), null));
             return true;
         }
 
         if (args.length < 1) {
-            sender.sendMessage(MessageUtil.createComponent(configManager.getString("alts.usage", ""), null));
+            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.alts.usage", "&cUsage: /alts <player>"), null));
             return true;
         }
 
         OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
-        if (!target.hasPlayedBefore()) {
-            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.player-not-found", ""), null));
+        if (!target.hasPlayedBefore() && !target.isOnline()) {
+            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.player-not-found", "&cPlayer not found."), null));
             return true;
         }
 
+        String targetName = target.getName() != null ? target.getName() : args[0];
         String targetIp = playerDataManager.getLastKnownIp(target.getUniqueId());
-        if (targetIp == null) {
-            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.no-alts-found", "").replace("%player%", target.getName()), null));
-            return true;
-        }
 
-        List<UUID> alts = playerDataManager.getPlayersByIp(targetIp);
-        alts.remove(target.getUniqueId()); // Remove the target player from the list
+        List<AltInfo> alts = playerDataManager.getDetailedAlts(target.getUniqueId());
 
         if (alts.isEmpty()) {
-            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.no-alts-found", "").replace("%player%", target.getName()), null));
+            String noAltsMsg = configManager.getString("messages.no-alts-found", "&cNo alternative accounts found for %player%.")
+                    .replace("%player%", targetName);
+            sender.sendMessage(MessageUtil.createComponent(noAltsMsg, null));
             return true;
         }
 
         // Header
-        sender.sendMessage(MessageUtil.replacePlaceholders(configManager.getString("alts.header", ""), new Punishment(0, target.getUniqueId(), target.getName(), Punishment.PunishmentType.KICK, "", "", 0, 0)));
+        Map<String, String> headerPlaceholders = new HashMap<>();
+        headerPlaceholders.put("%player%", targetName);
+        headerPlaceholders.put("%ip_address%", targetIp != null ? targetIp : "N/A");
+        headerPlaceholders.put("%alt_count%", String.valueOf(alts.size()));
+
+        String header = configManager.getString("messages.alts.header", "<dark_gray><st>------------------</st> <gradient:#FF00D9:#B300FF>Alt Fiókok: %player% (%alt_count%)</gradient> <dark_gray><st>------------------");
+        sender.sendMessage(MessageUtil.createComponent(header, null, headerPlaceholders));
 
         // Lines
-        String lineFormat = configManager.getString("alts.line", "");
-        for (UUID altUuid : alts) {
-            OfflinePlayer altPlayer = Bukkit.getOfflinePlayer(altUuid);
-            String altPlayerName = altPlayer.getName() != null ? altPlayer.getName() : altUuid.toString();
+        String lineFormat = configManager.getString("messages.alts.line", "<dark_gray>- %status% <color:#C34338>%alt_player%</color> %tags% <gray>(Utoljára: %last_seen%)");
+        
+        for (AltInfo alt : alts) {
+            Map<String, String> linePlaceholders = new HashMap<>();
+            linePlaceholders.put("%alt_player%", alt.getPlayerName());
+            linePlaceholders.put("%ip_address%", alt.getLastIp() != null ? alt.getLastIp() : "N/A");
             
-            String statusColor = configManager.getString("alts.status-colors.none", "§f[CLEAN]");
+            String status;
+            Punishment activePunishment = null;
 
-            Punishment activeBan = dataManager.getActivePunishment(altUuid, null, banTypes);
-            Punishment activeMute = dataManager.getActivePunishment(altUuid, null, muteTypes);
-
-            if (activeBan != null) {
-                statusColor = configManager.getString("alts.status-colors.banned", "§c[BANNED]");
-            } else if (activeMute != null) {
-                statusColor = configManager.getString("alts.status-colors.muted", "§e[MUTED]");
-            } else if (altPlayer.isOnline()) {
-                statusColor = configManager.getString("alts.status-colors.online", "§a[ONLINE]");
+            if (alt.isBanned()) {
+                activePunishment = alt.getActiveBan();
+                status = configManager.getString("messages.alts.status.banned", "<red><bold>[BANNED]</bold></red>");
+            } else if (alt.isMuted()) {
+                activePunishment = alt.getActiveMute();
+                status = configManager.getString("messages.alts.status.muted", "<yellow><bold>[MUTED]</bold></yellow>");
             } else {
-                statusColor = configManager.getString("alts.status-colors.offline", "§7[OFFLINE]");
+                OfflinePlayer op = Bukkit.getOfflinePlayer(alt.getUuid());
+                if (op.isOnline()) {
+                    status = configManager.getString("messages.alts.status.online", "<green>[ONLINE]</green>");
+                } else {
+                    status = configManager.getString("messages.alts.status.clean", "<gray>[CLEAN]</gray>");
+                }
             }
 
-            String formattedLine = lineFormat
-                    .replace("%alt_player_status%", statusColor)
-                    .replace("%alt_player%", altPlayerName)
-                    .replace("%ip_address%", targetIp);
-            sender.sendMessage(MessageUtil.createComponent(formattedLine, null));
+            StringBuilder tags = new StringBuilder();
+            if (alt.isExempt()) {
+                tags.append(" ").append(configManager.getString("messages.alts.tags.exempt", "<gradient:#00FFCC:#0099FF>[🛡️ KIVÉTEL]</gradient>"));
+            }
+            if (alt.getMatchType() == AltInfo.MatchType.CIDR_SUBNET) {
+                tags.append(" ").append(configManager.getString("messages.alts.tags.cidr", "<dark_purple>[CIDR /24]</dark_purple>"));
+            }
+
+            linePlaceholders.put("%status%", status);
+            linePlaceholders.put("%tags%", tags.toString());
+            linePlaceholders.put("%last_seen%", alt.getLastSeen() > 0 ? dateFormat.format(new Date(alt.getLastSeen())) : "Ismeretlen");
+
+            String line = lineFormat;
+            sender.sendMessage(MessageUtil.createComponent(line, activePunishment, linePlaceholders));
         }
 
         // Footer
-        sender.sendMessage(MessageUtil.replacePlaceholders(configManager.getString("alts.footer", ""), new Punishment(0, target.getUniqueId(), target.getName(), Punishment.PunishmentType.KICK, "", "", 0, 0)));
+        String footer = configManager.getString("messages.alts.footer", "<dark_gray><st>----------------------------------------------------");
+        sender.sendMessage(MessageUtil.createComponent(footer, null, headerPlaceholders));
 
         return true;
     }

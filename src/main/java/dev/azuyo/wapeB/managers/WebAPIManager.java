@@ -537,6 +537,8 @@ public class WebAPIManager {
                     po.addProperty("reason", p.getReason());
                     po.addProperty("executor", p.getExecutorName());
                     po.addProperty("date", p.getDate());
+                    po.addProperty("duration", p.getDuration());
+                    po.addProperty("active", p.isActive());
                     po.addProperty("uuid", p.getPlayerUuid() != null ? p.getPlayerUuid().toString() : "");
                     arr.add(po);
                 }

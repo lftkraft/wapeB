@@ -46,8 +46,8 @@ public class BanIpCommand implements CommandExecutor {
         OfflinePlayer targetPlayer = null;
         String finalTargetName = targetIdentifier;
 
-        if (IP_PATTERN.matcher(targetIdentifier).matches()) {
-            targetIp = targetIdentifier;
+        if (dev.azuyo.wapeB.utils.IPUtil.isValidIpOrCidr(targetIdentifier)) {
+            targetIp = dev.azuyo.wapeB.utils.IPUtil.normalizeCidr(targetIdentifier);
         } else {
             targetPlayer = Bukkit.getOfflinePlayer(targetIdentifier);
             if (!targetPlayer.hasPlayedBefore() && !targetPlayer.isOnline()) {
@@ -73,20 +73,42 @@ public class BanIpCommand implements CommandExecutor {
         boolean silent = args.length > 1 && args[args.length - 1].equalsIgnoreCase("-s");
         String[] reasonArgs = silent ? Arrays.copyOfRange(args, 1, args.length - 1) : Arrays.copyOfRange(args, 1, args.length);
         long duration = -1;
-        String reason;
+        String reason = null;
 
         if (reasonArgs.length > 0) {
-            long parsedTime = TimeUtil.parseTime(reasonArgs[0]);
-            if (parsedTime != -1) {
-                duration = parsedTime;
-                reason = String.join(" ", Arrays.copyOfRange(reasonArgs, 1, reasonArgs.length));
+            String firstArg = reasonArgs[0];
+            if (firstArg.startsWith("$")) {
+                dev.azuyo.wapeB.managers.TemplateManager.PunishmentTemplate template = plugin.getTemplateManager().getTemplate("ban", firstArg);
+                if (template != null) {
+                    reason = template.getReason();
+                    if (template.getDuration() != null && !template.getDuration().equalsIgnoreCase("perm")) {
+                        duration = TimeUtil.parseTime(template.getDuration());
+                    }
+                    reasonArgs = Arrays.copyOfRange(reasonArgs, 1, reasonArgs.length);
+                }
+            } else {
+                long parsedTime = TimeUtil.parseTime(firstArg);
+                if (parsedTime != -1) {
+                    duration = parsedTime;
+                    reasonArgs = Arrays.copyOfRange(reasonArgs, 1, reasonArgs.length);
+                }
+            }
+        }
+
+        if (reason == null || reason.isEmpty()) {
+            if (reasonArgs.length > 0 && reasonArgs[0].startsWith("$")) {
+                dev.azuyo.wapeB.managers.TemplateManager.PunishmentTemplate template = plugin.getTemplateManager().getTemplate("ban", reasonArgs[0]);
+                if (template != null) {
+                    reason = template.getReason();
+                    if (duration == -1 && template.getDuration() != null && !template.getDuration().equalsIgnoreCase("perm")) {
+                        duration = TimeUtil.parseTime(template.getDuration());
+                    }
+                }
             } else {
                 reason = String.join(" ", reasonArgs);
             }
-        } else {
-            reason = configManager.getString("messages.ban.default-reason", "The Ban Hammer has spoken!");
         }
-        if (reason.isEmpty()) {
+        if (reason == null || reason.isEmpty()) {
             reason = configManager.getString("messages.ban.default-reason", "The Ban Hammer has spoken!");
         }
 

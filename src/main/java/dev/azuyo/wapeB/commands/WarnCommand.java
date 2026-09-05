@@ -42,12 +42,21 @@ public class WarnCommand implements CommandExecutor {
         }
 
         boolean silent = args[args.length - 1].equalsIgnoreCase("-s");
-        String reason = String.join(" ", silent ? Arrays.copyOfRange(args, 1, args.length - 1) : Arrays.copyOfRange(args, 1, args.length));
+        String reasonStr = String.join(" ", silent ? Arrays.copyOfRange(args, 1, args.length - 1) : Arrays.copyOfRange(args, 1, args.length));
 
-        if (reason.isEmpty()) {
+        if (reasonStr.startsWith("$")) {
+            dev.azuyo.wapeB.managers.TemplateManager.PunishmentTemplate template = plugin.getTemplateManager().getTemplate("warn", reasonStr);
+            if (template != null) {
+                reasonStr = template.getReason();
+            }
+        }
+
+        if (reasonStr.isEmpty()) {
             sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.warn.usage", "&cUsage: /warn <player> <reason> [-s]"), null));
             return true;
         }
+
+        String reason = reasonStr;
 
         String executorName = (sender instanceof Player) ? sender.getName() : configManager.getString("console-name", "Console");
 

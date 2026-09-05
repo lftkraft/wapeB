@@ -1,4 +1,4 @@
-# 📚 wapeB API - Complete Developer Documentation (v1.0.9)
+# 📚 wapeB API - Complete Developer Documentation (v1.0.10)
 
 This documentation provides a comprehensive guide to the **wapeB** Minecraft punishment system's **Java API**, **Bukkit Events**, **Dynamic Command Overrides**, and **HTTP REST Web API**.
 
@@ -36,7 +36,7 @@ repositories {
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.8-R0.1-SNAPSHOT")
-    compileOnly("com.github.lftkraft:wapeB:v1.0.9")
+    compileOnly("com.github.lftkraft:wapeB:v1.0.10")
 }
 ```
 
@@ -147,10 +147,22 @@ Fetches active warnings for a player.
 - `List<Punishment> getWarnings(UUID playerUuid)`
 - `List<Punishment> getWarnings(String playerName)`
 
-#### `getAlts`
-Returns a list of alternative account usernames linked by IP address.
+#### `getAlts` & `getDetailedAlts`
+Returns linked alternative account usernames or detailed `AltInfo` records (with punishment status, CIDR subnet indicator, exemptions, and last seen timestamps).
 - `List<String> getAlts(UUID playerUuid)`
 - `List<String> getAlts(String playerName)`
+- `List<AltInfo> getDetailedAlts(UUID playerUuid)`
+- `List<AltInfo> getDetailedAlts(String playerName)`
+
+#### `getIpHistory`
+Fetches historical IP addresses and timestamps logged for a player.
+- `List<IpHistoryRecord> getIpHistory(UUID playerUuid)`
+- `List<IpHistoryRecord> getIpHistory(String playerName)`
+
+#### Alt Exemptions (`isAltExempt` / `setAltExempt`)
+Manage family / roommate exemptions from alt account checks.
+- `boolean isAltExempt(UUID/String player)` – Returns `true` if player is exempted.
+- `boolean setAltExempt(UUID/String player, boolean exempt, String addedBy)` – Adds or removes exemption.
 
 #### Status Checkers (`boolean`)
 - `boolean isBanned(UUID/String/IP)` – `true` if active ban exists for player, IP, or alts.
@@ -245,7 +257,71 @@ api.revokePunishment(105, "Admin"); // Remove punishment by ID
 
 ---
 
-### C) Command Alias Methods
+---
+
+### C) CIDR Subnet & GeoIP API Methods
+
+Manage CIDR IP subnet bans (`192.168.1.0/24` or `192.168.1.*`) and fetch GeoIP information asynchronously:
+
+```java
+// Check if an IP is covered by an active CIDR ban
+boolean isBanned = api.isCidrBanned("192.168.1.50");
+
+// Fetch active CIDR ban details
+Punishment cidrBan = api.getActiveCidrBan("192.168.1.0/24");
+
+// Ban an entire IP range / subnet
+api.banIpRange("192.168.1.0/24", "VPN / Botnet Subnet", "Console", 7 * 86400000L, false);
+
+// Unban an IP range
+api.unbanIpRange("192.168.1.0/24", "Resolved", "Admin");
+
+// Fetch GeoIP information (Country, City, ISP)
+GeoIPUtil.GeoInfo geo = api.getGeoInfo("1.1.1.1");
+String location = geo.getFormatted(); // e.g. "Australia (AU) | City: Sydney | ISP: Cloudflare"
+```
+
+---
+
+### D) Punishment Templates API Methods
+
+Query and apply pre-defined punishment templates from `templates.yml`:
+
+```java
+// Fetch a specific template (e.g., category: "ban", key: "cheat")
+PunishmentTemplate template = api.getTemplate("ban", "cheat");
+String reason = template.getReason();
+String duration = template.getDuration();
+
+// Fetch all templates or category templates
+Map<String, Map<String, PunishmentTemplate>> allTemplates = api.getAllTemplates();
+List<PunishmentTemplate> banTemplates = api.getTemplatesForCategory("ban");
+
+// Execute punishment directly using a template
+api.punishWithTemplate(playerUuid, "ban", "cheat", "AdminName", false);
+api.punishWithTemplate("PlayerName", "mute", "spam", "ModName", false);
+```
+
+---
+
+### E) Warn-Action Escalation API Methods
+
+Query warning thresholds and trigger automated escalation actions:
+
+```java
+// Get active warning count for player (respects configured warning-expiry)
+int activeWarns = api.getActiveWarnCount(playerUuid);
+
+// Fetch configured warn-action thresholds map (e.g. 3 -> "tempmute...", 5 -> "tempban...")
+Map<Integer, String> warnActions = api.getWarnActions();
+
+// Manually trigger warn-action threshold check for a player
+api.triggerWarnActionCheck(playerUuid);
+```
+
+---
+
+### F) Command Alias Methods
 
 Register dynamic command aliases at runtime:
 ```java

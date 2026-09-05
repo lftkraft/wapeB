@@ -49,8 +49,8 @@ public class PlayerLoginListener implements Listener {
         String playerName = player.getName();
         String playerIp = event.getAddress().getHostAddress();
 
-        // --- Update Player Data ---
-        playerDataManager.setLastKnownIp(playerUuid, playerIp);
+        // --- Update Player Data & History ---
+        playerDataManager.recordIpHistory(playerUuid, playerName, playerIp);
 
         // --- Lockdown Check ---
         boolean lockdownEnabled = plugin.getConfigManager().getConfig().getBoolean("lockdown.enabled", false);

@@ -236,7 +236,7 @@ public class YamlDataManager implements DataManager {
                     String storedIp = punishmentsConfig.getString(path + ".ipAddress");
 
                     boolean uuidMatch = playerUuid != null && playerUuid.equals(storedUuid);
-                    boolean ipMatch = ipAddress != null && !ipAddress.isEmpty() && ipAddress.equals(storedIp);
+                    boolean ipMatch = ipAddress != null && !ipAddress.isEmpty() && storedIp != null && (ipAddress.equals(storedIp) || dev.azuyo.wapeB.utils.IPUtil.isIpInCidr(ipAddress, storedIp));
                     boolean altMatch = altUuids != null && storedUuid != null && altUuids.contains(storedUuid);
 
                     if (uuidMatch || ipMatch || altMatch) {

@@ -1,0 +1,257 @@
+# wapeB German Language File
+# Language code: de
+
+# --- Punishment Type Display Names ---
+punishment-types:
+  BAN: Bann
+  TEMPBAN: Zeitbann
+  IPBAN: IP-Bann
+  TEMPIPBAN: Zeit-IP-Bann
+  MUTE: Stummschaltung
+  TEMPMUTE: Zeit-Stummschaltung
+  IPMUTE: IP-Stummschaltung
+  TEMPIPMUTE: Zeit-IP-Stummschaltung
+  WARN: Verwarnung
+  KICK: Kicked
+  FREEZE_LOGOUT_BAN: Logout-Bann
+  SENTINEL_AUTO_MUTE: Auto-Mute
+  SENTINEL_AI_MUTE: AI-Mute
+
+# --- Time Formats ---
+time-formats:
+  permanent: Dauerhaft
+  year: ' Jahr(e)'
+  week: ' Woche(n)'
+  day: ' Tag(e)'
+  hour: ' Stunde(n)'
+  minute: Min
+  second: Sek
+
+messages:
+  no-permission: '%prefix% <red>Du hast keine Berechtigung für diesen Befehl.'
+  player-not-found: '%prefix% <red>Spieler nicht gefunden.'
+  invalid-ip: '%prefix% <red>Ungültiges IP-Format.'
+  no-ip-history: '%prefix% <red>Keine IP-Adresse für Spieler %player% gefunden.'
+  not-banned: '%prefix% <red>Spieler ist nicht gebannt.'
+  not-muted: '%prefix% <red>Spieler ist nicht stummgeschaltet.'
+  invalid-punishment-id: '%prefix% <red>Ungültige Strafe-ID.'
+  no-warnings: '%prefix% <yellow>Dieser Spieler hat keine aktiven Verwarnungen.'
+  no-history: '%prefix% <yellow>Dieser Spieler hat keine Strafen-Historie.'
+  no-active-ban: '%prefix% <yellow>Dieser Spieler hat keinen aktiven Bann.'
+  no-active-mute: '%prefix% <yellow>Dieser Spieler ist nicht stummgeschaltet.'
+  no-alts-found: '%prefix% <yellow>Keine Zweitkonten für %player% gefunden.'
+  no-active-bans: '%prefix% <yellow>Keine aktiven Banns vorhanden.'
+  no-staff-history: '%prefix% <yellow>Keine Einträge für Teammitglied %executor% gefunden.'
+  rollback-success: '%prefix% <green>Strafe #%punishment_id% erfolgreich zurückgenommen.'
+  rollback-usage: '%prefix% <white>Verwendung: <red>/punish-rollback <id>'
+  console-only: '%prefix% <red>Dieser Befehl kann nur über die Konsole ausgeführt werden!'
+  global-unban-success: '%prefix% <green>Alle aktiven Banns wurden aufgehoben! (Global Unban).'
+
+  punishment-notification:
+    permission: wapeb.notify.punishment
+    ban-attempt: '%prefix% <color:#C34338>%player% <white>hat versucht sich zu verbinden (Gebannt für <color:#C34338>%duration%<white>).'
+    mute-attempt: '%prefix% <color:#C34338>%player% <white>hat versucht zu schreiben (Stummgeschaltet für <color:#C34338>%duration%<white>).'
+
+  ban:
+    usage: '%prefix% <white>Verwendung: <red>/ban <spieler> [zeit] [grund] [-s]'
+    default-reason: Verstoß gegen die Regeln.
+    success: '%prefix% <green>Spieler <color:#C34338>%player%<green> erfolgreich gebannt.'
+    broadcast: '%prefix% <color:#C34338>%executor% <white>hat <color:#C34338>%player%<white> gebannt. Grund: <color:#C34338>%reason%'
+    silent:
+      prefix: '<gray>(Stille) '
+    kick-screen:
+      - '%mid% <b><gradient:#C34338:#C63528>DU BIST GEBANNT</gradient></b>'
+      - '%mid% <white>Du wurdest von diesem Server gebannt.'
+      - ''
+      - '%mid% Von: <color:#C34338>%executor%'
+      - '%mid% Grund: <color:#C34338>%reason%'
+      - '%mid% Dauer: <color:#C34338>%duration%'
+      - '%mid% ID: #%punishment_id%'
+
+  kick:
+    usage: '%prefix% <white>Verwendung: <red>/kick <spieler> [grund] [-s]'
+    default-reason: Vom Teammitglied gekickt.
+    success: '%prefix% <green>Spieler <color:#C34338>%player%<green> gekickt.'
+    broadcast: '%prefix% <color:#C34338>%executor% <white>hat <color:#C34338>%player%<white> gekickt.'
+    silent:
+      prefix: '<gray>(Stille) '
+    kick-screen:
+      - '%mid% <b><gradient:#C34338:#C63528>SERVER KICK</gradient></b>'
+      - '%mid% Von: <color:#C34338>%executor%'
+      - '%mid% Grund: <color:#C34338>%reason%'
+
+  mute:
+    usage: '%prefix% <white>Verwendung: <red>/mute <spieler> [zeit] [grund] [-s]'
+    default-reason: Chatregeln verstoßen.
+    success: '%prefix% <green>Spieler <color:#C34338>%player%<green> stummgeschaltet.'
+    broadcast: '%prefix% <color:#C34338>%executor% <white>hat <color:#C34338>%player%<white> stummgeschaltet.'
+    silent:
+      prefix: '<gray>(Stille) '
+    player-is-muted: "%prefix% <red>Du bist derzeit stummgeschaltet! Läuft ab in: <color:#C34338>%duration%"
+
+  unban:
+    usage: '%prefix% <white>Verwendung: <red>/unban <spieler> [grund] [-s]'
+    success: '%prefix% <green>Bann für <color:#C34338>%player%<green> aufgehoben.'
+    broadcast: '%prefix% <color:#C34338>%player%<white> wurde entbannt.'
+    silent:
+      prefix: '<gray>(Stille) '
+
+  unmute:
+    usage: '%prefix% <white>Verwendung: <red>/unmute <spieler> [grund] [-s]'
+    success: '%prefix% <green>Stummschaltung für <color:#C34338>%player%<green> aufgehoben.'
+    broadcast: '%prefix% <color:#C34338>%player%<white> ist nicht mehr stummgeschaltet.'
+    silent:
+      prefix: '<gray>(Stille) '
+
+  banip:
+    usage: '%prefix% <white>Verwendung: <red>/banip <spieler/IP> [zeit] [grund] [-s]'
+    default-reason: IP Bann.
+    success: '%prefix% <green>IP-Bann für <color:#C34338>%player%<green> erfolgreich.'
+    broadcast: '%prefix% <color:#C34338>%executor% <white>hat IP-Bann verhängt für <color:#C34338>%player%<white>.'
+    silent:
+      prefix: '<gray>(Stille) '
+
+  muteip:
+    usage: '%prefix% <white>Verwendung: <red>/muteip <spieler/IP> [zeit] [grund] [-s]'
+    default-reason: IP Stummschaltung.
+    success: '%prefix% <green>IP-Stummschaltung für <color:#C34338>%player%<green> erfolgreich.'
+    broadcast: '%prefix% <color:#C34338>%executor% <white>hat IP-Stummschaltung verhängt für <color:#C34338>%player%<white>.'
+    silent:
+      prefix: '<gray>(Stille) '
+
+  warn:
+    usage: '%prefix% <white>Verwendung: <red>/warn <spieler> <grund> [-s]'
+    success: '%prefix% <green>Spieler <color:#C34338>%player%<green> verwarnt.'
+    player-warned: '%prefix% <yellow>Du hast eine Verwarnung erhalten! Grund: <color:#C34338>%reason%'
+    broadcast: '%prefix% <color:#C34338>%executor% <white>hat <color:#C34338>%player%<white> verwarnt.'
+    silent:
+      prefix: '<gray>(Stille) '
+
+  unwarn:
+    usage: '%prefix% <white>Verwendung: <red>/unwarn <spieler> <id> [-s]'
+    success: '%prefix% <green>Verwarnung für <color:#C34338>%player%<green> entfernt.'
+    broadcast: '%prefix% Verwarnung für <color:#C34338>%player%<white> wurde entfernt.'
+    not-found: '%prefix% <red>Verwarnungs-ID nicht gefunden.'
+    silent:
+      prefix: '<gray>(Stille) '
+
+  kickall:
+    usage: '%prefix% <white>Verwendung: <red>/kickall [grund]'
+    default-reason: Wartungsarbeiten.
+    success: '%prefix% <green>Alle Spieler wurden gekickt.'
+    broadcast: '%prefix% <color:#C34338>%executor% <white>hat alle Spieler gekickt.'
+    kick-screen:
+      - '%mid% <b><gradient:#C34338:#C63528>SERVER KICK</gradient></b>'
+      - '%mid% Von: <color:#C34338>%executor%'
+      - '%mid% Grund: <color:#C34338>%reason%'
+
+  warnings:
+    usage: '%prefix% <white>Verwendung: <red>/warnings <spieler>'
+    header: <dark_gray><st>------------------</st> <gradient:#FF00D9:#B300FF>Verwarnungen von %player%</gradient> <dark_gray><st>------------------
+    line: '<dark_gray>- <gray>[#%punishment_id%] <white>Von: <gradient:#FF00D9:#B300FF>%executor%</gradient> <white>Grund: <gradient:#EC00E3:#D900EC>%reason%</gradient> <gray>(%date%)'
+    footer: <dark_gray><st>----------------------------------------------------
+
+  history:
+    usage: '%prefix% <white>Verwendung: <red>/history <spieler>'
+    header: <dark_gray><st>------------------</st> <gradient:#FF00D9:#B300FF>Historie von %player%</gradient> <dark_gray><st>------------------
+    line: '<dark_gray>- <gray>[#%punishment_id%] <red>%type% <white>Von: <gradient:#FF00D9:#B300FF>%executor%</gradient> <white>Grund: <gradient:#EC00E3:#D900EC>%reason%</gradient> <gray>(%date%) - Läuft ab: %end_date%'
+    footer: <dark_gray><st>----------------------------------------------------
+
+  checkban:
+    usage: '%prefix% <white>Verwendung: <red>/checkban <spieler>'
+    header: '<white>Bann-Prüfung: <color:#C34338>%player% <gray>(Bann)%alt_notice%'
+    details:
+      - '<white>Typ: <color:#C34338>%type%'
+      - '<white>Von: <color:#C34338>%executor%'
+      - '<white>Grund: <color:#C34338>%reason%'
+      - '<white>Läuft ab in: <color:#C34338>%duration%'
+      - '<white>Ablaufdatum: <color:#C34338>%end_date%'
+      - '<white>Strafe ID: #<color:#C34338>%punishment_id%'
+      - '<white>IP-Adresse: <color:#C34338>%ip_address%'
+      - '<white>GeoIP: <color:#C34338>%geoip%'
+    footer: <dark_gray><st>----------------------------------------------------
+
+  checkmute:
+    usage: '%prefix% <white>Verwendung: <red>/checkmute <spieler>'
+    header: '%prefix% <white>Stummschaltung-Prüfung: <color:#C34338>%player% <gray>(Mute)%alt_notice%'
+    details:
+      - '<white>Typ: <color:#C34338>%type%'
+      - '<white>Von: <color:#C34338>%executor%'
+      - '<white>Grund: <color:#C34338>%reason%'
+      - '<white>Läuft ab in: <color:#C34338>%duration%'
+      - '<white>Ablaufdatum: <color:#C34338>%end_date%'
+      - '<white>Strafe ID: #<color:#C34338>%punishment_id%'
+      - '<white>IP-Adresse: <color:#C34338>%ip_address%'
+      - '<white>GeoIP: <color:#C34338>%geoip%'
+    footer: <dark_gray><st>----------------------------------------------------
+
+lockdown:
+  kick-reason:
+    - <b><gradient:#FA0707:#F84A1D>COOLNETWORK</gradient></b>
+    - <dark_gray><st>                           <reset>
+    - <b><gradient:#C34338:#C63528>WARTUNG</gradient></b>
+    - ''
+    - <white>Der Server befindet sich derzeit in Wartung.
+    - '<white>Grund: <gradient:#C34338:#C63528>%reason%</gradient>'
+  messages:
+    enabled: '%prefix% <green>Server-Lockdown wurde aktiviert.'
+    disabled: '%prefix% <green>Server-Lockdown wurde deaktiviert.'
+    usage: '%prefix% <white>Verwendung: <red>/lockdown <on|off> [grund]'
+    reason-set: '%prefix% <green>Lockdown-Grund gesetzt auf: <white>%reason%'
+    status: '%prefix% <white>Lockdown-Status: <gradient:#FF00D9:#B300FF>%status% <white>Grund: <gradient:#FF00D9:#B300FF>%reason%'
+
+freeze:
+  usage: '%prefix% <white>Verwendung: <red>/freeze <spieler> [grund]'
+  messages:
+    frozen: '%prefix% <yellow>Du wurdest von %executor% eingefroren.'
+    unfrozen: '%prefix% <green>Du wurdest von %executor% entfroren.'
+    frozen-success: '%prefix% <green>Spieler %player% erfolgreich eingefroren.'
+    unfrozen-success: '%prefix% <green>Spieler %player% erfolgreich entfroren.'
+    already-frozen: '%prefix% <red>Spieler ist bereits eingefroren.'
+    not-frozen: '%prefix% <red>Spieler ist nicht eingefroren.'
+    logout-ban-broadcast: '%prefix% <color:#C34338>%player% <white>wurde gebannt, da er das Spiel während des Einfrierens verlassen hat.'
+    freeze-screen:
+      - ''
+      - '%prefix% <white>Du bist eingefroren!'
+      - ''
+      - <white>Verlasse nicht das Spiel, sonst wirst du gebannt.
+
+alts:
+  usage: '%prefix% <white>Verwendung: <red>/alts <spieler>'
+  header: <dark_gray><st>------------------</st> <gradient:#FF00D9:#B300FF>Zweitkonten von %player% (%alt_count%)</gradient> <dark_gray><st>------------------
+  line: '<dark_gray>- %status% <color:#C34338>%alt_player%</color> %tags% <gray>(Zuletzt gesehen: %last_seen%)'
+  footer: <dark_gray><st>----------------------------------------------------
+  status-colors:
+    online: <green>[ONLINE]</green>
+    clean: <gray>[SAUBER]</gray>
+    banned: <red><bold>[GEBANNT]</bold></red>
+    muted: <yellow><bold>[STUMM]</bold></yellow>
+    none: <white>[SAUBER]</white>
+  login-notification: '%prefix% <red>%player% <white>hat sich mit Zweitkonten angemeldet! IP: <color:#C34338>%ip_address%'
+
+banlist:
+  usage: '%prefix% <white>Verwendung: <red>/banlist'
+  header: <dark_gray><st>------------------</st> <gradient:#FF00D9:#B300FF>Aktive Banns</gradient> <dark_gray><st>------------------
+  line: '<dark_gray>- <gray>%player% <white>(%type%) Von: <gradient:#FF00D9:#B300FF>%executor% <white>Grund: <gradient:#EC00E3:#D900EC>%reason% <gray>(Ablauf: %end_date%)'
+  footer: <dark_gray><st>----------------------------------------------------
+
+staffhistory:
+  usage: '%prefix% <white>Verwendung: <red>/staffhistory <team_name>'
+  header: <dark_gray><st>------------------</st> <gradient:#FF00D9:#B300FF>Historie von %executor%</gradient> <dark_gray><st>------------------
+  line: '<dark_gray>- <gray>[#%punishment_id%] <red>%type% <white>%player% <white>Grund: <gradient:#EC00E3:#D900EC>%reason% <gray>(%date%)'
+  footer: <dark_gray><st>----------------------------------------------------
+
+web-api:
+  messages:
+    login-code: '%prefix% <white>Dein Login-Code lautet: <gradient:#FF00D9:#B300FF><bold>%code%</bold></gradient>'
+    unlink-success: '%prefix% <green>Alle aktiven Web-Sitzungen wurden beendet.'
+
+sentinel:
+  messages:
+    word-filter-blocked: '%prefix% <red>Deine Nachricht wurde aufgrund unangebrachten Inhalts blockiert.'
+    spam-blocked: '%prefix% <red>Deine Nachricht wurde wegen Spam blockiert.'
+    flood-blocked: '%prefix% <red>Deine Nachricht wurde wegen Message-Flooding blockiert.'
+    auto-muted: '%prefix% <red>Du wurdest für %duration% wegen Chatverstoßes stummgeschaltet.'
+    ai-muted: '%prefix% <red>Du wurdest für %duration% durch KI-Moderation stummgeschaltet: %reason%'
+    auto-mute-broadcast: '%prefix% <gradient:#FF00D9:#B300FF>%player% <white>wurde von Sentinel für %duration% stummgeschaltet. Grund: %reason%'
+    ai-mute-broadcast: '%prefix% <color:#C34338>%player% <white>wurde von Sentinel KI stummgeschaltet.'

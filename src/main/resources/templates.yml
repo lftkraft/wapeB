@@ -1,0 +1,43 @@
+# wapeB Punishment Templates
+# Usage in commands: /ban <player> $<template> or /mute <player> $<template>
+# Example: /ban Alex $cheat or /mute Alex $spam
+
+ban:
+  cheat:
+    reason: "Csalás / Nehezítés nélkül megengedett segédprogramok"
+    duration: "30d"
+  hacks:
+    reason: "Kliens módosítás / Hack használata"
+    duration: "90d"
+  alt:
+    reason: "Kitiltás kerülése más fiókkal (Alt account)"
+    duration: "perm"
+  advertisement:
+    reason: "Más Minecraft szerver / IP cím reklámozása"
+    duration: "14d"
+
+mute:
+  spam:
+    reason: "Chat spammelés / Karakterhalmozás"
+    duration: "1h"
+  swearing:
+    reason: "Káromkodás / Minősíthetetlen szóhasználat"
+    duration: "2h"
+  provocation:
+    reason: "Játékosok szándékos hergelése / Provokáció"
+    duration: "6h"
+  discord_promo:
+    reason: "Idegen Discord szerver linkelés"
+    duration: "1d"
+
+warn:
+  caps:
+    reason: "Túlzott CAPS LOCK használata a chaten"
+  behavior:
+    reason: "Nem megfelelő közösségi viselkedés"
+
+kick:
+  afk:
+    reason: "Inaktivitás miatt kirúgva (AFK)"
+  warning:
+    reason: "Utolsó figyelmeztetés - olvasd el a szabályzatot!"

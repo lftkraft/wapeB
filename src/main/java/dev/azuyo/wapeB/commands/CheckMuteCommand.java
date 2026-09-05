@@ -59,28 +59,36 @@ public class CheckMuteCommand implements CommandExecutor {
             return true;
         }
 
+        Map<String, String> headerPlaceholders = new HashMap<>();
+        String targetName = target.getName() != null ? target.getName() : args[0];
+        headerPlaceholders.put("%target%", targetName);
+        boolean isAltMute = activeMute.getPlayerUuid() != null && !activeMute.getPlayerUuid().equals(target.getUniqueId());
+        headerPlaceholders.put("%alt_notice%", isAltMute ? " (Alt fiók: " + (activeMute.getPlayerName() != null ? activeMute.getPlayerName() : "Ismeretlen") + ")" : "");
+        headerPlaceholders.put("%punished_player%", activeMute.getPlayerName() != null ? activeMute.getPlayerName() : targetName);
+
         // Header
-        sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.checkmute.header", ""), activeMute));
+        sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.checkmute.header", ""), activeMute, headerPlaceholders));
 
         // Details
         List<String> details = configManager.getStringList("messages.checkmute.details");
         for (String line : details) {
-            Map<String, String> placeholders = new HashMap<>();
+            Map<String, String> placeholders = new HashMap<>(headerPlaceholders);
             placeholders.put("%type%", activeMute.getType().toString());
             
-            // Special handling for IP Address line
-            if (line.contains("%ip_address%")) {
-                if (activeMute.getIpAddress() != null && !activeMute.getIpAddress().isEmpty()) {
-                    placeholders.put("%ip_address%", activeMute.getIpAddress());
-                    sender.sendMessage(MessageUtil.createComponent(line, activeMute, placeholders));
-                }
-            } else {
-                sender.sendMessage(MessageUtil.createComponent(line, activeMute, placeholders));
+            if (activeMute.getIpAddress() != null && !activeMute.getIpAddress().isEmpty()) {
+                placeholders.put("%ip_address%", activeMute.getIpAddress());
+                placeholders.put("%geoip%", dev.azuyo.wapeB.utils.GeoIPUtil.getGeoInfo(activeMute.getIpAddress()).getFormatted());
             }
+
+            if (line.contains("%ip_address%") && (activeMute.getIpAddress() == null || activeMute.getIpAddress().isEmpty())) {
+                continue;
+            }
+
+            sender.sendMessage(MessageUtil.createComponent(line, activeMute, placeholders));
         }
 
         // Footer
-        sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.checkmute.footer", ""), activeMute));
+        sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.checkmute.footer", ""), activeMute, headerPlaceholders));
 
         return true;
     }

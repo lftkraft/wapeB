@@ -1,5 +1,5 @@
 name: wapeB
-version: '1.0.0'
+version: '${version}'
 main: dev.azuyo.wapeB.WapeB
 api-version: '1.21'
 authors: [ resonancehu ]
@@ -88,9 +88,13 @@ commands:
     usage: /unfreeze <player>
     aliases: [unss]
   alts:
-    description: Shows a player's alts based on IP address.
+    description: Shows a player's alts based on IP address and CIDR history.
     usage: /alts <player>
-    aliases: [duplicates, altslist]
+    aliases: [duplicates, altslist, dupeip, checkip]
+  altexempt:
+    description: Manages alt account exemptions.
+    usage: /altexempt <player> [add|remove]
+    aliases: [exemptalt]
   banlist:
     description: Lists all active bans.
     usage: /banlist

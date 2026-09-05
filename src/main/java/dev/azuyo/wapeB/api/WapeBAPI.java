@@ -44,6 +44,16 @@ public interface WapeBAPI {
 
     List<String> getAlts(UUID playerUuid);
     List<String> getAlts(String playerName);
+    List<dev.azuyo.wapeB.utils.AltInfo> getDetailedAlts(UUID playerUuid);
+    List<dev.azuyo.wapeB.utils.AltInfo> getDetailedAlts(String playerName);
+
+    List<dev.azuyo.wapeB.utils.IpHistoryRecord> getIpHistory(UUID playerUuid);
+    List<dev.azuyo.wapeB.utils.IpHistoryRecord> getIpHistory(String playerName);
+
+    boolean isAltExempt(UUID playerUuid);
+    boolean isAltExempt(String playerName);
+    boolean setAltExempt(UUID playerUuid, boolean exempt, String addedBy);
+    boolean setAltExempt(String playerName, boolean exempt, String addedBy);
 
     boolean isBanned(UUID playerUuid);
     boolean isBanned(String playerName);
@@ -94,6 +104,32 @@ public interface WapeBAPI {
     boolean revokePunishment(int punishmentId, String executor);
 
     boolean setLockdown(boolean enabled, String reason);
+
+    // --- CIDR Subnet & GeoIP API Methods ---
+
+    boolean isCidrBanned(String ipOrCidr);
+    Punishment getActiveCidrBan(String ipOrCidr);
+    boolean banIpRange(String cidrOrRange, String reason, String executor, long duration, boolean silent);
+    boolean unbanIpRange(String cidrOrRange, String reason, String executor);
+
+    dev.azuyo.wapeB.utils.GeoIPUtil.GeoInfo getGeoInfo(String ipAddress);
+
+    // --- Template API Methods ---
+
+    dev.azuyo.wapeB.managers.TemplateManager.PunishmentTemplate getTemplate(String category, String templateKey);
+    java.util.Map<String, java.util.Map<String, dev.azuyo.wapeB.managers.TemplateManager.PunishmentTemplate>> getAllTemplates();
+    List<dev.azuyo.wapeB.managers.TemplateManager.PunishmentTemplate> getTemplatesForCategory(String category);
+
+    boolean punishWithTemplate(UUID target, String category, String templateKey, String executor, boolean silent);
+    boolean punishWithTemplate(String targetName, String category, String templateKey, String executor, boolean silent);
+
+    // --- Warn Action API Methods ---
+
+    java.util.Map<Integer, String> getWarnActions();
+    int getActiveWarnCount(UUID playerUuid);
+    int getActiveWarnCount(String playerName);
+    boolean triggerWarnActionCheck(UUID targetUuid);
+    boolean triggerWarnActionCheck(String targetName);
 
     // --- Command Override & Alias Methods ---
 

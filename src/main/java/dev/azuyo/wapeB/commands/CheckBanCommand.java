@@ -59,28 +59,36 @@ public class CheckBanCommand implements CommandExecutor {
             return true;
         }
 
+        Map<String, String> headerPlaceholders = new HashMap<>();
+        String targetName = target.getName() != null ? target.getName() : args[0];
+        headerPlaceholders.put("%target%", targetName);
+        boolean isAltBan = activeBan.getPlayerUuid() != null && !activeBan.getPlayerUuid().equals(target.getUniqueId());
+        headerPlaceholders.put("%alt_notice%", isAltBan ? " (Alt fiók: " + (activeBan.getPlayerName() != null ? activeBan.getPlayerName() : "Ismeretlen") + ")" : "");
+        headerPlaceholders.put("%punished_player%", activeBan.getPlayerName() != null ? activeBan.getPlayerName() : targetName);
+
         // Header
-        sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.checkban.header", ""), activeBan));
+        sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.checkban.header", ""), activeBan, headerPlaceholders));
 
         // Details
         List<String> details = configManager.getStringList("messages.checkban.details");
         for (String line : details) {
-            Map<String, String> placeholders = new HashMap<>();
+            Map<String, String> placeholders = new HashMap<>(headerPlaceholders);
             placeholders.put("%type%", activeBan.getType().toString());
             
-            // Special handling for IP Address line
-            if (line.contains("%ip_address%")) {
-                if (activeBan.getIpAddress() != null && !activeBan.getIpAddress().isEmpty()) {
-                    placeholders.put("%ip_address%", activeBan.getIpAddress());
-                    sender.sendMessage(MessageUtil.createComponent(line, activeBan, placeholders));
-                }
-            } else {
-                sender.sendMessage(MessageUtil.createComponent(line, activeBan, placeholders));
+            if (activeBan.getIpAddress() != null && !activeBan.getIpAddress().isEmpty()) {
+                placeholders.put("%ip_address%", activeBan.getIpAddress());
+                placeholders.put("%geoip%", dev.azuyo.wapeB.utils.GeoIPUtil.getGeoInfo(activeBan.getIpAddress()).getFormatted());
             }
+
+            if (line.contains("%ip_address%") && (activeBan.getIpAddress() == null || activeBan.getIpAddress().isEmpty())) {
+                continue;
+            }
+
+            sender.sendMessage(MessageUtil.createComponent(line, activeBan, placeholders));
         }
 
         // Footer
-        sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.checkban.footer", ""), activeBan));
+        sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.checkban.footer", ""), activeBan, headerPlaceholders));
 
         return true;
     }

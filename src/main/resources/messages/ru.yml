@@ -1,0 +1,256 @@
+# wapeB Russian Language File
+# Language code: ru
+
+# --- Punishment Type Display Names ---
+punishment-types:
+  BAN: Бан
+  TEMPBAN: Временный Бан
+  IPBAN: Бан по IP
+  TEMPIPBAN: Временный Бан по IP
+  MUTE: Мут
+  TEMPMUTE: Временный Мут
+  IPMUTE: Мут по IP
+  TEMPIPMUTE: Временный Мут по IP
+  WARN: Предупреждение
+  KICK: Кик
+  FREEZE_LOGOUT_BAN: Logout-Ban
+  SENTINEL_AUTO_MUTE: Auto-Mute
+  SENTINEL_AI_MUTE: AI-Mute
+
+# --- Time Formats ---
+time-formats:
+  permanent: Навсегда
+  year: ' г.'
+  week: ' нед.'
+  day: ' дн.'
+  hour: ' ч.'
+  minute: мин
+  second: сек
+
+messages:
+  no-permission: '%prefix% <red>У вас нет прав для выполнения этой команды.'
+  player-not-found: '%prefix% <red>Игрок не найден.'
+  invalid-ip: '%prefix% <red>Неверный формат IP-адреса.'
+  no-ip-history: '%prefix% <red>IP-адрес для игрока %player% не найден.'
+  not-banned: '%prefix% <red>Игрок не забанен.'
+  not-muted: '%prefix% <red>У игрока нет мута.'
+  invalid-punishment-id: '%prefix% <red>Неверный ID наказания.'
+  no-warnings: '%prefix% <yellow>У этого игрока нет активных предупреждений.'
+  no-history: '%prefix% <yellow>У этого игрока нет истории наказаний.'
+  no-active-ban: '%prefix% <yellow>У этого игрока нет активного бана.'
+  no-active-mute: '%prefix% <yellow>У этого игрока нет активного мута.'
+  no-alts-found: '%prefix% <yellow>Твинки для игрока %player% не найдены.'
+  no-active-bans: '%prefix% <yellow>На сервере нет активных банов.'
+  no-staff-history: '%prefix% <yellow>История для администратора %executor% не найдена.'
+  rollback-success: '%prefix% <green>Наказание #%punishment_id% успешно отменено.'
+  rollback-usage: '%prefix% <white>Использование: <red>/punish-rollback <id>'
+  console-only: '%prefix% <red>Эту команду можно выполнять только из консоли!'
+  global-unban-success: '%prefix% <green>Все активные баны отменены! (Global Unban).'
+
+  punishment-notification:
+    permission: wapeb.notify.punishment
+    ban-attempt: '%prefix% <color:#C34338>%player% <white>пытался войти, находясь в бане (<color:#C34338>%duration%<white>).'
+    mute-attempt: '%prefix% <color:#C34338>%player% <white>пытался написать в чат, находясь в муте (<color:#C34338>%duration%<white>).'
+
+  ban:
+    usage: '%prefix% <white>Использование: <red>/ban <игрок> [время] [причина] [-s]'
+    default-reason: Нарушение правил сервера.
+    success: '%prefix% <green>Игрок <color:#C34338>%player%<green> успешно забанен.'
+    broadcast: '%prefix% <color:#C34338>%executor% <white>забанил <color:#C34338>%player%<white>. Причина: <color:#C34338>%reason%'
+    silent:
+      prefix: '<gray>(Тихо) '
+    kick-screen:
+      - '%mid% <b><gradient:#C34338:#C63528>ВЫ ЗАБАНЕНЫ</gradient></b>'
+      - '%mid% <white>Вы были забанены на этом сервере.'
+      - ''
+      - '%mid% Забанил: <color:#C34338>%executor%'
+      - '%mid% Причина: <color:#C34338>%reason%'
+      - '%mid% Истекает через: <color:#C34338>%duration%'
+
+  kick:
+    usage: '%prefix% <white>Использование: <red>/kick <игрок> [причина] [-s]'
+    default-reason: Кикнут администратором.
+    success: '%prefix% <green>Игрок <color:#C34338>%player%<green> кикнут.'
+    broadcast: '%prefix% <color:#C34338>%executor% <white>кикнул <color:#C34338>%player%<white>.'
+    silent:
+      prefix: '<gray>(Тихо) '
+    kick-screen:
+      - '%mid% <b><gradient:#C34338:#C63528>КИК С СЕРВЕРА</gradient></b>'
+      - '%mid% Кикнул: <color:#C34338>%executor%'
+      - '%mid% Причина: <color:#C34338>%reason%'
+
+  mute:
+    usage: '%prefix% <white>Использование: <red>/mute <игрок> [время] [причина] [-s]'
+    default-reason: Нарушение правил чата.
+    success: '%prefix% <green>Игрок <color:#C34338>%player%<green> замучен.'
+    broadcast: '%prefix% <color:#C34338>%executor% <white>замутил <color:#C34338>%player%<white>.'
+    silent:
+      prefix: '<gray>(Тихо) '
+    player-is-muted: "%prefix% <red>Вы замучены! Истекает через: <color:#C34338>%duration%"
+
+  unban:
+    usage: '%prefix% <white>Использование: <red>/unban <игрок> [причина] [-s]'
+    success: '%prefix% <green>Игрок <color:#C34338>%player%<green> разбанен.'
+    broadcast: '%prefix% <color:#C34338>%player%<white> разбанен.'
+    silent:
+      prefix: '<gray>(Тихо) '
+
+  unmute:
+    usage: '%prefix% <white>Использование: <red>/unmute <игрок> [причина] [-s]'
+    success: '%prefix% <green>С игрока <color:#C34338>%player%<green> снят мут.'
+    broadcast: '%prefix% С игрока <color:#C34338>%player%<white> снят мут.'
+    silent:
+      prefix: '<gray>(Тихо) '
+
+  banip:
+    usage: '%prefix% <white>Использование: <red>/banip <игрок/IP> [время] [причина] [-s]'
+    default-reason: Бан по IP.
+    success: '%prefix% <green>Бан по IP для <color:#C34338>%player%<green> выполнен.'
+    broadcast: '%prefix% <color:#C34338>%executor% <white>забанил IP игрока <color:#C34338>%player%<white>.'
+    silent:
+      prefix: '<gray>(Тихо) '
+
+  muteip:
+    usage: '%prefix% <white>Использование: <red>/muteip <игрок/IP> [время] [причина] [-s]'
+    default-reason: Мут по IP.
+    success: '%prefix% <green>Мут по IP для <color:#C34338>%player%<green> выполнен.'
+    broadcast: '%prefix% <color:#C34338>%executor% <white>замутил IP игрока <color:#C34338>%player%<white>.'
+    silent:
+      prefix: '<gray>(Тихо) '
+
+  warn:
+    usage: '%prefix% <white>Использование: <red>/warn <игрок> <причина> [-s]'
+    success: '%prefix% <green>Игрок <color:#C34338>%player%<green> получил предупреждение.'
+    player-warned: '%prefix% <yellow>Вы получили предупреждение! Причина: <color:#C34338>%reason%'
+    broadcast: '%prefix% <color:#C34338>%executor% <white>предупредил <color:#C34338>%player%<white>.'
+    silent:
+      prefix: '<gray>(Тихо) '
+
+  unwarn:
+    usage: '%prefix% <white>Использование: <red>/unwarn <игрок> <id> [-s]'
+    success: '%prefix% <green>Предупреждение для <color:#C34338>%player%<green> удалено.'
+    broadcast: '%prefix% Предупреждение игрока <color:#C34338>%player%<white> удалено.'
+    not-found: '%prefix% <red>ID предупреждения не найден.'
+    silent:
+      prefix: '<gray>(Тихо) '
+
+  kickall:
+    usage: '%prefix% <white>Использование: <red>/kickall [причина]'
+    default-reason: Технические работы.
+    success: '%prefix% <green>Все игроки кикнуты.'
+    broadcast: '%prefix% <color:#C34338>%executor% <white>кикнул всех игроков.'
+    kick-screen:
+      - '%mid% <b><gradient:#C34338:#C63528>ОБЩИЙ КИК</gradient></b>'
+      - '%mid% Кикнул: <color:#C34338>%executor%'
+      - '%mid% Причина: <color:#C34338>%reason%'
+
+  warnings:
+    usage: '%prefix% <white>Использование: <red>/warnings <игрок>'
+    header: <dark_gray><st>------------------</st> <gradient:#FF00D9:#B300FF>Предупреждения игрока %player%</gradient> <dark_gray><st>------------------
+    line: '<dark_gray>- <gray>[#%punishment_id%] <white>Выдал: <gradient:#FF00D9:#B300FF>%executor%</gradient> <white>Причина: <gradient:#EC00E3:#D900EC>%reason%</gradient> <gray>(%date%)'
+    footer: <dark_gray><st>----------------------------------------------------
+
+  history:
+    usage: '%prefix% <white>Использование: <red>/history <игрок>'
+    header: <dark_gray><st>------------------</st> <gradient:#FF00D9:#B300FF>История игрока %player%</gradient> <dark_gray><st>------------------
+    line: '<dark_gray>- <gray>[#%punishment_id%] <red>%type% <white>Выдал: <gradient:#FF00D9:#B300FF>%executor%</gradient> <white>Причина: <gradient:#EC00E3:#D900EC>%reason%</gradient> <gray>(%date%) - Истекает: %end_date%'
+    footer: <dark_gray><st>----------------------------------------------------
+
+  checkban:
+    usage: '%prefix% <white>Использование: <red>/checkban <игрок>'
+    header: '<white>Проверка Бана: <color:#C34338>%player% <gray>(Бан)%alt_notice%'
+    details:
+      - '<white>Тип: <color:#C34338>%type%'
+      - '<white>Выдал: <color:#C34338>%executor%'
+      - '<white>Причина: <color:#C34338>%reason%'
+      - '<white>Истекает через: <color:#C34338>%duration%'
+      - '<white>Дата окончания: <color:#C34338>%end_date%'
+      - '<white>ID Наказания: #<color:#C34338>%punishment_id%'
+      - '<white>IP адрес: <color:#C34338>%ip_address%'
+      - '<white>GeoIP: <color:#C34338>%geoip%'
+    footer: <dark_gray><st>----------------------------------------------------
+
+  checkmute:
+    usage: '%prefix% <white>Использование: <red>/checkmute <игрок>'
+    header: '%prefix% <white>Проверка Мута: <color:#C34338>%player% <gray>(Мут)%alt_notice%'
+    details:
+      - '<white>Тип: <color:#C34338>%type%'
+      - '<white>Выдал: <color:#C34338>%executor%'
+      - '<white>Причина: <color:#C34338>%reason%'
+      - '<white>Истекает через: <color:#C34338>%duration%'
+      - '<white>Дата окончания: <color:#C34338>%end_date%'
+      - '<white>ID Наказания: #<color:#C34338>%punishment_id%'
+      - '<white>IP адрес: <color:#C34338>%ip_address%'
+      - '<white>GeoIP: <color:#C34338>%geoip%'
+    footer: <dark_gray><st>----------------------------------------------------
+
+lockdown:
+  kick-reason:
+    - <b><gradient:#FA0707:#F84A1D>COOLNETWORK</gradient></b>
+    - <dark_gray><st>                           <reset>
+    - <b><gradient:#C34338:#C63528>ТЕХРАБОТЫ</gradient></b>
+    - ''
+    - <white>На сервере ведутся технические работы.
+    - '<white>Причина: <gradient:#C34338:#C63528>%reason%</gradient>'
+  messages:
+    enabled: '%prefix% <green>Режим техобслуживания включен.'
+    disabled: '%prefix% <green>Режим техобслуживания выключен.'
+    usage: '%prefix% <white>Использование: <red>/lockdown <on|off> [причина]'
+    reason-set: '%prefix% <green>Причина блокировки установлена: <white>%reason%'
+    status: '%prefix% <white>Статус блокировки: <gradient:#FF00D9:#B300FF>%status% <white>Причина: <gradient:#FF00D9:#B300FF>%reason%'
+
+freeze:
+  usage: '%prefix% <white>Использование: <red>/freeze <игрок> [причина]'
+  messages:
+    frozen: '%prefix% <yellow>Вы заморожены администратором %executor%.'
+    unfrozen: '%prefix% <green>Вы разморожены администратором %executor%.'
+    frozen-success: '%prefix% <green>Игрок %player% успешно заморожен.'
+    unfrozen-success: '%prefix% <green>Игрок %player% успешно разморожен.'
+    already-frozen: '%prefix% <red>Игрок уже заморожен.'
+    not-frozen: '%prefix% <red>Игрок не заморожен.'
+    logout-ban-broadcast: '%prefix% <color:#C34338>%player% <white>забанен за выход во время заморозки.'
+    freeze-screen:
+      - ''
+      - '%prefix% <white>Вы заморожены!'
+      - ''
+      - <white>Не выходите с сервера, иначе получите бан.
+
+alts:
+  usage: '%prefix% <white>Использование: <red>/alts <игрок>'
+  header: <dark_gray><st>------------------</st> <gradient:#FF00D9:#B300FF>Твинки игрока %player% (%alt_count%)</gradient> <dark_gray><st>------------------
+  line: '<dark_gray>- %status% <color:#C34338>%alt_player%</color> %tags% <gray>(Заходил: %last_seen%)'
+  footer: <dark_gray><st>----------------------------------------------------
+  status-colors:
+    online: <green>[В СЕТИ]</green>
+    clean: <gray>[ЧИСТ]</gray>
+    banned: <red><bold>[БАНИТ]</bold></red>
+    muted: <yellow><bold>[МУТ]</bold></yellow>
+    none: <white>[ЧИСТ]</white>
+  login-notification: '%prefix% <red>%player% <white>вошел с аккаунтов-твинков! IP: <color:#C34338>%ip_address%'
+
+banlist:
+  usage: '%prefix% <white>Использование: <red>/banlist'
+  header: <dark_gray><st>------------------</st> <gradient:#FF00D9:#B300FF>Активные Баны</gradient> <dark_gray><st>------------------
+  line: '<dark_gray>- <gray>%player% <white>(%type%) Выдал: <gradient:#FF00D9:#B300FF>%executor% <white>Причина: <gradient:#EC00E3:#D900EC>%reason% <gray>(Истекает: %end_date%)'
+  footer: <dark_gray><st>----------------------------------------------------
+
+staffhistory:
+  usage: '%prefix% <white>Использование: <red>/staffhistory <имя_админа>'
+  header: <dark_gray><st>------------------</st> <gradient:#FF00D9:#B300FF>История %executor%</gradient> <dark_gray><st>------------------
+  line: '<dark_gray>- <gray>[#%punishment_id%] <red>%type% <white>%player% <white>Причина: <gradient:#EC00E3:#D900EC>%reason% <gray>(%date%)'
+  footer: <dark_gray><st>----------------------------------------------------
+
+web-api:
+  messages:
+    login-code: '%prefix% <white>Ваш код авторизации: <gradient:#FF00D9:#B300FF><bold>%code%</bold></gradient>'
+    unlink-success: '%prefix% <green>Все активные веб-сессии завершены.'
+
+sentinel:
+  messages:
+    word-filter-blocked: '%prefix% <red>Ваше сообщение заблокировано из-за недопустимого содержания.'
+    spam-blocked: '%prefix% <red>Ваше сообщение заблокировано за спам.'
+    flood-blocked: '%prefix% <red>Ваше сообщение заблокировано за флуд.'
+    auto-muted: '%prefix% <red>Вы замучены на %duration% за нарушение правил чата.'
+    ai-muted: '%prefix% <red>Вы замучены на %duration% ИИ-модерацией: %reason%'
+    auto-mute-broadcast: '%prefix% <gradient:#FF00D9:#B300FF>%player% <white>замучен Sentinel на %duration%. Причина: %reason%'
+    ai-mute-broadcast: '%prefix% <color:#C34338>%player% <white>замучен ИИ Sentinel.'

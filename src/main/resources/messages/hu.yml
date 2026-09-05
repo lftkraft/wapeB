@@ -1,0 +1,256 @@
+# wapeB Standard Hungarian Language File
+# Language code: hu
+
+# --- Punishment Type Display Names ---
+punishment-types:
+  BAN: Ban
+  TEMPBAN: Temp-Ban
+  IPBAN: IP-Ban
+  TEMPIPBAN: Temp-IP-Ban
+  MUTE: Mute
+  TEMPMUTE: Temp-Mute
+  IPMUTE: IP-Mute
+  TEMPIPMUTE: Temp-IP-Mute
+  WARN: Warning
+  KICK: Kick
+  FREEZE_LOGOUT_BAN: Logout-Ban
+  SENTINEL_AUTO_MUTE: Auto-Mute
+  SENTINEL_AI_MUTE: AI-Mute
+
+# --- Time Formats ---
+time-formats:
+  permanent: Örök
+  year: ' év'
+  week: ' hét'
+  day: ' nap'
+  hour: ' óra'
+  minute: p
+  second: mp
+
+messages:
+  no-permission: '%prefix% <white>Ehhez nincs jogosultságod.'
+  player-not-found: '%prefix% <white>Nem található ilyen nevű játékos.'
+  invalid-ip: '%prefix% <white>Érvénytelen IP-cím formátum.'
+  no-ip-history: '%prefix% <white>Nincs elmentett IP-cím %player% játékoshoz.'
+  not-banned: '%prefix% <white>A játékos nincs kitiltva.'
+  not-muted: '%prefix% <white>A játékos nincs némítva.'
+  invalid-punishment-id: '%prefix% <white>Nem létező szankció azonosító.'
+  no-warnings: '%prefix% <white>A játékosnak nincsenek aktív figyelmeztetései.'
+  no-history: '%prefix% <white>A játékosnak nincsenek szankciós előzményei.'
+  no-active-ban: '%prefix% <white>A játékosnak nincs aktív kitiltása.'
+  no-active-mute: '%prefix% <white>A játékosnak nincs aktív némítása.'
+  no-alts-found: '%prefix% <white>Nem találhatók másodlagos fiókok %player% számára.'
+  no-active-bans: '%prefix% <white>Jelenleg nincsenek aktív kitiltások.'
+  no-staff-history: '%prefix% <color:#C34338>%executor% <white>staff taghoz nincsenek elmentett előzmények.'
+  rollback-success: '%prefix% <white>A(z) <color:#C34338>#%punishment_id% <white>azonosítójú szankció sikeresen visszavonva!'
+  rollback-usage: '%prefix% <white>Használat: <red>/punish-rollback <id>'
+  console-only: '%prefix% <red>Ezt a parancsot csak a konzolból lehet futtatni!'
+  global-unban-success: '%prefix% <white>Minden aktív kitiltás sikeresen törölve! (Globális Unban).'
+
+  punishment-notification:
+    permission: wapeb.notify.punishment
+    ban-attempt: '%prefix% <color:#C34338>%player% <white>megpróbált csatlakozni, de ki van tiltva (<color:#C34338>%duration%<white>).'
+    mute-attempt: '%prefix% <color:#C34338>%player% <white>megpróbált írni a chatre, de némítva van (<color:#C34338>%duration%<white>).'
+
+  ban:
+    usage: '%prefix% <white>Használat: <red>/ban <játékos> [idő] [indok] [-s]'
+    default-reason: Szabályzat megsértése.
+    success: '%prefix% <white>Sikeresen kitiltottad <color:#C34338>%player%<white> játékost.'
+    broadcast: '%prefix% <color:#C34338>%executor% <white>kitiltotta <color:#C34338>%player% <white>játékost. Indok: <color:#C34338>%reason%'
+    silent:
+      prefix: '<gray>(Csendes) '
+    kick-screen:
+      - '%mid% <b><gradient:#C34338:#C63528>KITILTÁS</gradient></b>'
+      - '%mid% <white>Ki lettél tiltva a szerverről.'
+      - ''
+      - '%mid% Végrehajtó: <color:#C34338>%executor%'
+      - '%mid% Indok: <color:#C34338>%reason%'
+      - '%mid% Lejár: <color:#C34338>%duration%'
+
+  kick:
+    usage: '%prefix% <white>Használat: <red>/kick <játékos> [indok] [-s]'
+    default-reason: Kirúgva a szerverről.
+    success: '%prefix% <white>Sikeresen kidobtad <color:#C34338>%player%<white> játékost.'
+    broadcast: '%prefix% <color:#C34338>%executor% <white>kidobta <color:#C34338>%player% <white>játékost.'
+    silent:
+      prefix: '<gray>(Csendes) '
+    kick-screen:
+      - '%mid% <b><gradient:#C34338:#C63528>KIDOBÁS</gradient></b>'
+      - '%mid% Végrehajtó: <color:#C34338>%executor%'
+      - '%mid% Indok: <color:#C34338>%reason%'
+
+  mute:
+    usage: '%prefix% <white>Használat: <red>/mute <játékos> [idő] [indok] [-s]'
+    default-reason: Némítva a chaten.
+    success: '%prefix% <white>Sikeresen lenémítottad <color:#C34338>%player%<white> játékost.'
+    broadcast: '%prefix% <color:#C34338>%executor% <white>lenémította <color:#C34338>%player% <white>játékost.'
+    silent:
+      prefix: '<gray>(Csendes) '
+    player-is-muted: "%prefix% <white>Némítva vagy! Ennyi idő múlva jár le: <color:#C34338>%duration%"
+
+  unban:
+    usage: '%prefix% <white>Használat: <red>/unban <játékos> [indok] [-s]'
+    success: '%prefix% <white>Sikeresen feloldottad <color:#C34338>%player%<white> kitiltását.'
+    broadcast: '%prefix% <color:#C34338>%player% <white>kitiltása feloldva.'
+    silent:
+      prefix: '<gray>(Csendes) '
+
+  unmute:
+    usage: '%prefix% <white>Használat: <red>/unmute <játékos> [indok] [-s]'
+    success: '%prefix% <white>Sikeresen feloldottad <color:#C34338>%player%<white> némítását.'
+    broadcast: '%prefix% <color:#C34338>%player% <white>némítása feloldva.'
+    silent:
+      prefix: '<gray>(Csendes) '
+
+  banip:
+    usage: '%prefix% <white>Használat: <red>/banip <játékos/IP> [idő] [indok] [-s]'
+    default-reason: IP tiltás.
+    success: '%prefix% <white>Sikeresen IP-bannoltad <color:#C34338>%player%<white> játékost.'
+    broadcast: '%prefix% <color:#C34338>%executor% <white>IP-banban részesítette <color:#C34338>%player% <white>játékost.'
+    silent:
+      prefix: '<gray>(Csendes) '
+
+  muteip:
+    usage: '%prefix% <white>Használat: <red>/muteip <játékos/IP> [idő] [indok] [-s]'
+    default-reason: IP némítás.
+    success: '%prefix% <white>Sikeresen IP-némítottad <color:#C34338>%player%<white> játékost.'
+    broadcast: '%prefix% <color:#C34338>%executor% <white>IP-némítást szabott ki <color:#C34338>%player% <white>játékosra.'
+    silent:
+      prefix: '<gray>(Csendes) '
+
+  warn:
+    usage: '%prefix% <white>Használat: <red>/warn <játékos> <indok> [-s]'
+    success: '%prefix% <white>Sikeresen figyelmeztetted <color:#C34338>%player% <white>játékost.'
+    player-warned: '%prefix% <white>Figyelmeztetést kaptál! Indok: <color:#C34338>%reason%'
+    broadcast: '%prefix% <color:#C34338>%executor% <white>figyelmeztette <color:#C34338>%player% <white>játékost.'
+    silent:
+      prefix: '<gray>(Csendes) '
+
+  unwarn:
+    usage: '%prefix% <white>Használat: <red>/unwarn <játékos> <id> [-s]'
+    success: '%prefix% <white>Sikeresen törölted <color:#C34338>%player% <white>játékos figyelmeztetését.'
+    broadcast: '%prefix% <color:#C34338>%player% <white>figyelmeztetése törölve.'
+    not-found: '%prefix% <white>Nem található a megadott azonosítójú figyelmeztetés.'
+    silent:
+      prefix: '<gray>(Csendes) '
+
+  kickall:
+    usage: '%prefix% <white>Használat: <red>/kickall [indok]'
+    default-reason: Szerver újraindítás / Karbantartás.
+    success: '%prefix% <white>Minden játékos ki lett dobva.'
+    broadcast: '%prefix% <color:#C34338>%executor% <white>mindenkit kidobott a szerverről.'
+    kick-screen:
+      - '%mid% <b><gradient:#C34338:#C63528>SZERVER KIRÚGÁS</gradient></b>'
+      - '%mid% Végrehajtó: <color:#C34338>%executor%'
+      - '%mid% Indok: <color:#C34338>%reason%'
+
+  warnings:
+    usage: '%prefix% <white>Használat: <red>/warnings <játékos>'
+    header: <dark_gray><st>------------------</st> <gradient:#FF00D9:#B300FF>%player% Figyelmeztetései</gradient> <dark_gray><st>------------------
+    line: '<dark_gray>- <gray>[%punishment_id%] <white>Általa: <gradient:#FF00D9:#B300FF>%executor%</gradient> <white>Indok: <gradient:#EC00E3:#D900EC>%reason%</gradient> <gray>(%date%)'
+    footer: <dark_gray><st>----------------------------------------------------
+
+  history:
+    usage: '%prefix% <white>Használat: <red>/history <játékos>'
+    header: <dark_gray><st>------------------</st> <gradient:#FF00D9:#B300FF>%player% Előzményei</gradient> <dark_gray><st>------------------
+    line: '<dark_gray>- <gray>[%punishment_id%] <red>%type% <white>Általa: <gradient:#FF00D9:#B300FF>%executor%</gradient> <white>Indok: <gradient:#EC00E3:#D900EC>%reason%</gradient> <gray>(%date%) - Lejár: %end_date%'
+    footer: <dark_gray><st>----------------------------------------------------
+
+  checkban:
+    usage: '%prefix% <white>Használat: <red>/checkban <játékos>'
+    header: '<white>Ellenőrzés: <color:#C34338>%player% <gray>(Kitiltás)%alt_notice%'
+    details:
+      - '<white>Típus: <color:#C34338>%type%'
+      - '<white>Végrehajtó: <color:#C34338>%executor%'
+      - '<white>Indok: <color:#C34338>%reason%'
+      - '<white>Lejár: <color:#C34338>%duration%'
+      - '<white>Lejárati dátum: <color:#C34338>%end_date%'
+      - '<white>Szankció ID: <color:#C34338>%punishment_id%'
+      - '<white>IP cím: <color:#C34338>%ip_address%'
+      - '<white>GeoIP: <color:#C34338>%geoip%'
+    footer: <dark_gray><st>----------------------------------------------------
+
+  checkmute:
+    usage: '%prefix% <white>Használat: <red>/checkmute <játékos>'
+    header: '%prefix% <white>Ellenőrzés: <color:#C34338>%player% <gray>(Némítás)%alt_notice%'
+    details:
+      - '<white>Típus: <color:#C34338>%type%'
+      - '<white>Végrehajtó: <color:#C34338>%executor%'
+      - '<white>Indok: <color:#C34338>%reason%'
+      - '<white>Lejár: <color:#C34338>%duration%'
+      - '<white>Lejárati dátum: <color:#C34338>%end_date%'
+      - '<white>Szankció ID: <color:#C34338>%punishment_id%'
+      - '<white>IP cím: <color:#C34338>%ip_address%'
+      - '<white>GeoIP: <color:#C34338>%geoip%'
+    footer: <dark_gray><st>----------------------------------------------------
+
+lockdown:
+  kick-reason:
+    - <b><gradient:#FA0707:#F84A1D>COOLNETWORK</gradient></b>
+    - <dark_gray><st>                           <reset>
+    - <b><gradient:#C34338:#C63528>WHITELIST</gradient></b>
+    - ''
+    - <white>Szia! Szerverünkön jelenleg karbantartás van.
+    - '<white>Indok: <gradient:#C34338:#C63528>%reason%</gradient>'
+  messages:
+    enabled: '%prefix% <white>A lockdown bekapcsolva.'
+    disabled: '%prefix% <white>A lockdown kikapcsolva.'
+    usage: '%prefix% <white>Használat: <red>/lockdown <on|off> [indok]'
+    reason-set: '%prefix% <white>Lockdown indoka beállítva: <white>%reason%'
+    status: '%prefix% <white>Lockdown státusz: %status%, Indok: %reason%'
+
+freeze:
+  usage: '%prefix% <white>Használat: <red>/freeze <játékos> [indok]'
+  messages:
+    frozen: '%prefix% <white>Le lettél fagyasztva <color:#C34338>%executor% <white>által.'
+    unfrozen: '%prefix% <white>A fagyasztásod fel lett oldva <color:#C34338>%executor% <white>által.'
+    frozen-success: '%prefix% <white>Lefagyasztottad <color:#C34338>%player% <white>játékost.'
+    unfrozen-success: '%prefix% <white>Feloldottad <color:#C34338>%player% <white>fagyasztását.'
+    already-frozen: '%prefix% <white>A játékos már le van fagyasztva.'
+    not-frozen: '%prefix% <white>A játékos nincs lefagyasztva.'
+    logout-ban-broadcast: '%prefix% <color:#C34338>%player% <white>Ki lett tiltva, mert lelépett miközben fagyasztva volt.'
+    freeze-screen:
+      - ''
+      - '%prefix% <white>Le lettél fagyasztva!'
+      - ''
+      - <white>Ne lépj le a szerverről!
+
+alts:
+  usage: '%prefix% <white>Használat: <red>/alts <játékos>'
+  header: '<dark_gray><st>------------------</st> <gradient:#FF00D9:#B300FF>Alt Fiókok: %player% (%alt_count%)</gradient> <dark_gray><st>------------------'
+  line: '<dark_gray>- %status% <color:#C34338>%alt_player%</color> %tags% <gray>(Utoljára: %last_seen%)'
+  footer: <dark_gray><st>----------------------------------------------------
+  status-colors:
+    online: <green>[ONLINE]</green>
+    clean: <gray>[CLEAN]</gray>
+    banned: <red><bold>[BANNED]</bold></red>
+    muted: <yellow><bold>[MUTED]</bold></yellow>
+    none: <white>[CLEAN]</white>
+  login-notification: '%prefix% <red>%player% <white>fiókra alt fiókok csatlakoztak! IP: <color:#C34338>%ip_address%'
+
+banlist:
+  usage: '%prefix% <white>Használat: <red>/banlist'
+  header: <dark_gray><st>------------------</st> <gradient:#FF00D9:#B300FF>Aktív Kitiltások</gradient> <dark_gray><st>------------------
+  line: '<dark_gray>- <gray>%player% <white>(%type%) Általa: <gradient:#FF00D9:#B300FF>%executor% <white>Indok: <gradient:#EC00E3:#D900EC>%reason% <gray>(Lejár: %end_date%)'
+  footer: <dark_gray><st>----------------------------------------------------
+
+staffhistory:
+  usage: '%prefix% <white>Használat: <red>/staffhistory <staff_név>'
+  header: <dark_gray><st>------------------</st> <gradient:#FF00D9:#B300FF>%executor% Előzményei</gradient> <dark_gray><st>------------------
+  line: '<dark_gray>- <gray>[%punishment_id%] <red>%type% <white>%player% <white>Indok: <gradient:#EC00E3:#D900EC>%reason% <gray>(%date%)'
+  footer: <dark_gray><st>----------------------------------------------------
+
+web-api:
+  messages:
+    login-code: '%prefix% <white>A bejelentkezési kódod: <gradient:#FF00D9:#B300FF><bold>%code%</bold></gradient>'
+    unlink-success: '%prefix% <green>Minden aktív webes munkamenet lezárva.'
+
+sentinel:
+  messages:
+    word-filter-blocked: '%prefix% <red>Az üzenetedet blokkoltuk nem megfelelő tartalom miatt.'
+    spam-blocked: '%prefix% <red>Az üzenetedet blokkoltuk spam miatt.'
+    flood-blocked: '%prefix% <red>Az üzenetedet blokkoltuk flood miatt.'
+    auto-muted: '%prefix% <red>Némítva lettél %duration% időre chat szabálysértés miatt.'
+    ai-muted: '%prefix% <red>Némítva lettél %duration% időre AI által detektált chat szabálysértés miatt: %reason%'
+    auto-mute-broadcast: '%prefix% <gradient:#FF00D9:#B300FF>%player% <white>némítva lett Sentinel által %duration% időre. Indok: %reason%'
+    ai-mute-broadcast: '%prefix% <color:#C34338>%player% <white>le lett némítva Sentinel által.'

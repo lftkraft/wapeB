@@ -1,0 +1,256 @@
+# wapeB Romanian Language File
+# Language code: ro
+
+# --- Punishment Type Display Names ---
+punishment-types:
+  BAN: Ban
+  TEMPBAN: Temp-Ban
+  IPBAN: IP-Ban
+  TEMPIPBAN: Temp-IP-Ban
+  MUTE: Mute
+  TEMPMUTE: Temp-Mute
+  IPMUTE: IP-Mute
+  TEMPIPMUTE: Temp-IP-Mute
+  WARN: Avertisment
+  KICK: Kick
+  FREEZE_LOGOUT_BAN: Logout-Ban
+  SENTINEL_AUTO_MUTE: Auto-Mute
+  SENTINEL_AI_MUTE: AI-Mute
+
+# --- Time Formats ---
+time-formats:
+  permanent: Permanent
+  year: ' an(i)'
+  week: ' săptămână(i)'
+  day: ' zi(le)'
+  hour: ' oră(e)'
+  minute: m
+  second: s
+
+messages:
+  no-permission: '%prefix% <red>Nu ai permisiunea de a executa această comandă.'
+  player-not-found: '%prefix% <red>Jucătorul nu a fost găsit.'
+  invalid-ip: '%prefix% <red>Format adresă IP invalid.'
+  no-ip-history: '%prefix% <red>Nicio adresă IP înregistrată pentru jucătorul %player%.'
+  not-banned: '%prefix% <red>Jucătorul nu este banat.'
+  not-muted: '%prefix% <red>Jucătorul nu are mute.'
+  invalid-punishment-id: '%prefix% <red>ID sancțiune invalid.'
+  no-warnings: '%prefix% <yellow>Acest jucător nu are avertismente active.'
+  no-history: '%prefix% <yellow>Acest jucător nu are istoric de sancțiuni.'
+  no-active-ban: '%prefix% <yellow>Acest jucător nu are un ban activ.'
+  no-active-mute: '%prefix% <yellow>Acest jucător nu are mute activ.'
+  no-alts-found: '%prefix% <yellow>Nu s-au găsit conturi secundare pentru %player%.'
+  no-active-bans: '%prefix% <yellow>Nu există banuri active pe server.'
+  no-staff-history: '%prefix% <yellow>Nu s-au găsit înregistrări pentru membrul staff %executor%.'
+  rollback-success: '%prefix% <green>Sancțiunea #%punishment_id% a fost revocată cu succes.'
+  rollback-usage: '%prefix% <white>Utilizare: <red>/punish-rollback <id>'
+  console-only: '%prefix% <red>Această comandă poate fi executată doar din consolă!'
+  global-unban-success: '%prefix% <green>Toate banurile active au fost revocate! (Global Unban).'
+
+  punishment-notification:
+    permission: wapeb.notify.punishment
+    ban-attempt: '%prefix% <color:#C34338>%player% <white>a încercat să se conecteze fiind banat (<color:#C34338>%duration%<white>).'
+    mute-attempt: '%prefix% <color:#C34338>%player% <white>a încercat să scrie având mute (<color:#C34338>%duration%<white>).'
+
+  ban:
+    usage: '%prefix% <white>Utilizare: <red>/ban <jucător> [timp] [motiv] [-s]'
+    default-reason: Încălcarea regulamentului serverului.
+    success: '%prefix% <green>Jucătorul <color:#C34338>%player%<green> a fost banat cu succes.'
+    broadcast: '%prefix% <color:#C34338>%executor% <white>l-a banat pe <color:#C34338>%player%<white>. Motiv: <color:#C34338>%reason%'
+    silent:
+      prefix: '<gray>(Silențios) '
+    kick-screen:
+      - '%mid% <b><gradient:#C34338:#C63528>AI FOST BANAT</gradient></b>'
+      - '%mid% <white>Ai fost banat de pe acest server.'
+      - ''
+      - '%mid% De către: <color:#C34338>%executor%'
+      - '%mid% Motiv: <color:#C34338>%reason%'
+      - '%mid% Expiră în: <color:#C34338>%duration%'
+
+  kick:
+    usage: '%prefix% <white>Utilizare: <red>/kick <jucător> [motiv] [-s]'
+    default-reason: Dat afară de un membru staff.
+    success: '%prefix% <green>Jucătorul <color:#C34338>%player%<green> a fost dat afară.'
+    broadcast: '%prefix% <color:#C34338>%executor% <white>l-a dat afară pe <color:#C34338>%player%<white>.'
+    silent:
+      prefix: '<gray>(Silențios) '
+    kick-screen:
+      - '%mid% <b><gradient:#C34338:#C63528>KICK SERVER</gradient></b>'
+      - '%mid% De către: <color:#C34338>%executor%'
+      - '%mid% Motiv: <color:#C34338>%reason%'
+
+  mute:
+    usage: '%prefix% <white>Utilizare: <red>/mute <jucător> [timp] [motiv] [-s]'
+    default-reason: Încălcarea regulilor de chat.
+    success: '%prefix% <green>Jucătorul <color:#C34338>%player%<green> a primit mute.'
+    broadcast: '%prefix% <color:#C34338>%executor% <white>i-a dat mute lui <color:#C34338>%player%<white>.'
+    silent:
+      prefix: '<gray>(Silențios) '
+    player-is-muted: "%prefix% <red>Ai mute în prezent! Expiră în: <color:#C34338>%duration%"
+
+  unban:
+    usage: '%prefix% <white>Utilizare: <red>/unban <jucător> [motiv] [-s]'
+    success: '%prefix% <green>Ban anulat pentru <color:#C34338>%player%<green>.'
+    broadcast: '%prefix% <color:#C34338>%player%<white> a primit unban.'
+    silent:
+      prefix: '<gray>(Silențios) '
+
+  unmute:
+    usage: '%prefix% <white>Utilizare: <red>/unmute <jucător> [motiv] [-s]'
+    success: '%prefix% <green>Mute anulat pentru <color:#C34338>%player%<green>.'
+    broadcast: '%prefix% <color:#C34338>%player%<white> nu mai are mute.'
+    silent:
+      prefix: '<gray>(Silențios) '
+
+  banip:
+    usage: '%prefix% <white>Utilizare: <red>/banip <jucător/IP> [timp] [motiv] [-s]'
+    default-reason: Ban IP.
+    success: '%prefix% <green>Ban IP pentru <color:#C34338>%player%<green> realizat cu succes.'
+    broadcast: '%prefix% <color:#C34338>%executor% <white>a banat IP-ul lui <color:#C34338>%player%<white>.'
+    silent:
+      prefix: '<gray>(Silențios) '
+
+  muteip:
+    usage: '%prefix% <white>Utilizare: <red>/muteip <jucător/IP> [timp] [motiv] [-s]'
+    default-reason: Mute IP.
+    success: '%prefix% <green>Mute IP pentru <color:#C34338>%player%<green> realizat cu succes.'
+    broadcast: '%prefix% <color:#C34338>%executor% <white>a dat mute pe IP lui <color:#C34338>%player%<white>.'
+    silent:
+      prefix: '<gray>(Silențios) '
+
+  warn:
+    usage: '%prefix% <white>Utilizare: <red>/warn <jucător> <motiv> [-s]'
+    success: '%prefix% <green>Jucătorul <color:#C34338>%player%<green> a fost avertizat.'
+    player-warned: '%prefix% <yellow>Ai primit un avertisment! Motiv: <color:#C34338>%reason%'
+    broadcast: '%prefix% <color:#C34338>%executor% <white>l-a avertizat pe <color:#C34338>%player%<white>.'
+    silent:
+      prefix: '<gray>(Silențios) '
+
+  unwarn:
+    usage: '%prefix% <white>Utilizare: <red>/unwarn <jucător> <id> [-s]'
+    success: '%prefix% <green>Avertisment șters pentru <color:#C34338>%player%<green>.'
+    broadcast: '%prefix% Avertismentul lui <color:#C34338>%player%<white> a fost șters.'
+    not-found: '%prefix% <red>ID avertisment negăsit.'
+    silent:
+      prefix: '<gray>(Silențios) '
+
+  kickall:
+    usage: '%prefix% <white>Utilizare: <red>/kickall [motiv]'
+    default-reason: Mentenanță server.
+    success: '%prefix% <green>Toți jucătorii au fost dați afară.'
+    broadcast: '%prefix% <color:#C34338>%executor% <white>i-a dat afară pe toți jucătorii.'
+    kick-screen:
+      - '%mid% <b><gradient:#C34338:#C63528>KICK GENERAL</gradient></b>'
+      - '%mid% De către: <color:#C34338>%executor%'
+      - '%mid% Motiv: <color:#C34338>%reason%'
+
+  warnings:
+    usage: '%prefix% <white>Utilizare: <red>/warnings <jucător>'
+    header: <dark_gray><st>------------------</st> <gradient:#FF00D9:#B300FF>Avertismentele lui %player%</gradient> <dark_gray><st>------------------
+    line: '<dark_gray>- <gray>[#%punishment_id%] <white>De: <gradient:#FF00D9:#B300FF>%executor%</gradient> <white>Motiv: <gradient:#EC00E3:#D900EC>%reason%</gradient> <gray>(%date%)'
+    footer: <dark_gray><st>----------------------------------------------------
+
+  history:
+    usage: '%prefix% <white>Utilizare: <red>/history <jucător>'
+    header: <dark_gray><st>------------------</st> <gradient:#FF00D9:#B300FF>Istoricul lui %player%</gradient> <dark_gray><st>------------------
+    line: '<dark_gray>- <gray>[#%punishment_id%] <red>%type% <white>De: <gradient:#FF00D9:#B300FF>%executor%</gradient> <white>Motiv: <gradient:#EC00E3:#D900EC>%reason%</gradient> <gray>(%date%) - Expiră: %end_date%'
+    footer: <dark_gray><st>----------------------------------------------------
+
+  checkban:
+    usage: '%prefix% <white>Utilizare: <red>/checkban <jucător>'
+    header: '<white>Verificare Ban: <color:#C34338>%player% <gray>(Ban)%alt_notice%'
+    details:
+      - '<white>Tip: <color:#C34338>%type%'
+      - '<white>De către: <color:#C34338>%executor%'
+      - '<white>Motiv: <color:#C34338>%reason%'
+      - '<white>Expiră în: <color:#C34338>%duration%'
+      - '<white>Data expirării: <color:#C34338>%end_date%'
+      - '<white>ID Sancțiune: #<color:#C34338>%punishment_id%'
+      - '<white>Adresă IP: <color:#C34338>%ip_address%'
+      - '<white>GeoIP: <color:#C34338>%geoip%'
+    footer: <dark_gray><st>----------------------------------------------------
+
+  checkmute:
+    usage: '%prefix% <white>Utilizare: <red>/checkmute <jucător>'
+    header: '%prefix% <white>Verificare Mute: <color:#C34338>%player% <gray>(Mute)%alt_notice%'
+    details:
+      - '<white>Tip: <color:#C34338>%type%'
+      - '<white>De către: <color:#C34338>%executor%'
+      - '<white>Motiv: <color:#C34338>%reason%'
+      - '<white>Expiră în: <color:#C34338>%duration%'
+      - '<white>Data expirării: <color:#C34338>%end_date%'
+      - '<white>ID Sancțiune: #<color:#C34338>%punishment_id%'
+      - '<white>Adresă IP: <color:#C34338>%ip_address%'
+      - '<white>GeoIP: <color:#C34338>%geoip%'
+    footer: <dark_gray><st>----------------------------------------------------
+
+lockdown:
+  kick-reason:
+    - <b><gradient:#FA0707:#F84A1D>COOLNETWORK</gradient></b>
+    - <dark_gray><st>                           <reset>
+    - <b><gradient:#C34338:#C63528>MENTENANȚĂ</gradient></b>
+    - ''
+    - <white>Serverul este în prezent în mentenanță.
+    - '<white>Motiv: <gradient:#C34338:#C63528>%reason%</gradient>'
+  messages:
+    enabled: '%prefix% <green>Lockdown server activat.'
+    disabled: '%prefix% <green>Lockdown server dezactivat.'
+    usage: '%prefix% <white>Utilizare: <red>/lockdown <on|off> [motiv]'
+    reason-set: '%prefix% <green>Motivul lockdown-ului a fost setat: <white>%reason%'
+    status: '%prefix% <white>Status lockdown: <gradient:#FF00D9:#B300FF>%status% <white>Motiv: <gradient:#FF00D9:#B300FF>%reason%'
+
+freeze:
+  usage: '%prefix% <white>Utilizare: <red>/freeze <jucător> [motiv]'
+  messages:
+    frozen: '%prefix% <yellow>Ai fost înghețat de %executor%.'
+    unfrozen: '%prefix% <green>Ai fost dezghețat de %executor%.'
+    frozen-success: '%prefix% <green>Jucătorul %player% a fost înghețat cu succes.'
+    unfrozen-success: '%prefix% <green>Jucătorul %player% a fost dezghețat cu succes.'
+    already-frozen: '%prefix% <red>Jucătorul este deja înghețat.'
+    not-frozen: '%prefix% <red>Jucătorul nu este înghețat.'
+    logout-ban-broadcast: '%prefix% <color:#C34338>%player% <white>a fost banat pentru că s-a deconectat în timp ce era înghețat.'
+    freeze-screen:
+      - ''
+      - '%prefix% <white>Ești înghețat!'
+      - ''
+      - <white>Nu te deconecta altfel vei fi banat.
+
+alts:
+  usage: '%prefix% <white>Utilizare: <red>/alts <jucător>'
+  header: <dark_gray><st>------------------</st> <gradient:#FF00D9:#B300FF>Conturi secundare pentru %player% (%alt_count%)</gradient> <dark_gray><st>------------------
+  line: '<dark_gray>- %status% <color:#C34338>%alt_player%</color> %tags% <gray>(Ultima dată: %last_seen%)'
+  footer: <dark_gray><st>----------------------------------------------------
+  status-colors:
+    online: <green>[ONLINE]</green>
+    clean: <gray>[CURAT]</gray>
+    banned: <red><bold>[BANAT]</bold></red>
+    muted: <yellow><bold>[MUTE]</bold></yellow>
+    none: <white>[CURAT]</white>
+  login-notification: '%prefix% <red>%player% <white>s-a conectat cu conturi secundare! IP: <color:#C34338>%ip_address%'
+
+banlist:
+  usage: '%prefix% <white>Utilizare: <red>/banlist'
+  header: <dark_gray><st>------------------</st> <gradient:#FF00D9:#B300FF>Banuri Active</gradient> <dark_gray><st>------------------
+  line: '<dark_gray>- <gray>%player% <white>(%type%) De: <gradient:#FF00D9:#B300FF>%executor% <white>Motiv: <gradient:#EC00E3:#D900EC>%reason% <gray>(Expiră: %end_date%)'
+  footer: <dark_gray><st>----------------------------------------------------
+
+staffhistory:
+  usage: '%prefix% <white>Utilizare: <red>/staffhistory <nume_staff>'
+  header: <dark_gray><st>------------------</st> <gradient:#FF00D9:#B300FF>Istoricul lui %executor%</gradient> <dark_gray><st>------------------
+  line: '<dark_gray>- <gray>[#%punishment_id%] <red>%type% <white>%player% <white>Motiv: <gradient:#EC00E3:#D900EC>%reason% <gray>(%date%)'
+  footer: <dark_gray><st>----------------------------------------------------
+
+web-api:
+  messages:
+    login-code: '%prefix% <white>Codul tău de autentificare este: <gradient:#FF00D9:#B300FF><bold>%code%</bold></gradient>'
+    unlink-success: '%prefix% <green>Toate sesiunile web active au fost închise.'
+
+sentinel:
+  messages:
+    word-filter-blocked: '%prefix% <red>Mesajul tău a fost blocat din cauza conținutului neadecvat.'
+    spam-blocked: '%prefix% <red>Mesajul tău a fost blocat pentru spam.'
+    flood-blocked: '%prefix% <red>Mesajul tău a fost blocat pentru trimitere prea rapidă.'
+    auto-muted: '%prefix% <red>Ai primit mute pentru %duration% din cauza încălcării regulilor de chat.'
+    ai-muted: '%prefix% <red>Ai primit mute pentru %duration% prin moderare AI: %reason%'
+    auto-mute-broadcast: '%prefix% <gradient:#FF00D9:#B300FF>%player% <white>a primit mute de la Sentinel pentru %duration%. Motiv: %reason%'
+    ai-mute-broadcast: '%prefix% <color:#C34338>%player% <white>a primit mute de la IA Sentinel.'

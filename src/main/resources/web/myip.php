@@ -28,11 +28,11 @@ function getExternalIP() {
         return $_SERVER['SERVER_ADDR'];
     }
 
-    return "Nem sikerült lekérni (nézd meg a cPanel/tárhely panelen)";
+    return "Failed to retrieve IP (check cPanel / web hosting panel)";
 }
 
 $ip = getExternalIP();
-echo "<h2>A webtárhelyed kimenő IP címe: <span style='color: green;'>$ip</span></h2>";
+echo "<h2>Web Host External IP Address: <span style='color: green;'>$ip</span></h2>";
 if (isset($_SERVER['SERVER_ADDR'])) {
-    echo "<p>Belső szerver IP: " . $_SERVER['SERVER_ADDR'] . "</p>";
+    echo "<p>Internal Server IP: " . $_SERVER['SERVER_ADDR'] . "</p>";
 }

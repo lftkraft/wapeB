@@ -24,6 +24,7 @@ public final class WapeB extends JavaPlugin {
     private WebAPIManager webAPIManager;
     private SentinelManager sentinelManager;
     private CommandManager commandManager;
+    private TemplateManager templateManager;
 
     @Override
     public void onEnable() {
@@ -32,6 +33,9 @@ public final class WapeB extends JavaPlugin {
         // Initialize configuration
         configManager = new ConfigManager(this);
         configManager.loadConfig();
+
+        // Initialize Template Manager
+        templateManager = new TemplateManager(this);
 
         // Initialize TimeUtil from config
         ConfigurationSection timeSection = configManager.getConfigurationSection("time-formats");
@@ -107,6 +111,7 @@ public final class WapeB extends JavaPlugin {
         Objects.requireNonNull(getCommand("freeze")).setExecutor(new FreezeCommand(this));
         Objects.requireNonNull(getCommand("unfreeze")).setExecutor(new FreezeCommand(this)); 
         Objects.requireNonNull(getCommand("alts")).setExecutor(new AltsCommand(this));
+        Objects.requireNonNull(getCommand("altexempt")).setExecutor(new AltExemptCommand(this));
         Objects.requireNonNull(getCommand("banlist")).setExecutor(new BanlistCommand(this));
         Objects.requireNonNull(getCommand("staffhistory")).setExecutor(new StaffHistoryCommand(this));
         Objects.requireNonNull(getCommand("lockdown")).setExecutor(new LockdownCommand(this));
@@ -166,5 +171,9 @@ public final class WapeB extends JavaPlugin {
 
     public CommandManager getCommandManager() {
         return commandManager;
+    }
+
+    public TemplateManager getTemplateManager() {
+        return templateManager;
     }
 }

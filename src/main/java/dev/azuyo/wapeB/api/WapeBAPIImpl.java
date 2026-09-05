@@ -240,6 +240,51 @@ public class WapeBAPIImpl implements WapeBAPI {
     }
 
     @Override
+    public List<dev.azuyo.wapeB.utils.AltInfo> getDetailedAlts(UUID playerUuid) {
+        return playerDataManager.getDetailedAlts(playerUuid);
+    }
+
+    @Override
+    public List<dev.azuyo.wapeB.utils.AltInfo> getDetailedAlts(String playerName) {
+        OfflinePlayer op = Bukkit.getOfflinePlayer(playerName);
+        return getDetailedAlts(op.getUniqueId());
+    }
+
+    @Override
+    public List<dev.azuyo.wapeB.utils.IpHistoryRecord> getIpHistory(UUID playerUuid) {
+        return playerDataManager.getIpHistory(playerUuid);
+    }
+
+    @Override
+    public List<dev.azuyo.wapeB.utils.IpHistoryRecord> getIpHistory(String playerName) {
+        OfflinePlayer op = Bukkit.getOfflinePlayer(playerName);
+        return getIpHistory(op.getUniqueId());
+    }
+
+    @Override
+    public boolean isAltExempt(UUID playerUuid) {
+        return playerDataManager.isAltExempt(playerUuid);
+    }
+
+    @Override
+    public boolean isAltExempt(String playerName) {
+        OfflinePlayer op = Bukkit.getOfflinePlayer(playerName);
+        return isAltExempt(op.getUniqueId());
+    }
+
+    @Override
+    public boolean setAltExempt(UUID playerUuid, boolean exempt, String addedBy) {
+        playerDataManager.setAltExempt(playerUuid, exempt, addedBy);
+        return true;
+    }
+
+    @Override
+    public boolean setAltExempt(String playerName, boolean exempt, String addedBy) {
+        OfflinePlayer op = Bukkit.getOfflinePlayer(playerName);
+        return setAltExempt(op.getUniqueId(), exempt, addedBy);
+    }
+
+    @Override
     public boolean isBanned(UUID playerUuid) {
         return getActiveBan(playerUuid) != null;
     }
@@ -438,6 +483,8 @@ public class WapeBAPIImpl implements WapeBAPI {
         dataManager.savePunishment(p);
         WebhookUtil.sendPunishmentWebhook(p);
 
+        checkWarnActions(target, targetName);
+
         Bukkit.getScheduler().runTask(plugin, () -> {
             if (op.isOnline()) {
                 ((Player)op).sendMessage(MessageUtil.createComponent(configManager.getString("messages.warn.target-notify", "&cYou have been warned for: %reason%"), p));
@@ -627,6 +674,148 @@ public class WapeBAPIImpl implements WapeBAPI {
             lockdownManager.setLockdownReason(event.getReason());
         }
         return true;
+    }
+
+    private void checkWarnActions(UUID targetUuid, String targetName) {
+        if (!configManager.getBoolean("warn-actions.enabled", true)) return;
+
+        org.bukkit.configuration.ConfigurationSection actionsSection = configManager.getConfigurationSection("warn-actions.actions");
+        if (actionsSection == null) return;
+
+        List<Punishment> activeWarns = getWarnings(targetUuid);
+        int activeCount = activeWarns.size();
+
+        String commandTemplate = actionsSection.getString(String.valueOf(activeCount));
+        if (commandTemplate != null && !commandTemplate.trim().isEmpty()) {
+            String cmd = commandTemplate.replace("%player%", targetName).replace("%count%", String.valueOf(activeCount));
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                plugin.getLogger().info("[wapeB Warn-Action] Threshold reached for " + targetName + " (" + activeCount + " warns). Running: /" + cmd);
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
+            });
+        }
+    }
+
+    // --- CIDR Subnet & GeoIP API Methods ---
+
+    @Override
+    public boolean isCidrBanned(String ipOrCidr) {
+        return getActiveCidrBan(ipOrCidr) != null;
+    }
+
+    @Override
+    public Punishment getActiveCidrBan(String ipOrCidr) {
+        String normalized = dev.azuyo.wapeB.utils.IPUtil.normalizeCidr(ipOrCidr);
+        return dataManager.getActivePunishment(null, normalized, BAN_TYPES);
+    }
+
+    @Override
+    public boolean banIpRange(String cidrOrRange, String reason, String executor, long duration, boolean silent) {
+        String cidr = dev.azuyo.wapeB.utils.IPUtil.normalizeCidr(cidrOrRange);
+        if (!dev.azuyo.wapeB.utils.IPUtil.isValidIpOrCidr(cidr)) return false;
+
+        Punishment.PunishmentType type = (duration == -1) ? Punishment.PunishmentType.IPBAN : Punishment.PunishmentType.TEMPIPBAN;
+        Punishment p = new Punishment(dataManager.getNextId(), null, "IP-Range", cidr, type, reason, executor, System.currentTimeMillis(), duration);
+        dataManager.savePunishment(p);
+        WebhookUtil.sendPunishmentWebhook(p);
+        return true;
+    }
+
+    @Override
+    public boolean unbanIpRange(String cidrOrRange, String reason, String executor) {
+        String cidr = dev.azuyo.wapeB.utils.IPUtil.normalizeCidr(cidrOrRange);
+        Punishment activeBan = dataManager.getActivePunishment(null, cidr, BAN_TYPES);
+        if (activeBan != null) {
+            return unbanPlayer((UUID) null, reason, executor);
+        }
+        return false;
+    }
+
+    @Override
+    public dev.azuyo.wapeB.utils.GeoIPUtil.GeoInfo getGeoInfo(String ipAddress) {
+        return dev.azuyo.wapeB.utils.GeoIPUtil.getGeoInfo(ipAddress);
+    }
+
+    // --- Template API Methods ---
+
+    @Override
+    public dev.azuyo.wapeB.managers.TemplateManager.PunishmentTemplate getTemplate(String category, String templateKey) {
+        return plugin.getTemplateManager().getTemplate(category, templateKey);
+    }
+
+    @Override
+    public Map<String, Map<String, dev.azuyo.wapeB.managers.TemplateManager.PunishmentTemplate>> getAllTemplates() {
+        return plugin.getTemplateManager().getAllTemplates();
+    }
+
+    @Override
+    public List<dev.azuyo.wapeB.managers.TemplateManager.PunishmentTemplate> getTemplatesForCategory(String category) {
+        return plugin.getTemplateManager().getTemplatesForCategory(category);
+    }
+
+    @Override
+    public boolean punishWithTemplate(UUID target, String category, String templateKey, String executor, boolean silent) {
+        dev.azuyo.wapeB.managers.TemplateManager.PunishmentTemplate t = getTemplate(category, templateKey);
+        if (t == null) return false;
+        long duration = t.getDuration().equalsIgnoreCase("perm") ? -1 : dev.azuyo.wapeB.utils.TimeUtil.parseTime(t.getDuration());
+        String cat = category.toLowerCase();
+        if (cat.contains("ban")) {
+            return banPlayer(target, t.getReason(), executor, duration, silent, cat.contains("ip"));
+        } else if (cat.contains("mute")) {
+            return mutePlayer(target, t.getReason(), executor, duration, silent, cat.contains("ip"));
+        } else if (cat.contains("warn")) {
+            return warnPlayer(target, t.getReason(), executor, silent);
+        } else if (cat.contains("kick")) {
+            return kickPlayer(target, t.getReason(), executor, silent);
+        }
+        return false;
+    }
+
+    @Override
+    public boolean punishWithTemplate(String targetName, String category, String templateKey, String executor, boolean silent) {
+        OfflinePlayer op = Bukkit.getOfflinePlayer(targetName);
+        return punishWithTemplate(op.getUniqueId(), category, templateKey, executor, silent);
+    }
+
+    // --- Warn Action API Methods ---
+
+    @Override
+    public Map<Integer, String> getWarnActions() {
+        Map<Integer, String> result = new HashMap<>();
+        org.bukkit.configuration.ConfigurationSection sec = configManager.getConfigurationSection("warn-actions.actions");
+        if (sec != null) {
+            for (String key : sec.getKeys(false)) {
+                try {
+                    int threshold = Integer.parseInt(key);
+                    result.put(threshold, sec.getString(key));
+                } catch (NumberFormatException ignored) {}
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public int getActiveWarnCount(UUID playerUuid) {
+        return getWarnings(playerUuid).size();
+    }
+
+    @Override
+    public int getActiveWarnCount(String playerName) {
+        OfflinePlayer op = Bukkit.getOfflinePlayer(playerName);
+        return getActiveWarnCount(op.getUniqueId());
+    }
+
+    @Override
+    public boolean triggerWarnActionCheck(UUID targetUuid) {
+        OfflinePlayer op = Bukkit.getOfflinePlayer(targetUuid);
+        String name = op.getName() != null ? op.getName() : targetUuid.toString();
+        checkWarnActions(targetUuid, name);
+        return true;
+    }
+
+    @Override
+    public boolean triggerWarnActionCheck(String playerName) {
+        OfflinePlayer op = Bukkit.getOfflinePlayer(playerName);
+        return triggerWarnActionCheck(op.getUniqueId());
     }
 
     // --- Command Override & Alias Methods ---

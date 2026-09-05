@@ -2,6 +2,7 @@ package dev.azuyo.wapeB.managers;
 
 import dev.azuyo.wapeB.WapeB;
 import dev.azuyo.wapeB.utils.Punishment;
+import dev.azuyo.wapeB.utils.TimeUtil;
 
 import java.io.File;
 import java.sql.*;
@@ -145,12 +146,22 @@ public class SqliteDataManager implements DataManager {
     @Override
     public synchronized List<Punishment> getWarnings(UUID playerUuid) {
         List<Punishment> warnings = new ArrayList<>();
-        String sql = "SELECT * FROM punishments WHERE playerUuid = ? AND type = 'WARN'";
+        String sql = "SELECT * FROM punishments WHERE playerUuid = ? AND type = 'WARN' AND active = 1";
+        String expiryString = plugin.getConfigManager().getString("warning-expiry", "3d");
+        long expiryMillis = expiryString.equals("0") ? -1 : TimeUtil.parseTime(expiryString);
+        long now = System.currentTimeMillis();
+
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, playerUuid.toString());
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
-                warnings.add(buildPunishmentFromResultSet(rs));
+                Punishment punishment = buildPunishmentFromResultSet(rs);
+                if (expiryMillis != -1 && (punishment.getDate() + expiryMillis) <= now) {
+                    punishment.setActive(false);
+                    savePunishment(punishment);
+                } else {
+                    warnings.add(punishment);
+                }
             }
         } catch (SQLException e) {
             plugin.getLogger().severe("Could not get warnings for " + playerUuid + " from SQLite!");
@@ -293,6 +304,26 @@ public class SqliteDataManager implements DataManager {
                 } else {
                     p.setActive(false);
                     savePunishment(p);
+                }
+            }
+
+            // Fallback CIDR check for subnets (e.g., 192.168.1.0/24)
+            if (ipAddress != null && !ipAddress.isEmpty()) {
+                String cidrSql = "SELECT * FROM punishments WHERE active = 1 AND ipAddress IS NOT NULL AND ipAddress LIKE '%/%' AND type IN (" +
+                        types.stream().map(t -> "'" + t.toString() + "'").collect(Collectors.joining(",")) + ")";
+                try (PreparedStatement cidrStmt = connection.prepareStatement(cidrSql)) {
+                    ResultSet cidrRs = cidrStmt.executeQuery();
+                    while (cidrRs.next()) {
+                        Punishment p = buildPunishmentFromResultSet(cidrRs);
+                        if (dev.azuyo.wapeB.utils.IPUtil.isIpInCidr(ipAddress, p.getIpAddress())) {
+                            if (p.getDuration() == -1 || p.getEnd() > System.currentTimeMillis()) {
+                                return p;
+                            } else {
+                                p.setActive(false);
+                                savePunishment(p);
+                            }
+                        }
+                    }
                 }
             }
         } catch (SQLException e) {

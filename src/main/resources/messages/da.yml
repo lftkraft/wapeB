@@ -1,0 +1,256 @@
+# wapeB Danish Language File
+# Language code: da
+
+# --- Punishment Type Display Names ---
+punishment-types:
+  BAN: Ban
+  TEMPBAN: Temp-Ban
+  IPBAN: IP-Ban
+  TEMPIPBAN: Temp-IP-Ban
+  MUTE: Mute
+  TEMPMUTE: Temp-Mute
+  IPMUTE: IP-Mute
+  TEMPIPMUTE: Temp-IP-Mute
+  WARN: Advarsel
+  KICK: Kick
+  FREEZE_LOGOUT_BAN: Logout-Ban
+  SENTINEL_AUTO_MUTE: Auto-Mute
+  SENTINEL_AI_MUTE: AI-Mute
+
+# --- Time Formats ---
+time-formats:
+  permanent: Permanent
+  year: ' år'
+  week: ' uge(r)'
+  day: ' dag(e)'
+  hour: ' time(r)'
+  minute: m
+  second: s
+
+messages:
+  no-permission: '%prefix% <red>Du har ikke tilladelse til at udføre denne kommando.'
+  player-not-found: '%prefix% <red>Spiller ikke fundet.'
+  invalid-ip: '%prefix% <red>Ugyldigt IP-adresseformat.'
+  no-ip-history: '%prefix% <red>Ingen gemt IP-adresse fundet for spilleren %player%.'
+  not-banned: '%prefix% <red>Spilleren er ikke bannet.'
+  not-muted: '%prefix% <red>Spilleren er ikke mutet.'
+  invalid-punishment-id: '%prefix% <red>Ugyldigt straf-ID.'
+  no-warnings: '%prefix% <yellow>Denne spiller har ingen aktive advarsler.'
+  no-history: '%prefix% <yellow>Denne spiller har ingen strafhistorik.'
+  no-active-ban: '%prefix% <yellow>Denne spiller har intet aktivt ban.'
+  no-active-mute: '%prefix% <yellow>Denne spiller er ikke mutet.'
+  no-alts-found: '%prefix% <yellow>Ingen alternative konti fundet for %player%.'
+  no-active-bans: '%prefix% <yellow>Der er ingen aktive bans på serveren.'
+  no-staff-history: '%prefix% <yellow>Ingen historik fundet for personalemedlemmet %executor%.'
+  rollback-success: '%prefix% <green>Straf #%punishment_id% blev annulleret med succes.'
+  rollback-usage: '%prefix% <white>Brug: <red>/punish-rollback <id>'
+  console-only: '%prefix% <red>Denne kommando kan kun udføres fra konsollen!'
+  global-unban-success: '%prefix% <green>Alle aktive bans er blevet annulleret! (Global Unban).'
+
+  punishment-notification:
+    permission: wapeb.notify.punishment
+    ban-attempt: '%prefix% <color:#C34338>%player% <white>forsøgte at tilslutte mens bannet (<color:#C34338>%duration%<white>).'
+    mute-attempt: '%prefix% <color:#C34338>%player% <white>forsøgte at skrive i chatten mens mutet (<color:#C34338>%duration%<white>).'
+
+  ban:
+    usage: '%prefix% <white>Brug: <red>/ban <spiller> [tid] [grund] [-s]'
+    default-reason: Overtrædelse af serverreglerne.
+    success: '%prefix% <green>Spilleren <color:#C34338>%player%<green> blev bannet.'
+    broadcast: '%prefix% <color:#C34338>%executor% <white>bannede <color:#C34338>%player%<white>. Grund: <color:#C34338>%reason%'
+    silent:
+      prefix: '<gray>(Lydløs) '
+    kick-screen:
+      - '%mid% <b><gradient:#C34338:#C63528>DU ER BANNET</gradient></b>'
+      - '%mid% <white>Du er blevet bannet fra denne server.'
+      - ''
+      - '%mid% Af: <color:#C34338>%executor%'
+      - '%mid% Grund: <color:#C34338>%reason%'
+      - '%mid% Udløber om: <color:#C34338>%duration%'
+
+  kick:
+    usage: '%prefix% <white>Brug: <red>/kick <spiller> [grund] [-s]'
+    default-reason: Kicked af et personalemedlem.
+    success: '%prefix% <green>Spilleren <color:#C34338>%player%<green> blev kicked.'
+    broadcast: '%prefix% <color:#C34338>%executor% <white>kickede <color:#C34338>%player%<white>.'
+    silent:
+      prefix: '<gray>(Lydløs) '
+    kick-screen:
+      - '%mid% <b><gradient:#C34338:#C63528>SERVER KICK</gradient></b>'
+      - '%mid% Af: <color:#C34338>%executor%'
+      - '%mid% Grund: <color:#C34338>%reason%'
+
+  mute:
+    usage: '%prefix% <white>Brug: <red>/mute <spiller> [tid] [grund] [-s]'
+    default-reason: Overtrædelse af chatregler.
+    success: '%prefix% <green>Spilleren <color:#C34338>%player%<green> blev mutet.'
+    broadcast: '%prefix% <color:#C34338>%executor% <white>mutede <color:#C34338>%player%<white>.'
+    silent:
+      prefix: '<gray>(Lydløs) '
+    player-is-muted: "%prefix% <red>Du er i øjeblikket mutet! Udløber om: <color:#C34338>%duration%"
+
+  unban:
+    usage: '%prefix% <white>Brug: <red>/unban <spiller> [grund] [-s]'
+    success: '%prefix% <green>Ban fjernet for <color:#C34338>%player%<green>.'
+    broadcast: '%prefix% <color:#C34338>%player%<white> blev unbannet.'
+    silent:
+      prefix: '<gray>(Lydløs) '
+
+  unmute:
+    usage: '%prefix% <white>Brug: <red>/unmute <spiller> [grund] [-s]'
+    success: '%prefix% <green>Mute fjernet for <color:#C34338>%player%<green>.'
+    broadcast: '%prefix% <color:#C34338>%player%<white> er ikke længere mutet.'
+    silent:
+      prefix: '<gray>(Lydløs) '
+
+  banip:
+    usage: '%prefix% <white>Brug: <red>/banip <spiller/IP> [tid] [grund] [-s]'
+    default-reason: IP Ban.
+    success: '%prefix% <green>IP-ban for <color:#C34338>%player%<green> udført med succes.'
+    broadcast: '%prefix% <color:#C34338>%executor% <white>IP-bannede <color:#C34338>%player%<white>.'
+    silent:
+      prefix: '<gray>(Lydløs) '
+
+  muteip:
+    usage: '%prefix% <white>Brug: <red>/muteip <spiller/IP> [tid] [grund] [-s]'
+    default-reason: IP Mute.
+    success: '%prefix% <green>IP-mute for <color:#C34338>%player%<green> udført med succes.'
+    broadcast: '%prefix% <color:#C34338>%executor% <white>IP-mutede <color:#C34338>%player%<white>.'
+    silent:
+      prefix: '<gray>(Lydløs) '
+
+  warn:
+    usage: '%prefix% <white>Brug: <red>/warn <spiller> <grund> [-s]'
+    success: '%prefix% <green>Spilleren <color:#C34338>%player%<green> blev advaret.'
+    player-warned: '%prefix% <yellow>Du har modtaget en advarsel! Grund: <color:#C34338>%reason%'
+    broadcast: '%prefix% <color:#C34338>%executor% <white>advarede <color:#C34338>%player%<white>.'
+    silent:
+      prefix: '<gray>(Lydløs) '
+
+  unwarn:
+    usage: '%prefix% <white>Brug: <red>/unwarn <spiller> <id> [-s]'
+    success: '%prefix% <green>Advarsel fjernet for <color:#C34338>%player%<green>.'
+    broadcast: '%prefix% Advarslen for <color:#C34338>%player%<white> blev fjernet.'
+    not-found: '%prefix% <red>Advarsels-ID ikke fundet.'
+    silent:
+      prefix: '<gray>(Lydløs) '
+
+  kickall:
+    usage: '%prefix% <white>Brug: <red>/kickall [grund]'
+    default-reason: Servervedligeholdelse.
+    success: '%prefix% <green>Alle spillere blev kicked.'
+    broadcast: '%prefix% <color:#C34338>%executor% <white>kickede alle spillere.'
+    kick-screen:
+      - '%mid% <b><gradient:#C34338:#C63528>SERVER KICK</gradient></b>'
+      - '%mid% Af: <color:#C34338>%executor%'
+      - '%mid% Grund: <color:#C34338>%reason%'
+
+  warnings:
+    usage: '%prefix% <white>Brug: <red>/warnings <spiller>'
+    header: <dark_gray><st>------------------</st> <gradient:#FF00D9:#B300FF>Advarsler for %player%</gradient> <dark_gray><st>------------------
+    line: '<dark_gray>- <gray>[#%punishment_id%] <white>Af: <gradient:#FF00D9:#B300FF>%executor%</gradient> <white>Grund: <gradient:#EC00E3:#D900EC>%reason%</gradient> <gray>(%date%)'
+    footer: <dark_gray><st>----------------------------------------------------
+
+  history:
+    usage: '%prefix% <white>Brug: <red>/history <spiller>'
+    header: <dark_gray><st>------------------</st> <gradient:#FF00D9:#B300FF>Historik for %player%</gradient> <dark_gray><st>------------------
+    line: '<dark_gray>- <gray>[#%punishment_id%] <red>%type% <white>Af: <gradient:#FF00D9:#B300FF>%executor%</gradient> <white>Grund: <gradient:#EC00E3:#D900EC>%reason%</gradient> <gray>(%date%) - Udløber: %end_date%'
+    footer: <dark_gray><st>----------------------------------------------------
+
+  checkban:
+    usage: '%prefix% <white>Brug: <red>/checkban <spiller>'
+    header: '<white>Tjek Ban: <color:#C34338>%player% <gray>(Ban)%alt_notice%'
+    details:
+      - '<white>Type: <color:#C34338>%type%'
+      - '<white>Af: <color:#C34338>%executor%'
+      - '<white>Grund: <color:#C34338>%reason%'
+      - '<white>Udløber om: <color:#C34338>%duration%'
+      - '<white>Udløbsdato: <color:#C34338>%end_date%'
+      - '<white>Straf-ID: #<color:#C34338>%punishment_id%'
+      - '<white>IP-adresse: <color:#C34338>%ip_address%'
+      - '<white>GeoIP: <color:#C34338>%geoip%'
+    footer: <dark_gray><st>----------------------------------------------------
+
+  checkmute:
+    usage: '%prefix% <white>Brug: <red>/checkmute <spiller>'
+    header: '%prefix% <white>Tjek Mute: <color:#C34338>%player% <gray>(Mute)%alt_notice%'
+    details:
+      - '<white>Type: <color:#C34338>%type%'
+      - '<white>Af: <color:#C34338>%executor%'
+      - '<white>Grund: <color:#C34338>%reason%'
+      - '<white>Udløber om: <color:#C34338>%duration%'
+      - '<white>Udløbsdato: <color:#C34338>%end_date%'
+      - '<white>Straf-ID: #<color:#C34338>%punishment_id%'
+      - '<white>IP-adresse: <color:#C34338>%ip_address%'
+      - '<white>GeoIP: <color:#C34338>%geoip%'
+    footer: <dark_gray><st>----------------------------------------------------
+
+lockdown:
+  kick-reason:
+    - <b><gradient:#FA0707:#F84A1D>COOLNETWORK</gradient></b>
+    - <dark_gray><st>                           <reset>
+    - <b><gradient:#C34338:#C63528>VEDLIGEHOLDELSE</gradient></b>
+    - ''
+    - <white>Serveren er i øjeblikket under vedligeholdelse.
+    - '<white>Grund: <gradient:#C34338:#C63528>%reason%</gradient>'
+  messages:
+    enabled: '%prefix% <green>Server-lockdown aktiveret.'
+    disabled: '%prefix% <green>Server-lockdown deaktiveret.'
+    usage: '%prefix% <white>Brug: <red>/lockdown <on|off> [grund]'
+    reason-set: '%prefix% <green>Lockdown-grund sat til: <white>%reason%'
+    status: '%prefix% <white>Lockdown-status: <gradient:#FF00D9:#B300FF>%status% <white>Grund: <gradient:#FF00D9:#B300FF>%reason%'
+
+freeze:
+  usage: '%prefix% <white>Brug: <red>/freeze <spiller> [grund]'
+  messages:
+    frozen: '%prefix% <yellow>Du er blevet frosset af %executor%.'
+    unfrozen: '%prefix% <green>Du er blevet optøet af %executor%.'
+    frozen-success: '%prefix% <green>Spiller %player% frosset med succes.'
+    unfrozen-success: '%prefix% <green>Spiller %player% optøet med succes.'
+    already-frozen: '%prefix% <red>Spilleren er allerede frosset.'
+    not-frozen: '%prefix% <red>Spilleren er ikke frosset.'
+    logout-ban-broadcast: '%prefix% <color:#C34338>%player% <white>blev bannet for at forlade spillet mens frosset.'
+    freeze-screen:
+      - ''
+      - '%prefix% <white>Du er frosset!'
+      - ''
+      - <white>Forlad ikke spillet ellers bliver du bannet.
+
+alts:
+  usage: '%prefix% <white>Brug: <red>/alts <spiller>'
+  header: <dark_gray><st>------------------</st> <gradient:#FF00D9:#B300FF>Alternative konti for %player% (%alt_count%)</gradient> <dark_gray><st>------------------
+  line: '<dark_gray>- %status% <color:#C34338>%alt_player%</color> %tags% <gray>(Sidst set: %last_seen%)'
+  footer: <dark_gray><st>----------------------------------------------------
+  status-colors:
+    online: <green>[ONLINE]</green>
+    clean: <gray>[REN]</gray>
+    banned: <red><bold>[BANNET]</bold></red>
+    muted: <yellow><bold>[MUTET]</bold></yellow>
+    none: <white>[REN]</white>
+  login-notification: '%prefix% <red>%player% <white>loggede ind med alternative konti! IP: <color:#C34338>%ip_address%'
+
+banlist:
+  usage: '%prefix% <white>Brug: <red>/banlist'
+  header: <dark_gray><st>------------------</st> <gradient:#FF00D9:#B300FF>Aktive Bans</gradient> <dark_gray><st>------------------
+  line: '<dark_gray>- <gray>%player% <white>(%type%) Af: <gradient:#FF00D9:#B300FF>%executor% <white>Grund: <gradient:#EC00E3:#D900EC>%reason% <gray>(Udløber: %end_date%)'
+  footer: <dark_gray><st>----------------------------------------------------
+
+staffhistory:
+  usage: '%prefix% <white>Brug: <red>/staffhistory <personalenavn>'
+  header: <dark_gray><st>------------------</st> <gradient:#FF00D9:#B300FF>Historik for %executor%</gradient> <dark_gray><st>------------------
+  line: '<dark_gray>- <gray>[#%punishment_id%] <red>%type% <white>%player% <white>Grund: <gradient:#EC00E3:#D900EC>%reason% <gray>(%date%)'
+  footer: <dark_gray><st>----------------------------------------------------
+
+web-api:
+  messages:
+    login-code: '%prefix% <white>Din kode til login er: <gradient:#FF00D9:#B300FF><bold>%code%</bold></gradient>'
+    unlink-success: '%prefix% <green>Alle aktive web-sessioner er blevet afbrudt.'
+
+sentinel:
+  messages:
+    word-filter-blocked: '%prefix% <red>Din besked blev blokeret pga. upassende indhold.'
+    spam-blocked: '%prefix% <red>Din besked blev blokeret for spam.'
+    flood-blocked: '%prefix% <red>Din besked blev blokeret for at sende beskeder for hurtigt.'
+    auto-muted: '%prefix% <red>Du er blevet mutet i %duration% for chat-overtrædelse.'
+    ai-muted: '%prefix% <red>Du er blevet mutet i %duration% af AI-moderation: %reason%'
+    auto-mute-broadcast: '%prefix% <gradient:#FF00D9:#B300FF>%player% <white>blev mutet af Sentinel i %duration%. Grund: %reason%'
+    ai-mute-broadcast: '%prefix% <color:#C34338>%player% <white>blev mutet af Sentinel AI.'

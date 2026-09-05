@@ -1,0 +1,256 @@
+# wapeB Swedish Language File
+# Language code: sv
+
+# --- Punishment Type Display Names ---
+punishment-types:
+  BAN: Ban
+  TEMPBAN: Temp-Ban
+  IPBAN: IP-Ban
+  TEMPIPBAN: Temp-IP-Ban
+  MUTE: Mute
+  TEMPMUTE: Temp-Mute
+  IPMUTE: IP-Mute
+  TEMPIPMUTE: Temp-IP-Mute
+  WARN: Varning
+  KICK: Kick
+  FREEZE_LOGOUT_BAN: Logout-Ban
+  SENTINEL_AUTO_MUTE: Auto-Mute
+  SENTINEL_AI_MUTE: AI-Mute
+
+# --- Time Formats ---
+time-formats:
+  permanent: Permanent
+  year: ' år'
+  week: ' vecka/veckor'
+  day: ' dag(ar)'
+  hour: ' timme/timmar'
+  minute: m
+  second: s
+
+messages:
+  no-permission: '%prefix% <red>Du har inte tillåtelse att använda detta kommando.'
+  player-not-found: '%prefix% <red>Spelaren hittades inte.'
+  invalid-ip: '%prefix% <red>Ogiltigt IP-adressformat.'
+  no-ip-history: '%prefix% <red>Ingen IP-adress hittades för spelaren %player%.'
+  not-banned: '%prefix% <red>Spelaren är inte bannlyst.'
+  not-muted: '%prefix% <red>Spelaren är inte tystad.'
+  invalid-punishment-id: '%prefix% <red>Ogiltigt straff-ID.'
+  no-warnings: '%prefix% <yellow>Denna spelare har inga aktiva varningar.'
+  no-history: '%prefix% <yellow>Denna spelare har ingen straffhistorik.'
+  no-active-ban: '%prefix% <yellow>Denna spelare har ingen aktiv bannlysning.'
+  no-active-mute: '%prefix% <yellow>Denna spelare är inte tystad.'
+  no-alts-found: '%prefix% <yellow>Inga alternativa konton hittades för %player%.'
+  no-active-bans: '%prefix% <yellow>Det finns inga aktiva bannlysningar på servern.'
+  no-staff-history: '%prefix% <yellow>Ingen historik hittades för stabsmedlemmen %executor%.'
+  rollback-success: '%prefix% <green>Straff #%punishment_id% upphävdes framgångsrikt.'
+  rollback-usage: '%prefix% <white>Användning: <red>/punish-rollback <id>'
+  console-only: '%prefix% <red>Detta kommando kan endast köras från konsolen!'
+  global-unban-success: '%prefix% <green>Alla aktiva bannlysningar har upphävts! (Global Unban).'
+
+  punishment-notification:
+    permission: wapeb.notify.punishment
+    ban-attempt: '%prefix% <color:#C34338>%player% <white>försökte ansluta under bannlysning (<color:#C34338>%duration%<white>).'
+    mute-attempt: '%prefix% <color:#C34338>%player% <white>försökte skriva i chatten under tystnad (<color:#C34338>%duration%<white>).'
+
+  ban:
+    usage: '%prefix% <white>Användning: <red>/ban <spelare> [tid] [anledning] [-s]'
+    default-reason: Brott mot serverns regler.
+    success: '%prefix% <green>Spelaren <color:#C34338>%player%<green> har bannlysts.'
+    broadcast: '%prefix% <color:#C34338>%executor% <white>bannlyste <color:#C34338>%player%<white>. Anledning: <color:#C34338>%reason%'
+    silent:
+      prefix: '<gray>(Tyst) '
+    kick-screen:
+      - '%mid% <b><gradient:#C34338:#C63528>DU ÄR BANNLYST</gradient></b>'
+      - '%mid% <white>Du har bannlysts från denna server.'
+      - ''
+      - '%mid% Av: <color:#C34338>%executor%'
+      - '%mid% Anledning: <color:#C34338>%reason%'
+      - '%mid% Går ut om: <color:#C34338>%duration%'
+
+  kick:
+    usage: '%prefix% <white>Användning: <red>/kick <spelare> [anledning] [-s]'
+    default-reason: Sparkad av en stabsmedlem.
+    success: '%prefix% <green>Spelaren <color:#C34338>%player%<green> har sparkats.'
+    broadcast: '%prefix% <color:#C34338>%executor% <white>sparkade <color:#C34338>%player%<white>.'
+    silent:
+      prefix: '<gray>(Tyst) '
+    kick-screen:
+      - '%mid% <b><gradient:#C34338:#C63528>SERVER SPARKNING</gradient></b>'
+      - '%mid% Av: <color:#C34338>%executor%'
+      - '%mid% Anledning: <color:#C34338>%reason%'
+
+  mute:
+    usage: '%prefix% <white>Användning: <red>/mute <spelare> [tid] [anledning] [-s]'
+    default-reason: Brott mot chattregler.
+    success: '%prefix% <green>Spelaren <color:#C34338>%player%<green> har tystats.'
+    broadcast: '%prefix% <color:#C34338>%executor% <white>tystade <color:#C34338>%player%<white>.'
+    silent:
+      prefix: '<gray>(Tyst) '
+    player-is-muted: "%prefix% <red>Du är för närvarande tystad! Går ut om: <color:#C34338>%duration%"
+
+  unban:
+    usage: '%prefix% <white>Användning: <red>/unban <spelare> [anledning] [-s]'
+    success: '%prefix% <green>Bannlysning upphävd för <color:#C34338>%player%<green>.'
+    broadcast: '%prefix% <color:#C34338>%player%<white> har avbannats.'
+    silent:
+      prefix: '<gray>(Tyst) '
+
+  unmute:
+    usage: '%prefix% <white>Användning: <red>/unmute <spelare> [anledning] [-s]'
+    success: '%prefix% <green>Tystnad upphävd för <color:#C34338>%player%<green>.'
+    broadcast: '%prefix% <color:#C34338>%player%<white> är inte längre tystad.'
+    silent:
+      prefix: '<gray>(Tyst) '
+
+  banip:
+    usage: '%prefix% <white>Användning: <red>/banip <spelare/IP> [tid] [anledning] [-s]'
+    default-reason: IP-bannlysning.
+    success: '%prefix% <green>IP-bannlysning för <color:#C34338>%player%<green> utförd.'
+    broadcast: '%prefix% <color:#C34338>%executor% <white>IP-bannlyste <color:#C34338>%player%<white>.'
+    silent:
+      prefix: '<gray>(Tyst) '
+
+  muteip:
+    usage: '%prefix% <white>Användning: <red>/muteip <spelare/IP> [tid] [anledning] [-s]'
+    default-reason: IP-tystnad.
+    success: '%prefix% <green>IP-tystnad för <color:#C34338>%player%<green> utförd.'
+    broadcast: '%prefix% <color:#C34338>%executor% <white>IP-tystade <color:#C34338>%player%<white>.'
+    silent:
+      prefix: '<gray>(Tyst) '
+
+  warn:
+    usage: '%prefix% <white>Användning: <red>/warn <spelare> <anledning> [-s]'
+    success: '%prefix% <green>Spelaren <color:#C34338>%player%<green> har varnats.'
+    player-warned: '%prefix% <yellow>Du har fått en varning! Anledning: <color:#C34338>%reason%'
+    broadcast: '%prefix% <color:#C34338>%executor% <white>varnade <color:#C34338>%player%<white>.'
+    silent:
+      prefix: '<gray>(Tyst) '
+
+  unwarn:
+    usage: '%prefix% <white>Användning: <red>/unwarn <spelare> <id> [-s]'
+    success: '%prefix% <green>Varning borttagen för <color:#C34338>%player%<green>.'
+    broadcast: '%prefix% Varningen för <color:#C34338>%player%<white> togs bort.'
+    not-found: '%prefix% <red>Varnings-ID hittades inte.'
+    silent:
+      prefix: '<gray>(Tyst) '
+
+  kickall:
+    usage: '%prefix% <white>Användning: <red>/kickall [anledning]'
+    default-reason: Serverunderhåll.
+    success: '%prefix% <green>Alla spelare har sparkats.'
+    broadcast: '%prefix% <color:#C34338>%executor% <white>sparkade alla spelare.'
+    kick-screen:
+      - '%mid% <b><gradient:#C34338:#C63528>ALLMÄN SPARKNING</gradient></b>'
+      - '%mid% Av: <color:#C34338>%executor%'
+      - '%mid% Anledning: <color:#C34338>%reason%'
+
+  warnings:
+    usage: '%prefix% <white>Användning: <red>/warnings <spelare>'
+    header: <dark_gray><st>------------------</st> <gradient:#FF00D9:#B300FF>Varningar för %player%</gradient> <dark_gray><st>------------------
+    line: '<dark_gray>- <gray>[#%punishment_id%] <white>Av: <gradient:#FF00D9:#B300FF>%executor%</gradient> <white>Anledning: <gradient:#EC00E3:#D900EC>%reason%</gradient> <gray>(%date%)'
+    footer: <dark_gray><st>----------------------------------------------------
+
+  history:
+    usage: '%prefix% <white>Användning: <red>/history <spelare>'
+    header: <dark_gray><st>------------------</st> <gradient:#FF00D9:#B300FF>Historik för %player%</gradient> <dark_gray><st>------------------
+    line: '<dark_gray>- <gray>[#%punishment_id%] <red>%type% <white>Av: <gradient:#FF00D9:#B300FF>%executor%</gradient> <white>Anledning: <gradient:#EC00E3:#D900EC>%reason%</gradient> <gray>(%date%) - Går ut: %end_date%'
+    footer: <dark_gray><st>----------------------------------------------------
+
+  checkban:
+    usage: '%prefix% <white>Användning: <red>/checkban <spelare>'
+    header: '<white>Granska Ban: <color:#C34338>%player% <gray>(Ban)%alt_notice%'
+    details:
+      - '<white>Typ: <color:#C34338>%type%'
+      - '<white>Av: <color:#C34338>%executor%'
+      - '<white>Anledning: <color:#C34338>%reason%'
+      - '<white>Går ut om: <color:#C34338>%duration%'
+      - '<white>Utgångsdatum: <color:#C34338>%end_date%'
+      - '<white>Straff-ID: #<color:#C34338>%punishment_id%'
+      - '<white>IP-adress: <color:#C34338>%ip_address%'
+      - '<white>GeoIP: <color:#C34338>%geoip%'
+    footer: <dark_gray><st>----------------------------------------------------
+
+  checkmute:
+    usage: '%prefix% <white>Användning: <red>/checkmute <spelare>'
+    header: '%prefix% <white>Granska Mute: <color:#C34338>%player% <gray>(Mute)%alt_notice%'
+    details:
+      - '<white>Typ: <color:#C34338>%type%'
+      - '<white>Av: <color:#C34338>%executor%'
+      - '<white>Anledning: <color:#C34338>%reason%'
+      - '<white>Går ut om: <color:#C34338>%duration%'
+      - '<white>Utgångsdatum: <color:#C34338>%end_date%'
+      - '<white>Straff-ID: #<color:#C34338>%punishment_id%'
+      - '<white>IP-adress: <color:#C34338>%ip_address%'
+      - '<white>GeoIP: <color:#C34338>%geoip%'
+    footer: <dark_gray><st>----------------------------------------------------
+
+lockdown:
+  kick-reason:
+    - <b><gradient:#FA0707:#F84A1D>COOLNETWORK</gradient></b>
+    - <dark_gray><st>                           <reset>
+    - <b><gradient:#C34338:#C63528>UNDERHÅLL</gradient></b>
+    - ''
+    - <white>Servern är för närvarande under underhåll.
+    - '<white>Anledning: <gradient:#C34338:#C63528>%reason%</gradient>'
+  messages:
+    enabled: '%prefix% <green>Serverlåsning aktiverad.'
+    disabled: '%prefix% <green>Serverlåsning inaktiverad.'
+    usage: '%prefix% <white>Användning: <red>/lockdown <on|off> [anledning]'
+    reason-set: '%prefix% <green>Låsningsanledning satt till: <white>%reason%'
+    status: '%prefix% <white>Låsningsstatus: <gradient:#FF00D9:#B300FF>%status% <white>Anledning: <gradient:#FF00D9:#B300FF>%reason%'
+
+freeze:
+  usage: '%prefix% <white>Användning: <red>/freeze <spelare> [anledning]'
+  messages:
+    frozen: '%prefix% <yellow>Du har frysts av %executor%.'
+    unfrozen: '%prefix% <green>Du har tinats upp av %executor%.'
+    frozen-success: '%prefix% <green>Spelaren %player% har frysts.'
+    unfrozen-success: '%prefix% <green>Spelaren %player% har tinats upp.'
+    already-frozen: '%prefix% <red>Spelaren är redan fryst.'
+    not-frozen: '%prefix% <red>Spelaren är inte fryst.'
+    logout-ban-broadcast: '%prefix% <color:#C34338>%player% <white>bannlystes för att ha lämnat spelet medan fryst.'
+    freeze-screen:
+      - ''
+      - '%prefix% <white>Du är fryst!'
+      - ''
+      - <white>Lämna inte spelet annars blir du bannlyst.
+
+alts:
+  usage: '%prefix% <white>Användning: <red>/alts <spelare>'
+  header: <dark_gray><st>------------------</st> <gradient:#FF00D9:#B300FF>Alternativa konton för %player% (%alt_count%)</gradient> <dark_gray><st>------------------
+  line: '<dark_gray>- %status% <color:#C34338>%alt_player%</color> %tags% <gray>(Senast sedd: %last_seen%)'
+  footer: <dark_gray><st>----------------------------------------------------
+  status-colors:
+    online: <green>[ONLINE]</green>
+    clean: <gray>[REN]</gray>
+    banned: <red><bold>[BANNLYST]</bold></red>
+    muted: <yellow><bold>[TYSTAD]</bold></yellow>
+    none: <white>[REN]</white>
+  login-notification: '%prefix% <red>%player% <white>loggade in med alternativa konton! IP: <color:#C34338>%ip_address%'
+
+banlist:
+  usage: '%prefix% <white>Användning: <red>/banlist'
+  header: <dark_gray><st>------------------</st> <gradient:#FF00D9:#B300FF>Aktiva Bannlysningar</gradient> <dark_gray><st>------------------
+  line: '<dark_gray>- <gray>%player% <white>(%type%) Av: <gradient:#FF00D9:#B300FF>%executor% <white>Anledning: <gradient:#EC00E3:#D900EC>%reason% <gray>(Går ut: %end_date%)'
+  footer: <dark_gray><st>----------------------------------------------------
+
+staffhistory:
+  usage: '%prefix% <white>Användning: <red>/staffhistory <stab_namn>'
+  header: <dark_gray><st>------------------</st> <gradient:#FF00D9:#B300FF>Historik för %executor%</gradient> <dark_gray><st>------------------
+  line: '<dark_gray>- <gray>[#%punishment_id%] <red>%type% <white>%player% <white>Anledning: <gradient:#EC00E3:#D900EC>%reason% <gray>(%date%)'
+  footer: <dark_gray><st>----------------------------------------------------
+
+web-api:
+  messages:
+    login-code: '%prefix% <white>Din inloggningskod är: <gradient:#FF00D9:#B300FF><bold>%code%</bold></gradient>'
+    unlink-success: '%prefix% <green>Alla aktiva webbsessioner har avslutats.'
+
+sentinel:
+  messages:
+    word-filter-blocked: '%prefix% <red>Ditt meddelande blockerades på grund av olämpligt innehåll.'
+    spam-blocked: '%prefix% <red>Ditt meddelande blockerades för skräppost.'
+    flood-blocked: '%prefix% <red>Ditt meddelande blockerades för att ha skickats för snabbt.'
+    auto-muted: '%prefix% <red>Du har tystats i %duration% för chattöverträdelse.'
+    ai-muted: '%prefix% <red>Du har tystats i %duration% av AI-moderering: %reason%'
+    auto-mute-broadcast: '%prefix% <gradient:#FF00D9:#B300FF>%player% <white>tystades av Sentinel i %duration%. Anledning: %reason%'
+    ai-mute-broadcast: '%prefix% <color:#C34338>%player% <white>tystades av Sentinel AI.'

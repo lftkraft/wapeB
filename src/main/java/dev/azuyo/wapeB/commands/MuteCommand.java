@@ -45,18 +45,43 @@ public class MuteCommand implements CommandExecutor {
         boolean ipMute = arguments.remove("-ip");
 
         long duration = -1;
-        String reason;
+        String reason = null;
 
         if (!arguments.isEmpty()) {
-            long parsedTime = TimeUtil.parseTime(arguments.get(0));
-            if (parsedTime != -1) {
-                duration = parsedTime;
-                arguments.remove(0);
+            String firstArg = arguments.get(0);
+            if (firstArg.startsWith("$")) {
+                dev.azuyo.wapeB.managers.TemplateManager.PunishmentTemplate template = plugin.getTemplateManager().getTemplate("mute", firstArg);
+                if (template != null) {
+                    reason = template.getReason();
+                    if (template.getDuration() != null && !template.getDuration().equalsIgnoreCase("perm")) {
+                        duration = TimeUtil.parseTime(template.getDuration());
+                    }
+                    arguments.remove(0);
+                }
+            } else {
+                long parsedTime = TimeUtil.parseTime(firstArg);
+                if (parsedTime != -1) {
+                    duration = parsedTime;
+                    arguments.remove(0);
+                }
             }
         }
-        
-        reason = String.join(" ", arguments);
-        if (reason.isEmpty()) {
+
+        if (reason == null || reason.isEmpty()) {
+            if (!arguments.isEmpty() && arguments.get(0).startsWith("$")) {
+                dev.azuyo.wapeB.managers.TemplateManager.PunishmentTemplate template = plugin.getTemplateManager().getTemplate("mute", arguments.get(0));
+                if (template != null) {
+                    reason = template.getReason();
+                    if (duration == -1 && template.getDuration() != null && !template.getDuration().equalsIgnoreCase("perm")) {
+                        duration = TimeUtil.parseTime(template.getDuration());
+                    }
+                }
+            } else {
+                reason = String.join(" ", arguments);
+            }
+        }
+
+        if (reason == null || reason.isEmpty()) {
             reason = configManager.getString("messages.mute.default-reason", "You have been muted.");
         }
 
