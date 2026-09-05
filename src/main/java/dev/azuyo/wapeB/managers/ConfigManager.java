@@ -103,13 +103,19 @@ public class ConfigManager {
     }
 
     public String getString(String path, String defaultValue) {
-        if (messagesConfig != null && (messagesConfig.isString(path) || messagesConfig.contains(path))) {
+        if (messagesConfig != null && messagesConfig.contains(path)) {
             String val = messagesConfig.getString(path);
-            if (val != null) {
+            if (val != null && !val.isEmpty()) {
                 return val;
             }
         }
-        return config != null ? config.getString(path, defaultValue) : defaultValue;
+        if (config != null && config.contains(path)) {
+            String val = config.getString(path);
+            if (val != null && !val.isEmpty()) {
+                return val;
+            }
+        }
+        return "<red>Missing message: " + path + "</red>";
     }
 
     public String getString(String path) {
@@ -117,13 +123,19 @@ public class ConfigManager {
     }
 
     public List<String> getStringList(String path) {
-        if (messagesConfig != null && (messagesConfig.isList(path) || messagesConfig.contains(path))) {
+        if (messagesConfig != null && messagesConfig.contains(path)) {
             List<String> list = messagesConfig.getStringList(path);
             if (list != null && !list.isEmpty()) {
                 return list;
             }
         }
-        return config != null ? config.getStringList(path) : Collections.emptyList();
+        if (config != null && config.contains(path)) {
+            List<String> list = config.getStringList(path);
+            if (list != null && !list.isEmpty()) {
+                return list;
+            }
+        }
+        return Collections.singletonList("<red>Missing message: " + path + "</red>");
     }
 
     public int getInt(String path, int defaultValue) {
