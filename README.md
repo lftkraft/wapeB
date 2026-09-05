@@ -16,7 +16,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'com.github.lftkraft:wapeB:v1.0.1'
+    compileOnly 'com.github.lftkraft:wapeB:v1.0.2'
 }
 ```
 
@@ -33,7 +33,7 @@ dependencies {
     <dependency>
         <groupId>com.github.lftkraft</groupId>
         <artifactId>wapeB</artifactId>
-        <version>v1.0.1</version>
+        <version>v1.0.2</version>
         <scope>provided</scope>
     </dependency>
 </dependencies>
