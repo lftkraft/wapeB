@@ -23,6 +23,12 @@ public interface WapeBAPI {
     Punishment getActiveMute(String playerName);
     Punishment getActiveMuteByIp(String ipAddress);
 
+    Punishment getActiveBanForPlayerOrAlt(UUID playerUuid);
+    Punishment getActiveBanForPlayerOrAlt(String playerName);
+
+    Punishment getActiveMuteForPlayerOrAlt(UUID playerUuid);
+    Punishment getActiveMuteForPlayerOrAlt(String playerName);
+
     List<Punishment> getWarnings(UUID playerUuid);
     List<Punishment> getWarnings(String playerName);
 
@@ -39,6 +45,12 @@ public interface WapeBAPI {
     boolean isMuted(UUID playerUuid);
     boolean isMuted(String playerName);
     boolean isMutedByIp(String ipAddress);
+
+    boolean isBannedForPlayerOrAlt(UUID playerUuid);
+    boolean isBannedForPlayerOrAlt(String playerName);
+
+    boolean isMutedForPlayerOrAlt(UUID playerUuid);
+    boolean isMutedForPlayerOrAlt(String playerName);
 
     boolean isFrozen(UUID playerUuid);
     boolean isFrozen(String playerName);

@@ -205,6 +205,11 @@ public class YamlDataManager implements DataManager {
 
     @Override
     public Punishment getActivePunishment(UUID playerUuid, String ipAddress, List<Punishment.PunishmentType> types) {
+        return getActivePunishment(playerUuid, ipAddress, null, types);
+    }
+
+    @Override
+    public Punishment getActivePunishment(UUID playerUuid, String ipAddress, List<UUID> altUuids, List<Punishment.PunishmentType> types) {
         ConfigurationSection section = punishmentsConfig.getConfigurationSection("punishments");
         if (section == null) return null;
 
@@ -213,13 +218,20 @@ public class YamlDataManager implements DataManager {
             String id = keys.get(i);
             String path = "punishments." + id;
             if (punishmentsConfig.getBoolean(path + ".active", false)) {
-                Punishment.PunishmentType storedType = Punishment.PunishmentType.valueOf(punishmentsConfig.getString(path + ".type"));
+                String storedTypeStr = punishmentsConfig.getString(path + ".type");
+                if (storedTypeStr == null) continue;
+                Punishment.PunishmentType storedType = Punishment.PunishmentType.valueOf(storedTypeStr);
                 
-                if(types.contains(storedType)) {
-                    boolean uuidMatch = playerUuid != null && punishmentsConfig.getString(path + ".playerUuid") != null && UUID.fromString(punishmentsConfig.getString(path + ".playerUuid")).equals(playerUuid);
-                    boolean ipMatch = ipAddress != null && punishmentsConfig.getString(path + ".ipAddress") != null && punishmentsConfig.getString(path + ".ipAddress").equals(ipAddress);
+                if (types.contains(storedType)) {
+                    String storedUuidStr = punishmentsConfig.getString(path + ".playerUuid");
+                    UUID storedUuid = storedUuidStr != null ? UUID.fromString(storedUuidStr) : null;
+                    String storedIp = punishmentsConfig.getString(path + ".ipAddress");
 
-                    if (uuidMatch || ipMatch) {
+                    boolean uuidMatch = playerUuid != null && playerUuid.equals(storedUuid);
+                    boolean ipMatch = ipAddress != null && !ipAddress.isEmpty() && ipAddress.equals(storedIp);
+                    boolean altMatch = altUuids != null && storedUuid != null && altUuids.contains(storedUuid);
+
+                    if (uuidMatch || ipMatch || altMatch) {
                         Punishment p = buildPunishment(path);
                         if (p.getDuration() == -1 || p.getEnd() > System.currentTimeMillis()) {
                             return p;

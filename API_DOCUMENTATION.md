@@ -1,4 +1,4 @@
-# 📚 wapeB API - Complete Developer Documentation (v1.0.6)
+# 📚 wapeB API - Complete Developer Documentation (v1.0.7)
 
 This documentation provides a comprehensive guide to the **wapeB** Minecraft punishment system's **Java API**, **Bukkit Events**, **Dynamic Command Overrides**, and **HTTP REST Web API**.
 
@@ -34,7 +34,7 @@ repositories {
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.8-R0.1-SNAPSHOT")
-    compileOnly("com.github.lftkraft:wapeB:v1.0.6")
+    compileOnly("com.github.lftkraft:wapeB:v1.0.7")
 }
 ```
 
@@ -46,7 +46,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'com.github.lftkraft:wapeB:v1.0.6'
+    compileOnly 'com.github.lftkraft:wapeB:v1.0.7'
 }
 ```
 
@@ -63,7 +63,7 @@ dependencies {
     <dependency>
         <groupId>com.github.lftkraft</groupId>
         <artifactId>wapeB</artifactId>
-        <version>v1.0.6</version>
+        <version>v1.0.7</version>
         <scope>provided</scope>
     </dependency>
 </dependencies>
@@ -124,17 +124,21 @@ Fetches all punishments for a player (both active and expired/revoked).
 - `List<Punishment> getPunishments(UUID playerUuid)`
 - `List<Punishment> getPunishments(String playerName)`
 
-#### `getActiveBan`
-Returns the currently active ban for a player (or `null` if not banned).
+#### `getActiveBan` / `getActiveBanForPlayerOrAlt`
+Returns the currently active ban for a player, resolving their online or offline IP and checking linked alt accounts.
 - `Punishment getActiveBan(UUID playerUuid)`
 - `Punishment getActiveBan(String playerName)`
 - `Punishment getActiveBanByIp(String ipAddress)`
+- `Punishment getActiveBanForPlayerOrAlt(UUID playerUuid)`
+- `Punishment getActiveBanForPlayerOrAlt(String playerName)`
 
-#### `getActiveMute`
-Returns the currently active mute for a player (or `null` if not muted).
+#### `getActiveMute` / `getActiveMuteForPlayerOrAlt`
+Returns the currently active mute for a player, resolving their online or offline IP and checking linked alt accounts.
 - `Punishment getActiveMute(UUID playerUuid)`
 - `Punishment getActiveMute(String playerName)`
 - `Punishment getActiveMuteByIp(String ipAddress)`
+- `Punishment getActiveMuteForPlayerOrAlt(UUID playerUuid)`
+- `Punishment getActiveMuteForPlayerOrAlt(String playerName)`
 
 #### `getWarnings`
 Fetches active warnings for a player.
@@ -147,8 +151,10 @@ Returns a list of alternative account usernames linked by IP address.
 - `List<String> getAlts(String playerName)`
 
 #### Status Checkers (`boolean`)
-- `boolean isBanned(UUID/String/IP)` – `true` if active ban exists.
-- `boolean isMuted(UUID/String/IP)` – `true` if active mute exists.
+- `boolean isBanned(UUID/String/IP)` – `true` if active ban exists for player, IP, or alts.
+- `boolean isMuted(UUID/String/IP)` – `true` if active mute exists for player, IP, or alts.
+- `boolean isBannedForPlayerOrAlt(UUID/String)` – Explicit check for player or alt bans.
+- `boolean isMutedForPlayerOrAlt(UUID/String)` – Explicit check for player or alt mutes.
 - `boolean isFrozen(UUID/String)` – `true` if player is currently frozen (`/freeze`).
 - `boolean isLockdownActive()` – `true` if server lockdown is enabled (`/lockdown`).
 - `String getLockdownReason()` – Returns current lockdown reason.

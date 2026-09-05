@@ -238,7 +238,12 @@ public class SqliteDataManager implements DataManager {
 
     @Override
     public synchronized Punishment getActivePunishment(UUID playerUuid, String ipAddress, List<Punishment.PunishmentType> types) {
-        if (playerUuid == null && ipAddress == null) {
+        return getActivePunishment(playerUuid, ipAddress, null, types);
+    }
+
+    @Override
+    public synchronized Punishment getActivePunishment(UUID playerUuid, String ipAddress, List<UUID> altUuids, List<Punishment.PunishmentType> types) {
+        if (playerUuid == null && (ipAddress == null || ipAddress.isEmpty()) && (altUuids == null || altUuids.isEmpty())) {
             return null;
         }
 
@@ -247,28 +252,38 @@ public class SqliteDataManager implements DataManager {
         if (playerUuid != null) {
             conditions.add("playerUuid = ?");
         }
-        if (ipAddress != null) {
+        if (ipAddress != null && !ipAddress.isEmpty()) {
             conditions.add("ipAddress = ?");
+        }
+        if (altUuids != null && !altUuids.isEmpty()) {
+            for (UUID altUuid : altUuids) {
+                conditions.add("playerUuid = ?");
+            }
         }
         sqlBuilder.append(String.join(" OR ", conditions));
         sqlBuilder.append(") AND type IN (");
         sqlBuilder.append(types.stream().map(t -> "?").collect(Collectors.joining(",")));
-        sqlBuilder.append(") ORDER BY id DESC LIMIT 1");
+        sqlBuilder.append(") ORDER BY id DESC");
 
         try (PreparedStatement pstmt = connection.prepareStatement(sqlBuilder.toString())) {
             int paramIndex = 1;
             if (playerUuid != null) {
                 pstmt.setString(paramIndex++, playerUuid.toString());
             }
-            if (ipAddress != null) {
+            if (ipAddress != null && !ipAddress.isEmpty()) {
                 pstmt.setString(paramIndex++, ipAddress);
+            }
+            if (altUuids != null && !altUuids.isEmpty()) {
+                for (UUID altUuid : altUuids) {
+                    pstmt.setString(paramIndex++, altUuid.toString());
+                }
             }
             for (Punishment.PunishmentType type : types) {
                 pstmt.setString(paramIndex++, type.toString());
             }
 
             ResultSet rs = pstmt.executeQuery();
-            if (rs.next()) {
+            while (rs.next()) {
                 Punishment p = buildPunishmentFromResultSet(rs);
                 if (p.getDuration() == -1 || p.getEnd() > System.currentTimeMillis()) {
                     return p;

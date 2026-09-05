@@ -52,12 +52,7 @@ public class CheckBanCommand implements CommandExecutor {
             return true;
         }
 
-        String targetIp = null;
-        if (target.isOnline() && target.getPlayer() != null && target.getPlayer().getAddress() != null) {
-            targetIp = target.getPlayer().getAddress().getAddress().getHostAddress();
-        }
-
-        Punishment activeBan = dataManager.getActivePunishment(target.getUniqueId(), targetIp, banTypes);
+        Punishment activeBan = plugin.getApi().getActiveBan(target.getUniqueId());
 
         if (activeBan == null || (activeBan.getDuration() != -1 && activeBan.getEnd() <= System.currentTimeMillis())) {
             sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.no-active-ban", ""), null));

@@ -63,36 +63,70 @@ public class WapeBAPIImpl implements WapeBAPI {
 
     @Override
     public Punishment getActiveBan(UUID playerUuid) {
-        String ip = playerDataManager.getLastKnownIp(playerUuid);
-        return dataManager.getActivePunishment(playerUuid, ip, BAN_TYPES);
+        return getActiveBanForPlayerOrAlt(playerUuid);
     }
 
     @Override
     public Punishment getActiveBan(String playerName) {
         OfflinePlayer op = Bukkit.getOfflinePlayer(playerName);
-        return getActiveBan(op.getUniqueId());
+        return getActiveBanForPlayerOrAlt(op.getUniqueId());
     }
 
     @Override
     public Punishment getActiveBanByIp(String ipAddress) {
-        return dataManager.getActivePunishment(null, ipAddress, BAN_TYPES);
+        List<UUID> alts = (ipAddress != null && !ipAddress.isEmpty()) ? playerDataManager.getPlayersByIp(ipAddress) : null;
+        return dataManager.getActivePunishment(null, ipAddress, alts, BAN_TYPES);
+    }
+
+    @Override
+    public Punishment getActiveBanForPlayerOrAlt(UUID playerUuid) {
+        if (playerUuid == null) return null;
+        OfflinePlayer op = Bukkit.getOfflinePlayer(playerUuid);
+        String ip = (op.isOnline() && op.getPlayer() != null && op.getPlayer().getAddress() != null)
+                ? op.getPlayer().getAddress().getAddress().getHostAddress()
+                : playerDataManager.getLastKnownIp(playerUuid);
+        List<UUID> alts = (ip != null && !ip.isEmpty()) ? playerDataManager.getPlayersByIp(ip) : null;
+        return dataManager.getActivePunishment(playerUuid, ip, alts, BAN_TYPES);
+    }
+
+    @Override
+    public Punishment getActiveBanForPlayerOrAlt(String playerName) {
+        OfflinePlayer op = Bukkit.getOfflinePlayer(playerName);
+        return getActiveBanForPlayerOrAlt(op.getUniqueId());
     }
 
     @Override
     public Punishment getActiveMute(UUID playerUuid) {
-        String ip = playerDataManager.getLastKnownIp(playerUuid);
-        return dataManager.getActivePunishment(playerUuid, ip, MUTE_TYPES);
+        return getActiveMuteForPlayerOrAlt(playerUuid);
     }
 
     @Override
     public Punishment getActiveMute(String playerName) {
         OfflinePlayer op = Bukkit.getOfflinePlayer(playerName);
-        return getActiveMute(op.getUniqueId());
+        return getActiveMuteForPlayerOrAlt(op.getUniqueId());
     }
 
     @Override
     public Punishment getActiveMuteByIp(String ipAddress) {
-        return dataManager.getActivePunishment(null, ipAddress, MUTE_TYPES);
+        List<UUID> alts = (ipAddress != null && !ipAddress.isEmpty()) ? playerDataManager.getPlayersByIp(ipAddress) : null;
+        return dataManager.getActivePunishment(null, ipAddress, alts, MUTE_TYPES);
+    }
+
+    @Override
+    public Punishment getActiveMuteForPlayerOrAlt(UUID playerUuid) {
+        if (playerUuid == null) return null;
+        OfflinePlayer op = Bukkit.getOfflinePlayer(playerUuid);
+        String ip = (op.isOnline() && op.getPlayer() != null && op.getPlayer().getAddress() != null)
+                ? op.getPlayer().getAddress().getAddress().getHostAddress()
+                : playerDataManager.getLastKnownIp(playerUuid);
+        List<UUID> alts = (ip != null && !ip.isEmpty()) ? playerDataManager.getPlayersByIp(ip) : null;
+        return dataManager.getActivePunishment(playerUuid, ip, alts, MUTE_TYPES);
+    }
+
+    @Override
+    public Punishment getActiveMuteForPlayerOrAlt(String playerName) {
+        OfflinePlayer op = Bukkit.getOfflinePlayer(playerName);
+        return getActiveMuteForPlayerOrAlt(op.getUniqueId());
     }
 
     @Override
@@ -146,6 +180,16 @@ public class WapeBAPIImpl implements WapeBAPI {
     }
 
     @Override
+    public boolean isBannedForPlayerOrAlt(UUID playerUuid) {
+        return getActiveBanForPlayerOrAlt(playerUuid) != null;
+    }
+
+    @Override
+    public boolean isBannedForPlayerOrAlt(String playerName) {
+        return getActiveBanForPlayerOrAlt(playerName) != null;
+    }
+
+    @Override
     public boolean isMuted(UUID playerUuid) {
         return getActiveMute(playerUuid) != null;
     }
@@ -158,6 +202,16 @@ public class WapeBAPIImpl implements WapeBAPI {
     @Override
     public boolean isMutedByIp(String ipAddress) {
         return getActiveMuteByIp(ipAddress) != null;
+    }
+
+    @Override
+    public boolean isMutedForPlayerOrAlt(UUID playerUuid) {
+        return getActiveMuteForPlayerOrAlt(playerUuid) != null;
+    }
+
+    @Override
+    public boolean isMutedForPlayerOrAlt(String playerName) {
+        return getActiveMuteForPlayerOrAlt(playerName) != null;
     }
 
     @Override

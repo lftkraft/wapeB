@@ -52,12 +52,7 @@ public class CheckMuteCommand implements CommandExecutor {
             return true;
         }
 
-        String targetIp = null;
-        if (target.isOnline() && target.getPlayer() != null && target.getPlayer().getAddress() != null) {
-            targetIp = target.getPlayer().getAddress().getAddress().getHostAddress();
-        }
-
-        Punishment activeMute = dataManager.getActivePunishment(target.getUniqueId(), targetIp, muteTypes);
+        Punishment activeMute = plugin.getApi().getActiveMute(target.getUniqueId());
 
         if (activeMute == null || (activeMute.getDuration() != -1 && activeMute.getEnd() <= System.currentTimeMillis())) {
             sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.no-active-mute", ""), null));
