@@ -152,6 +152,81 @@ public class WapeBAPIImpl implements WapeBAPI {
     }
 
     @Override
+    public List<Punishment> getStaffHistory(String executorName) {
+        if (executorName == null || executorName.trim().isEmpty()) return Collections.emptyList();
+        return dataManager.getStaffHistory(executorName);
+    }
+
+    @Override
+    public boolean recordStaffAction(String staffName, String targetPlayer, Punishment.PunishmentType type, String reason, long duration) {
+        if (staffName == null || staffName.trim().isEmpty() || targetPlayer == null || targetPlayer.trim().isEmpty()) {
+            return false;
+        }
+        OfflinePlayer op = Bukkit.getOfflinePlayer(targetPlayer);
+        return recordStaffAction(staffName, op.getUniqueId(), targetPlayer, type, reason, duration);
+    }
+
+    @Override
+    public boolean recordStaffAction(String staffName, UUID targetUuid, String targetPlayer, Punishment.PunishmentType type, String reason, long duration) {
+        return recordStaffAction(staffName, staffName, targetUuid, targetPlayer, type, reason, duration);
+    }
+
+    @Override
+    public boolean recordStaffAction(String staffName, String executorDisplayName, String targetPlayer, Punishment.PunishmentType type, String reason, long duration) {
+        if (staffName == null || staffName.trim().isEmpty() || targetPlayer == null || targetPlayer.trim().isEmpty()) {
+            return false;
+        }
+        OfflinePlayer op = Bukkit.getOfflinePlayer(targetPlayer);
+        return recordStaffAction(staffName, executorDisplayName, op.getUniqueId(), targetPlayer, type, reason, duration);
+    }
+
+    private boolean recordStaffAction(String staffName, String executorDisplayName, UUID targetUuid, String targetPlayer, Punishment.PunishmentType type, String reason, long duration) {
+        if (staffName == null || staffName.trim().isEmpty() || targetPlayer == null || targetPlayer.trim().isEmpty()) {
+            return false;
+        }
+        String ip = (targetUuid != null) ? playerDataManager.getLastKnownIp(targetUuid) : null;
+        String finalExecutor = (executorDisplayName != null && !executorDisplayName.trim().isEmpty()) ? executorDisplayName : staffName;
+
+        Punishment p = new Punishment(
+                dataManager.getNextId(),
+                targetUuid,
+                targetPlayer,
+                ip,
+                type != null ? type : Punishment.PunishmentType.WARN,
+                reason != null ? reason : "N/A",
+                finalExecutor,
+                System.currentTimeMillis(),
+                duration
+        );
+        dataManager.savePunishment(p);
+        return true;
+    }
+
+    @Override
+    public boolean addStaffHistoryEntry(String staffName, Punishment punishment) {
+        if (staffName == null || staffName.trim().isEmpty() || punishment == null) {
+            return false;
+        }
+        String finalExecutor = (punishment.getExecutorName() != null && !punishment.getExecutorName().trim().isEmpty())
+                ? punishment.getExecutorName()
+                : staffName;
+
+        Punishment entry = new Punishment(
+                punishment.getId() <= 0 ? dataManager.getNextId() : punishment.getId(),
+                punishment.getPlayerUuid(),
+                punishment.getPlayerName(),
+                punishment.getIpAddress(),
+                punishment.getType(),
+                punishment.getReason(),
+                finalExecutor,
+                punishment.getDate() <= 0 ? System.currentTimeMillis() : punishment.getDate(),
+                punishment.getDuration()
+        );
+        dataManager.savePunishment(entry);
+        return true;
+    }
+
+    @Override
     public List<String> getAlts(UUID playerUuid) {
         String ip = playerDataManager.getLastKnownIp(playerUuid);
         if (ip == null) return Collections.emptyList();

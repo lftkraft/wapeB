@@ -35,6 +35,13 @@ public interface WapeBAPI {
     List<Punishment> getHistory(UUID playerUuid);
     List<Punishment> getHistory(String playerName);
 
+    List<Punishment> getStaffHistory(String executorName);
+
+    boolean recordStaffAction(String staffName, String targetPlayer, Punishment.PunishmentType type, String reason, long duration);
+    boolean recordStaffAction(String staffName, UUID targetUuid, String targetPlayer, Punishment.PunishmentType type, String reason, long duration);
+    boolean recordStaffAction(String staffName, String executorDisplayName, String targetPlayer, Punishment.PunishmentType type, String reason, long duration);
+    boolean addStaffHistoryEntry(String staffName, Punishment punishment);
+
     List<String> getAlts(UUID playerUuid);
     List<String> getAlts(String playerName);
 

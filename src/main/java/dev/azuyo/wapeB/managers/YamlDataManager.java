@@ -167,13 +167,21 @@ public class YamlDataManager implements DataManager {
     @Override
     public List<Punishment> getStaffHistory(String executorName) {
         List<Punishment> staffHistory = new ArrayList<>();
+        if (executorName == null || executorName.trim().isEmpty()) return staffHistory;
         ConfigurationSection section = punishmentsConfig.getConfigurationSection("punishments");
         if (section == null) return staffHistory;
 
-        for (String id : section.getKeys(false)) {
+        String lowerExec = executorName.toLowerCase();
+        List<String> keys = new ArrayList<>(section.getKeys(false));
+        for (int i = keys.size() - 1; i >= 0; i--) {
+            String id = keys.get(i);
             String path = "punishments." + id;
-            if (punishmentsConfig.getString(path + ".executorName").equalsIgnoreCase(executorName)) {
-                staffHistory.add(buildPunishment(path));
+            String exec = punishmentsConfig.getString(path + ".executorName");
+            if (exec != null) {
+                String eLower = exec.toLowerCase();
+                if (eLower.equals(lowerExec) || eLower.startsWith(lowerExec + " - ") || eLower.startsWith(lowerExec + " (")) {
+                    staffHistory.add(buildPunishment(path));
+                }
             }
         }
         return staffHistory;

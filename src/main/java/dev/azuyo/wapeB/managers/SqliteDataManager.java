@@ -204,9 +204,12 @@ public class SqliteDataManager implements DataManager {
     @Override
     public synchronized List<Punishment> getStaffHistory(String executorName) {
         List<Punishment> staffHistory = new ArrayList<>();
-        String sql = "SELECT * FROM punishments WHERE executorName = ?";
+        if (executorName == null || executorName.trim().isEmpty()) return staffHistory;
+        String sql = "SELECT * FROM punishments WHERE LOWER(executorName) = LOWER(?) OR LOWER(executorName) LIKE LOWER(? || ' - %') OR LOWER(executorName) LIKE LOWER(? || ' (%)') ORDER BY id DESC";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, executorName);
+            pstmt.setString(2, executorName);
+            pstmt.setString(3, executorName);
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
                 staffHistory.add(buildPunishmentFromResultSet(rs));

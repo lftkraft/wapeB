@@ -1,4 +1,4 @@
-# 📚 wapeB API - Complete Developer Documentation (v1.0.7)
+# 📚 wapeB API - Complete Developer Documentation (v1.0.8)
 
 This documentation provides a comprehensive guide to the **wapeB** Minecraft punishment system's **Java API**, **Bukkit Events**, **Dynamic Command Overrides**, and **HTTP REST Web API**.
 
@@ -9,13 +9,15 @@ This documentation provides a comprehensive guide to the **wapeB** Minecraft pun
 2. [Java API Access & Thread Safety](#2-java-api-access--thread-safety)
 3. [Detailed Java API Reference](#3-detailed-java-api-reference)
    - [A) Query Methods](#a-query-methods)
-   - [B) Execution Methods](#b-execution-methods)
-   - [C) Command Alias Methods](#c-command-alias-methods)
+   - [B) Staff History & Action Recording Methods](#b-staff-history--action-recording-methods)
+   - [C) Execution Methods](#c-execution-methods)
+   - [D) Command Alias Methods](#d-command-alias-methods)
 4. [Bukkit Custom Events](#4-bukkit-custom-events)
 5. [Integration Examples & Code Snippets](#5-integration-examples--code-snippets)
    - [Example 1: Custom Mute Command (GMute)](#example-1-custom-mute-command-gmute)
    - [Example 2: Discord Bot (SyncCord / DiscordSRV) Executor Override](#example-2-discord-bot-synccord--discordsrv-executor-override)
-   - [Example 3: Chat Listener & Mute Notice](#example-3-chat-listener--mute-notice)
+   - [Example 3: External Staff History Recording](#example-3-external-staff-history-recording)
+   - [Example 4: Chat Listener & Mute Notice](#example-4-chat-listener--mute-notice)
 6. [HTTP REST Web API Reference](#6-http-rest-web-api-reference)
 
 ---
@@ -34,7 +36,7 @@ repositories {
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.8-R0.1-SNAPSHOT")
-    compileOnly("com.github.lftkraft:wapeB:v1.0.7")
+    compileOnly("com.github.lftkraft:wapeB:v1.0.8")
 }
 ```
 
@@ -46,7 +48,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'com.github.lftkraft:wapeB:v1.0.7'
+    compileOnly 'com.github.lftkraft:wapeB:v1.0.8'
 }
 ```
 
@@ -63,7 +65,7 @@ dependencies {
     <dependency>
         <groupId>com.github.lftkraft</groupId>
         <artifactId>wapeB</artifactId>
-        <version>v1.0.7</version>
+        <version>v1.0.8</version>
         <scope>provided</scope>
     </dependency>
 </dependencies>
@@ -161,7 +163,36 @@ Returns a list of alternative account usernames linked by IP address.
 
 ---
 
-### B) Execution Methods
+### B) Staff History & Action Recording Methods
+
+External plugins can query a staff member's history or attribute new actions directly to a staff member's history.
+
+#### `getStaffHistory`
+Returns all punishments and actions recorded under a specific staff member's executor name.
+- `List<Punishment> getStaffHistory(String executorName)`
+
+#### `recordStaffAction`
+Records a punishment action directly into a staff member's history.
+```java
+// Record a 1-hour mute performed by 'ywxlol' against 'Pistike'
+boolean recorded = api.recordStaffAction(
+    "ywxlol",                          // Staff executor name
+    "Pistike",                         // Target player name
+    Punishment.PunishmentType.MUTE,    // Punishment type
+    "Chat Spam",                       // Reason
+    3600000L                           // Duration (ms)
+);
+```
+
+#### `addStaffHistoryEntry`
+Adds an existing or custom `Punishment` object directly to a staff member's history.
+```java
+boolean recorded = api.addStaffHistoryEntry("ywxlol", punishment);
+```
+
+---
+
+### C) Execution Methods
 
 All execution methods trigger wapeB's `PlayerPunishEvent`. If a listener cancels the event (`event.setCancelled(true)`), the method returns `false`.
 
