@@ -4,6 +4,8 @@ A powerful, modern Paper/Spigot punishment plugin featuring a comprehensive **Ja
 
 [![JitPack](https://jitpack.io/v/lftkraft/wapeB.svg)](https://jitpack.io/#lftkraft/wapeB)
 
+> 📖 **Magyar nyelvű részletes fejlesztői dokumentáció:** [API_DOCUMENTATION.md](file:///e:/pluginok/wapeB/API_DOCUMENTATION.md)
+
 ---
 
 ## 📌 Installation / Dependency Setup
