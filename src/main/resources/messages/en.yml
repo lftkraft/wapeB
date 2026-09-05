@@ -27,6 +27,8 @@ time-formats:
   minute: m
   second: s
 
+console-name: Console
+
 messages:
   no-permission: '%prefix% <red>You do not have permission to execute this command.'
   player-not-found: '%prefix% <red>Player not found.'
@@ -121,8 +123,10 @@ messages:
 
   warn:
     usage: '%prefix% <white>Usage: <red>/warn <player> <reason> [-s]'
+    default-reason: Warning issued.
     success: '%prefix% <green>Successfully warned <color:#C34338>%player%<green>.'
     player-warned: '%prefix% <yellow>You received a warning! Reason: <color:#C34338>%reason%'
+    target-notify: '%prefix% <yellow>You received a warning! Reason: <color:#C34338>%reason%'
     broadcast: '%prefix% <color:#C34338>%executor% <white>warned <color:#C34338>%player%<white>.'
     silent:
       prefix: '<gray>(Silent) '
@@ -185,7 +189,50 @@ messages:
       - '<white>GeoIP: <color:#C34338>%geoip%'
     footer: <dark_gray><st>----------------------------------------------------
 
+  alts:
+    usage: '%prefix% <white>Usage: <red>/alts <player>'
+    header: <dark_gray><st>------------------</st> <gradient:#FF00D9:#B300FF>Alts for %player% (%alt_count%)</gradient> <dark_gray><st>------------------
+    line: '<dark_gray>- %status% <color:#C34338>%alt_player%</color> %tags% <gray>(Last seen: %last_seen%)'
+    footer: <dark_gray><st>----------------------------------------------------
+    status:
+      banned: '<red><bold>[BANNED]</bold></red>'
+      muted: '<yellow><bold>[MUTED]</bold></yellow>'
+      online: '<green>[ONLINE]</green>'
+      clean: '<gray>[CLEAN]</gray>'
+    status-colors:
+      online: <green>[ONLINE]</green>
+      clean: <gray>[CLEAN]</gray>
+      banned: <red><bold>[BANNED]</bold></red>
+      muted: <yellow><bold>[MUTED]</bold></yellow>
+      none: <white>[CLEAN]</white>
+    tags:
+      exempt: '<gradient:#00FFCC:#0099FF>[đź›ˇď¸Ź EXEMPT]</gradient>'
+      cidr: '<dark_purple>[CIDR /24]</dark_purple>'
+    login-notification: '%prefix% <red>%player% <white>has logged in with alts! IP: <color:#C34338>%ip_address%'
+
+  altexempt:
+    usage: '%prefix% <white>Usage: <red>/altexempt <player> [add/remove]'
+    added: '%prefix% <green>Successfully exempted <color:#C34338>%player%<green> from alt-account checks.'
+    removed: '%prefix% <green>Successfully removed alt-account exemption for <color:#C34338>%player%<green>.'
+
+  freeze:
+    frozen-target: '%prefix% <yellow>You have been frozen by %executor%.'
+    unfrozen-target: '%prefix% <green>You have been unfrozen by %executor%.'
+
+  banlist:
+    usage: '%prefix% <white>Usage: <red>/banlist'
+    header: <dark_gray><st>------------------</st> <gradient:#FF00D9:#B300FF>Active Bans</gradient> <dark_gray><st>------------------
+    line: '<dark_gray>- <gray>%player% <white>(%type%) By: <gradient:#FF00D9:#B300FF>%executor% <white>Reason: <gradient:#EC00E3:#D900EC>%reason% <gray>(Expires: %end_date%)'
+    footer: <dark_gray><st>----------------------------------------------------
+
+  staffhistory:
+    usage: '%prefix% <white>Usage: <red>/staffhistory <staff_name>'
+    header: <dark_gray><st>------------------</st> <gradient:#FF00D9:#B300FF>%executor%'s History</gradient> <dark_gray><st>------------------
+    line: '<dark_gray>- <gray>[#%punishment_id%] <red>%type% <white>%player% <white>Reason: <gradient:#EC00E3:#D900EC>%reason% <gray>(%date%)'
+    footer: <dark_gray><st>----------------------------------------------------
+
 lockdown:
+  bypass-permission: wapeb.lockdown.bypass
   kick-reason:
     - <b><gradient:#FA0707:#F84A1D>COOLNETWORK</gradient></b>
     - <dark_gray><st>                           <reset>
@@ -202,6 +249,8 @@ lockdown:
 
 freeze:
   usage: '%prefix% <white>Usage: <red>/freeze <player> [reason]'
+  ban-reason: Logging out while frozen
+  ban-duration: 30d
   messages:
     frozen: '%prefix% <yellow>You have been frozen by %executor%.'
     unfrozen: '%prefix% <green>You have been unfrozen by %executor%.'
@@ -221,12 +270,20 @@ alts:
   header: <dark_gray><st>------------------</st> <gradient:#FF00D9:#B300FF>Alts for %player% (%alt_count%)</gradient> <dark_gray><st>------------------
   line: '<dark_gray>- %status% <color:#C34338>%alt_player%</color> %tags% <gray>(Last seen: %last_seen%)'
   footer: <dark_gray><st>----------------------------------------------------
+  status:
+    banned: '<red><bold>[BANNED]</bold></red>'
+    muted: '<yellow><bold>[MUTED]</bold></yellow>'
+    online: '<green>[ONLINE]</green>'
+    clean: '<gray>[CLEAN]</gray>'
   status-colors:
     online: <green>[ONLINE]</green>
     clean: <gray>[CLEAN]</gray>
     banned: <red><bold>[BANNED]</bold></red>
     muted: <yellow><bold>[MUTED]</bold></yellow>
     none: <white>[CLEAN]</white>
+  tags:
+    exempt: '<gradient:#00FFCC:#0099FF>[đź›ˇď¸Ź EXEMPT]</gradient>'
+    cidr: '<dark_purple>[CIDR /24]</dark_purple>'
   login-notification: '%prefix% <red>%player% <white>has logged in with alts! IP: <color:#C34338>%ip_address%'
 
 banlist:
@@ -255,3 +312,17 @@ sentinel:
     ai-muted: '%prefix% <red>You have been muted for %duration% by AI moderation: %reason%'
     auto-mute-broadcast: '%prefix% <gradient:#FF00D9:#B300FF>%player% <white>was muted by Sentinel for %duration%. Reason: %reason%'
     ai-mute-broadcast: '%prefix% <color:#C34338>%player% <white>was muted by Sentinel AI.'
+
+gui:
+  title: 'Punish: %player%'
+  items:
+    ban_1d:
+      material: 'REDSTONE'
+      name: '<red>1 Day Ban'
+      lore:
+        - '<gray>Ban player for 1 day'
+    ban_perm:
+      material: 'BEDROCK'
+      name: '<dark_red>Permanent Ban'
+      lore:
+        - '<gray>Permanently ban player'

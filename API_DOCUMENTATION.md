@@ -1,4 +1,4 @@
-# 📚 wapeB API - Complete Developer Documentation (v1.0.10)
+# 📚 wapeB API - Complete Developer Documentation (v1.0.11)
 
 This documentation provides a comprehensive guide to the **wapeB** Minecraft punishment system's **Java API**, **Bukkit Events**, **Dynamic Command Overrides**, and **HTTP REST Web API**.
 
@@ -36,7 +36,7 @@ repositories {
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.8-R0.1-SNAPSHOT")
-    compileOnly("com.github.lftkraft:wapeB:v1.0.10")
+    compileOnly("com.github.lftkraft:wapeB:v1.0.11")
 }
 ```
 
