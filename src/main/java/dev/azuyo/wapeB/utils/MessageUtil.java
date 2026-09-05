@@ -105,18 +105,27 @@ public class MessageUtil {
         if (punishment != null && punishment.getType() != null) {
             String typeName = WapeB.getInstance().getConfigManager().getString("punishment-types." + punishment.getType().name(), punishment.getType().name());
 
+            long remainingMillis;
+            if (punishment.getDuration() == -1 || punishment.getEnd() == -1) {
+                remainingMillis = -1;
+            } else {
+                remainingMillis = Math.max(0L, punishment.getEnd() - System.currentTimeMillis());
+            }
+
             result = result
                     .replace("%player%", punishment.getPlayerName() != null ? punishment.getPlayerName() : "N/A")
                     .replace("%executor%", punishment.getExecutorName() != null ? punishment.getExecutorName() : "N/A")
                     .replace("%reason%", punishment.getReason() != null ? punishment.getReason() : "N/A")
                     .replace("%type%", typeName)
                     .replace("%punishment_id%", String.valueOf(punishment.getId()))
-                    .replace("%duration%", TimeUtil.formatDuration(punishment.getDuration()))
+                    .replace("%duration%", TimeUtil.formatDuration(remainingMillis))
+                    .replace("%original_duration%", TimeUtil.formatDuration(punishment.getDuration()))
+                    .replace("%total_duration%", TimeUtil.formatDuration(punishment.getDuration()))
                     .replace("%date%", DATE_FORMAT.format(new Date(punishment.getDate())))
                     .replace("%end_date%", (punishment.getEnd() == -1) ? "Permanent" : DATE_FORMAT.format(new Date(punishment.getEnd())));
         } else {
             // Replace remaining standard placeholders with empty string if no punishment object
-            String[] placeholders = {"%player%", "%executor%", "%reason%", "%type%", "%punishment_id%", "%duration%", "%date%", "%end_date%"};
+            String[] placeholders = {"%player%", "%executor%", "%reason%", "%type%", "%punishment_id%", "%duration%", "%original_duration%", "%total_duration%", "%date%", "%end_date%"};
             for (String p : placeholders) {
                 if (result.contains(p)) result = result.replace(p, "");
             }

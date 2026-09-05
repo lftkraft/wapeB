@@ -68,13 +68,19 @@ public class WebhookUtil {
                 
                 String typeDisplayName = config.getString("punishment-types." + punishment.getType().name(), punishment.getType().name());
 
+                long remainingMillis = (punishment.getDuration() == -1 || punishment.getEnd() == -1)
+                        ? -1
+                        : Math.max(0L, punishment.getEnd() - System.currentTimeMillis());
+
                 // Replace placeholders in the description
                 description = description
                         .replace("%type%", typeDisplayName)
                         .replace("%player%", punishment.getPlayerName() != null ? punishment.getPlayerName() : "N/A")
                         .replace("%executor%", punishment.getExecutorName() != null ? punishment.getExecutorName() : "N/A")
                         .replace("%reason%", punishment.getReason() != null ? punishment.getReason() : "N/A")
-                        .replace("%duration%", TimeUtil.formatDuration(punishment.getDuration()))
+                        .replace("%duration%", TimeUtil.formatDuration(remainingMillis))
+                        .replace("%original_duration%", TimeUtil.formatDuration(punishment.getDuration()))
+                        .replace("%total_duration%", TimeUtil.formatDuration(punishment.getDuration()))
                         .replace("%punishment_id%", String.valueOf(punishment.getId()));
 
                 embed.addProperty("title", title);
