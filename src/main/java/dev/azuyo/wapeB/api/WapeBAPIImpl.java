@@ -199,8 +199,13 @@ public class WapeBAPIImpl implements WapeBAPI {
             type = (duration == -1) ? Punishment.PunishmentType.BAN : Punishment.PunishmentType.TEMPBAN;
         }
 
+        plugin.getLogger().info("[wapeB Debug] PlayerPunishEvent FIRED for " + targetName + " | Original Executor: '" + executor + "' | Type: " + type);
+
         PlayerPunishEvent event = new PlayerPunishEvent(target, targetName, targetIp, type, reason, executor, duration, silent);
         Bukkit.getPluginManager().callEvent(event);
+
+        plugin.getLogger().info("[wapeB Debug] PlayerPunishEvent PROCESSED for " + targetName + " | Final Executor: '" + event.getExecutor() + "' | Cancelled: " + event.isCancelled());
+
         if (event.isCancelled()) return false;
 
         // Deactivate existing ban
@@ -250,8 +255,12 @@ public class WapeBAPIImpl implements WapeBAPI {
             type = (duration == -1) ? Punishment.PunishmentType.MUTE : Punishment.PunishmentType.TEMPMUTE;
         }
 
+        plugin.getLogger().info("[wapeB Debug] PlayerPunishEvent FIRED for " + targetName + " | Original Executor: '" + executor + "' | Type: " + type);
+
         PlayerPunishEvent event = new PlayerPunishEvent(target, targetName, targetIp, type, reason, executor, duration, silent);
         Bukkit.getPluginManager().callEvent(event);
+
+        plugin.getLogger().info("[wapeB Debug] PlayerPunishEvent PROCESSED for " + targetName + " | Final Executor: '" + event.getExecutor() + "' | Cancelled: " + event.isCancelled());
         if (event.isCancelled()) return false;
 
         Punishment existingMute = dataManager.getActivePunishment(target, targetIp, MUTE_TYPES);
@@ -287,8 +296,13 @@ public class WapeBAPIImpl implements WapeBAPI {
         OfflinePlayer op = Bukkit.getOfflinePlayer(target);
         String targetName = op.getName() != null ? op.getName() : target.toString();
 
+        plugin.getLogger().info("[wapeB Debug] PlayerPunishEvent FIRED for " + targetName + " | Original Executor: '" + executor + "' | Type: WARN");
+
         PlayerPunishEvent event = new PlayerPunishEvent(target, targetName, null, Punishment.PunishmentType.WARN, reason, executor, -1, silent);
         Bukkit.getPluginManager().callEvent(event);
+
+        plugin.getLogger().info("[wapeB Debug] PlayerPunishEvent PROCESSED for " + targetName + " | Final Executor: '" + event.getExecutor() + "' | Cancelled: " + event.isCancelled());
+
         if (event.isCancelled()) return false;
 
         Punishment p = new Punishment(dataManager.getNextId(), target, targetName, Punishment.PunishmentType.WARN, event.getReason(), event.getExecutor(), System.currentTimeMillis(), -1);
@@ -322,8 +336,14 @@ public class WapeBAPIImpl implements WapeBAPI {
         if (!op.isOnline()) return false;
 
         Player onlineTarget = (Player) op;
+
+        plugin.getLogger().info("[wapeB Debug] PlayerPunishEvent FIRED for " + onlineTarget.getName() + " | Original Executor: '" + executor + "' | Type: KICK");
+
         PlayerPunishEvent event = new PlayerPunishEvent(target, onlineTarget.getName(), null, Punishment.PunishmentType.KICK, reason, executor, -1, silent);
         Bukkit.getPluginManager().callEvent(event);
+
+        plugin.getLogger().info("[wapeB Debug] PlayerPunishEvent PROCESSED for " + onlineTarget.getName() + " | Final Executor: '" + event.getExecutor() + "' | Cancelled: " + event.isCancelled());
+
         if (event.isCancelled()) return false;
 
         Punishment p = new Punishment(dataManager.getNextId(), target, onlineTarget.getName(), Punishment.PunishmentType.KICK, event.getReason(), event.getExecutor(), System.currentTimeMillis(), -1);
