@@ -16,7 +16,7 @@ public class PlayerPunishEvent extends Event implements Cancellable {
     private final String ipAddress;
     private final Punishment.PunishmentType type;
     private String reason;
-    private final String executor;
+    private String executor;
     private long duration;
     private boolean silent;
     private boolean cancelled;
@@ -59,6 +59,10 @@ public class PlayerPunishEvent extends Event implements Cancellable {
 
     public String getExecutor() {
         return executor;
+    }
+
+    public void setExecutor(String executor) {
+        this.executor = executor;
     }
 
     public long getDuration() {

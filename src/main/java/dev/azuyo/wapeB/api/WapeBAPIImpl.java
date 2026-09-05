@@ -210,7 +210,7 @@ public class WapeBAPIImpl implements WapeBAPI {
             dataManager.savePunishment(existingBan);
         }
 
-        Punishment p = new Punishment(dataManager.getNextId(), target, targetName, targetIp, type, event.getReason(), executor, System.currentTimeMillis(), event.getDuration());
+        Punishment p = new Punishment(dataManager.getNextId(), target, targetName, targetIp, type, event.getReason(), event.getExecutor(), System.currentTimeMillis(), event.getDuration());
         dataManager.savePunishment(p);
         WebhookUtil.sendPunishmentWebhook(p);
 
@@ -260,7 +260,7 @@ public class WapeBAPIImpl implements WapeBAPI {
             dataManager.savePunishment(existingMute);
         }
 
-        Punishment p = new Punishment(dataManager.getNextId(), target, targetName, targetIp, type, event.getReason(), executor, System.currentTimeMillis(), event.getDuration());
+        Punishment p = new Punishment(dataManager.getNextId(), target, targetName, targetIp, type, event.getReason(), event.getExecutor(), System.currentTimeMillis(), event.getDuration());
         dataManager.savePunishment(p);
         WebhookUtil.sendPunishmentWebhook(p);
 
@@ -291,7 +291,7 @@ public class WapeBAPIImpl implements WapeBAPI {
         Bukkit.getPluginManager().callEvent(event);
         if (event.isCancelled()) return false;
 
-        Punishment p = new Punishment(dataManager.getNextId(), target, targetName, Punishment.PunishmentType.WARN, event.getReason(), executor, System.currentTimeMillis(), -1);
+        Punishment p = new Punishment(dataManager.getNextId(), target, targetName, Punishment.PunishmentType.WARN, event.getReason(), event.getExecutor(), System.currentTimeMillis(), -1);
         dataManager.savePunishment(p);
         WebhookUtil.sendPunishmentWebhook(p);
 
@@ -326,7 +326,7 @@ public class WapeBAPIImpl implements WapeBAPI {
         Bukkit.getPluginManager().callEvent(event);
         if (event.isCancelled()) return false;
 
-        Punishment p = new Punishment(dataManager.getNextId(), target, onlineTarget.getName(), Punishment.PunishmentType.KICK, event.getReason(), executor, System.currentTimeMillis(), -1);
+        Punishment p = new Punishment(dataManager.getNextId(), target, onlineTarget.getName(), Punishment.PunishmentType.KICK, event.getReason(), event.getExecutor(), System.currentTimeMillis(), -1);
         p.setActive(false);
         dataManager.savePunishment(p);
         WebhookUtil.sendPunishmentWebhook(p);
