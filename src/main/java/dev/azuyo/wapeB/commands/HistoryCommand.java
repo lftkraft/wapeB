@@ -40,8 +40,11 @@ public class HistoryCommand implements CommandExecutor {
             return true;
         }
 
-        OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
-        if (!target.hasPlayedBefore() && !target.isOnline()) {
+        String targetNameInput = args[0];
+        OfflinePlayer target = Bukkit.getOfflinePlayer(targetNameInput);
+        List<Punishment> history = plugin.getApi().getHistory(targetNameInput);
+
+        if (history.isEmpty() && !target.hasPlayedBefore() && !target.isOnline()) {
             sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.player-not-found", ""), null));
             return true;
         }
@@ -53,11 +56,11 @@ public class HistoryCommand implements CommandExecutor {
             } catch (NumberFormatException ignored) {}
         }
 
-        List<Punishment> history = dataManager.getHistory(target.getUniqueId());
         Collections.reverse(history); // Show newest first
 
         if (history.isEmpty()) {
-            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.no-history", ""), null, Collections.singletonMap("%player%", target.getName())));
+            String targetDisplayName = target.getName() != null ? target.getName() : targetNameInput;
+            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.no-history", ""), null, Collections.singletonMap("%player%", targetDisplayName)));
             return true;
         }
 

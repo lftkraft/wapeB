@@ -252,12 +252,17 @@ public class SqliteDataManager implements DataManager {
 
     @Override
     public synchronized Punishment getActivePunishment(UUID playerUuid, String ipAddress, List<Punishment.PunishmentType> types) {
-        return getActivePunishment(playerUuid, ipAddress, null, types);
+        return getActivePunishment(playerUuid, null, ipAddress, null, types);
     }
 
     @Override
     public synchronized Punishment getActivePunishment(UUID playerUuid, String ipAddress, List<UUID> altUuids, List<Punishment.PunishmentType> types) {
-        if (playerUuid == null && (ipAddress == null || ipAddress.isEmpty()) && (altUuids == null || altUuids.isEmpty())) {
+        return getActivePunishment(playerUuid, null, ipAddress, altUuids, types);
+    }
+
+    @Override
+    public synchronized Punishment getActivePunishment(UUID playerUuid, String playerName, String ipAddress, List<UUID> altUuids, List<Punishment.PunishmentType> types) {
+        if (playerUuid == null && (playerName == null || playerName.isEmpty()) && (ipAddress == null || ipAddress.isEmpty()) && (altUuids == null || altUuids.isEmpty())) {
             return null;
         }
 
@@ -265,6 +270,9 @@ public class SqliteDataManager implements DataManager {
         List<String> conditions = new ArrayList<>();
         if (playerUuid != null) {
             conditions.add("playerUuid = ?");
+        }
+        if (playerName != null && !playerName.isEmpty()) {
+            conditions.add("LOWER(playerName) = LOWER(?)");
         }
         if (ipAddress != null && !ipAddress.isEmpty()) {
             conditions.add("ipAddress = ?");
@@ -283,6 +291,9 @@ public class SqliteDataManager implements DataManager {
             int paramIndex = 1;
             if (playerUuid != null) {
                 pstmt.setString(paramIndex++, playerUuid.toString());
+            }
+            if (playerName != null && !playerName.isEmpty()) {
+                pstmt.setString(paramIndex++, playerName);
             }
             if (ipAddress != null && !ipAddress.isEmpty()) {
                 pstmt.setString(paramIndex++, ipAddress);

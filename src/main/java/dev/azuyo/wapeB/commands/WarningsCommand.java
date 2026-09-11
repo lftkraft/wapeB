@@ -38,16 +38,18 @@ public class WarningsCommand implements CommandExecutor {
             return true;
         }
 
-        OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
-        if (!target.hasPlayedBefore() && !target.isOnline()) {
+        String targetNameInput = args[0];
+        OfflinePlayer target = Bukkit.getOfflinePlayer(targetNameInput);
+        List<Punishment> warnings = plugin.getApi().getWarnings(targetNameInput);
+
+        if (warnings.isEmpty() && !target.hasPlayedBefore() && !target.isOnline()) {
             sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.player-not-found", ""), null));
             return true;
         }
 
-        List<Punishment> warnings = dataManager.getWarnings(target.getUniqueId());
-
         if (warnings.isEmpty()) {
-            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.no-warnings", ""), null, Collections.singletonMap("%player%", target.getName())));
+            String targetDisplayName = target.getName() != null ? target.getName() : targetNameInput;
+            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.no-warnings", ""), null, Collections.singletonMap("%player%", targetDisplayName)));
             return true;
         }
 

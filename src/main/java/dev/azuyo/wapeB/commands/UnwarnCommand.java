@@ -38,11 +38,8 @@ public class UnwarnCommand implements CommandExecutor {
             return true;
         }
 
-        OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
-        if (!target.hasPlayedBefore() && !target.isOnline()) {
-            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.player-not-found", "&cPlayer not found."), null));
-            return true;
-        }
+        String targetNameInput = args[0];
+        OfflinePlayer target = Bukkit.getOfflinePlayer(targetNameInput);
 
         int punishmentId;
         try {
@@ -54,9 +51,13 @@ public class UnwarnCommand implements CommandExecutor {
 
         Punishment punishment = dataManager.getPunishment(punishmentId);
 
-        if (punishment == null || !punishment.getPlayerUuid().equals(target.getUniqueId()) || punishment.getType() != Punishment.PunishmentType.WARN) {
-            String notFoundMsg = configManager.getString("messages.unwarn.not-found", "%prefix% <red>Warning with ID #%punishment_id% not found for this player.");
-            sender.sendMessage(MessageUtil.createComponent(notFoundMsg, null, Collections.singletonMap("%punishment_id%", String.valueOf(punishmentId))));
+        boolean matchesPlayer = punishment != null && (
+            (punishment.getPlayerUuid() != null && punishment.getPlayerUuid().equals(target.getUniqueId())) ||
+            (punishment.getPlayerName() != null && punishment.getPlayerName().equalsIgnoreCase(targetNameInput))
+        );
+
+        if (punishment == null || !matchesPlayer || punishment.getType() != Punishment.PunishmentType.WARN) {
+            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.unwarn.not-found", "%prefix% <red>Warning with ID #%punishment_id% not found for this player."), null, Collections.singletonMap("%punishment_id%", String.valueOf(punishmentId))));
             return true;
         }
 

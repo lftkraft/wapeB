@@ -25,6 +25,8 @@ public interface DataManager {
 
     Punishment getActivePunishment(UUID playerUuid, String ipAddress, List<UUID> altUuids, List<Punishment.PunishmentType> types);
 
+    Punishment getActivePunishment(UUID playerUuid, String playerName, String ipAddress, List<UUID> altUuids, List<Punishment.PunishmentType> types);
+
     void removePunishment(int id);
 
     int getNextId();

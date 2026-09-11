@@ -591,8 +591,27 @@ public class WapeBAPIImpl implements WapeBAPI {
 
     @Override
     public boolean unbanPlayer(UUID target, String reason, String executor) {
+        if (target == null) return false;
         String ip = playerDataManager.getLastKnownIp(target);
-        Punishment activeBan = dataManager.getActivePunishment(target, ip, BAN_TYPES);
+        OfflinePlayer op = Bukkit.getOfflinePlayer(target);
+        String name = op != null ? op.getName() : null;
+        List<UUID> alts = (ip != null && !ip.isEmpty()) ? playerDataManager.getPlayersByIp(ip) : null;
+        Punishment activeBan = dataManager.getActivePunishment(target, name, ip, alts, BAN_TYPES);
+        return unbanPunishment(activeBan, reason, executor);
+    }
+
+    @Override
+    public boolean unbanPlayer(String targetName, String reason, String executor) {
+        if (targetName == null || targetName.isEmpty()) return false;
+        OfflinePlayer op = Bukkit.getOfflinePlayer(targetName);
+        UUID targetUuid = op != null ? op.getUniqueId() : null;
+        String ip = targetUuid != null ? playerDataManager.getLastKnownIp(targetUuid) : null;
+        List<UUID> alts = (ip != null && !ip.isEmpty()) ? playerDataManager.getPlayersByIp(ip) : null;
+        Punishment activeBan = dataManager.getActivePunishment(targetUuid, targetName, ip, alts, BAN_TYPES);
+        return unbanPunishment(activeBan, reason, executor);
+    }
+
+    private boolean unbanPunishment(Punishment activeBan, String reason, String executor) {
         if (activeBan == null) return false;
 
         PlayerUnpunishEvent event = new PlayerUnpunishEvent(activeBan, executor);
@@ -605,7 +624,7 @@ public class WapeBAPIImpl implements WapeBAPI {
         Bukkit.getScheduler().runTask(plugin, () -> {
             String broadcastMsg = configManager.getString("messages.unban.broadcast", "%prefix% %executor% unbanned %player%.");
             if (!broadcastMsg.isEmpty()) {
-                Punishment temp = new Punishment(activeBan.getId(), activeBan.getPlayerUuid(), activeBan.getPlayerName(), activeBan.getType(), reason, executor, activeBan.getDate(), activeBan.getDuration());
+                Punishment temp = new Punishment(activeBan.getId(), activeBan.getPlayerUuid(), activeBan.getPlayerName(), activeBan.getIpAddress(), activeBan.getType(), reason, executor, activeBan.getDate(), activeBan.getDuration());
                 Bukkit.broadcast(MessageUtil.createComponent(broadcastMsg, temp));
             }
         });
@@ -614,15 +633,28 @@ public class WapeBAPIImpl implements WapeBAPI {
     }
 
     @Override
-    public boolean unbanPlayer(String targetName, String reason, String executor) {
-        OfflinePlayer op = Bukkit.getOfflinePlayer(targetName);
-        return unbanPlayer(op.getUniqueId(), reason, executor);
+    public boolean unmutePlayer(UUID target, String reason, String executor) {
+        if (target == null) return false;
+        String ip = playerDataManager.getLastKnownIp(target);
+        OfflinePlayer op = Bukkit.getOfflinePlayer(target);
+        String name = op != null ? op.getName() : null;
+        List<UUID> alts = (ip != null && !ip.isEmpty()) ? playerDataManager.getPlayersByIp(ip) : null;
+        Punishment activeMute = dataManager.getActivePunishment(target, name, ip, alts, MUTE_TYPES);
+        return unmutePunishment(activeMute, reason, executor);
     }
 
     @Override
-    public boolean unmutePlayer(UUID target, String reason, String executor) {
-        String ip = playerDataManager.getLastKnownIp(target);
-        Punishment activeMute = dataManager.getActivePunishment(target, ip, MUTE_TYPES);
+    public boolean unmutePlayer(String targetName, String reason, String executor) {
+        if (targetName == null || targetName.isEmpty()) return false;
+        OfflinePlayer op = Bukkit.getOfflinePlayer(targetName);
+        UUID targetUuid = op != null ? op.getUniqueId() : null;
+        String ip = targetUuid != null ? playerDataManager.getLastKnownIp(targetUuid) : null;
+        List<UUID> alts = (ip != null && !ip.isEmpty()) ? playerDataManager.getPlayersByIp(ip) : null;
+        Punishment activeMute = dataManager.getActivePunishment(targetUuid, targetName, ip, alts, MUTE_TYPES);
+        return unmutePunishment(activeMute, reason, executor);
+    }
+
+    private boolean unmutePunishment(Punishment activeMute, String reason, String executor) {
         if (activeMute == null) return false;
 
         PlayerUnpunishEvent event = new PlayerUnpunishEvent(activeMute, executor);
@@ -635,18 +667,12 @@ public class WapeBAPIImpl implements WapeBAPI {
         Bukkit.getScheduler().runTask(plugin, () -> {
             String broadcastMsg = configManager.getString("messages.unmute.broadcast", "%prefix% %executor% unmuted %player%.");
             if (!broadcastMsg.isEmpty()) {
-                Punishment temp = new Punishment(activeMute.getId(), activeMute.getPlayerUuid(), activeMute.getPlayerName(), activeMute.getType(), reason, executor, activeMute.getDate(), activeMute.getDuration());
+                Punishment temp = new Punishment(activeMute.getId(), activeMute.getPlayerUuid(), activeMute.getPlayerName(), activeMute.getIpAddress(), activeMute.getType(), reason, executor, activeMute.getDate(), activeMute.getDuration());
                 Bukkit.broadcast(MessageUtil.createComponent(broadcastMsg, temp));
             }
         });
 
         return true;
-    }
-
-    @Override
-    public boolean unmutePlayer(String targetName, String reason, String executor) {
-        OfflinePlayer op = Bukkit.getOfflinePlayer(targetName);
-        return unmutePlayer(op.getUniqueId(), reason, executor);
     }
 
     @Override

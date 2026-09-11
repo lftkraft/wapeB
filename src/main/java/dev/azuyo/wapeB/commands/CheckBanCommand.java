@@ -46,13 +46,14 @@ public class CheckBanCommand implements CommandExecutor {
             return true;
         }
 
-        OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
-        if (!target.hasPlayedBefore() && !target.isOnline()) {
+        String targetNameInput = args[0];
+        Punishment activeBan = plugin.getApi().getActiveBan(targetNameInput);
+        OfflinePlayer target = Bukkit.getOfflinePlayer(targetNameInput);
+
+        if (activeBan == null && !target.hasPlayedBefore() && !target.isOnline()) {
             sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.player-not-found", ""), null));
             return true;
         }
-
-        Punishment activeBan = plugin.getApi().getActiveBan(target.getUniqueId());
 
         if (activeBan == null || (activeBan.getDuration() != -1 && activeBan.getEnd() <= System.currentTimeMillis())) {
             sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.no-active-ban", ""), null));

@@ -70,8 +70,11 @@ public class TimeUtil {
         if (millis == -1) {
             return displayPermanent;
         }
+        if (millis <= 0) {
+            return 0 + displaySecond;
+        }
 
-        long seconds = millis / 1000;
+        long seconds = (millis + 999) / 1000;
         long minutes = seconds / 60;
         long hours = minutes / 60;
         long days = hours / 24;
@@ -90,8 +93,11 @@ public class TimeUtil {
         if (millis == -1) {
             return displayPermanent;
         }
+        if (millis <= 0) {
+            return 0 + displaySecond;
+        }
 
-        long totalSeconds = Math.max(0, millis / 1000);
+        long totalSeconds = (millis + 999) / 1000;
         long years = totalSeconds / (365 * 24 * 3600);
         long days = (totalSeconds % (365 * 24 * 3600)) / (24 * 3600);
         long hours = (totalSeconds % (24 * 3600)) / 3600;

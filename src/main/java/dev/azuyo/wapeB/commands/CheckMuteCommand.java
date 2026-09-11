@@ -46,13 +46,14 @@ public class CheckMuteCommand implements CommandExecutor {
             return true;
         }
 
-        OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
-        if (!target.hasPlayedBefore() && !target.isOnline()) {
+        String targetNameInput = args[0];
+        Punishment activeMute = plugin.getApi().getActiveMute(targetNameInput);
+        OfflinePlayer target = Bukkit.getOfflinePlayer(targetNameInput);
+
+        if (activeMute == null && !target.hasPlayedBefore() && !target.isOnline()) {
             sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.player-not-found", ""), null));
             return true;
         }
-
-        Punishment activeMute = plugin.getApi().getActiveMute(target.getUniqueId());
 
         if (activeMute == null || (activeMute.getDuration() != -1 && activeMute.getEnd() <= System.currentTimeMillis())) {
             sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.no-active-mute", ""), null));

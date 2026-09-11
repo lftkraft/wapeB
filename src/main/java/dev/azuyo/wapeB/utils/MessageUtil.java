@@ -110,6 +110,7 @@ public class MessageUtil {
             String detailedOriginalStr = TimeUtil.formatDetailedDuration(punishment.getDuration());
 
             result = result
+                    .replace("%time%", remainingStr)
                     .replace("%duration%", remainingStr)
                     .replace("%remaining%", remainingStr)
                     .replace("%remaining_duration%", remainingStr)
@@ -141,7 +142,7 @@ public class MessageUtil {
             // Replace remaining standard placeholders with empty string if no punishment object
             String[] placeholders = {
                     "%player%", "%executor%", "%reason%", "%type%", "%punishment_id%",
-                    "%duration%", "%remaining%", "%remaining_duration%", "%time_left%", "%expires_in%",
+                    "%time%", "%duration%", "%remaining%", "%remaining_duration%", "%time_left%", "%expires_in%",
                     "%detailed_duration%", "%detailed_remaining%",
                     "%original_duration%", "%total_duration%", "%detailed_original_duration%",
                     "%date%", "%end_date%"

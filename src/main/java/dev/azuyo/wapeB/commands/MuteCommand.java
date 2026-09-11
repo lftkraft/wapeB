@@ -86,16 +86,11 @@ public class MuteCommand implements CommandExecutor {
         }
 
         OfflinePlayer target = Bukkit.getOfflinePlayer(targetName);
-        if (!target.hasPlayedBefore() && !target.isOnline()) {
-            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.player-not-found", "&cPlayer not found."), null));
-            return true;
-        }
-
         String executorName = (sender instanceof Player) ? sender.getName() : configManager.getString("console-name", "Console");
 
-        boolean success = plugin.getApi().mutePlayer(target.getUniqueId(), reason, executorName, duration, silent, ipMute);
+        boolean success = plugin.getApi().mutePlayer(targetName, reason, executorName, duration, silent, ipMute);
         if (success) {
-            Punishment mute = plugin.getApi().getActiveMute(target.getUniqueId());
+            Punishment mute = plugin.getApi().getActiveMute(targetName);
             sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.mute.success", "&aSuccessfully muted %player%."), mute));
         }
 

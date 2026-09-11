@@ -78,6 +78,7 @@ public class WebhookUtil {
                         .replace("%player%", punishment.getPlayerName() != null ? punishment.getPlayerName() : "N/A")
                         .replace("%executor%", punishment.getExecutorName() != null ? punishment.getExecutorName() : "N/A")
                         .replace("%reason%", punishment.getReason() != null ? punishment.getReason() : "N/A")
+                        .replace("%time%", TimeUtil.formatDuration(remainingMillis))
                         .replace("%duration%", TimeUtil.formatDuration(remainingMillis))
                         .replace("%original_duration%", TimeUtil.formatDuration(punishment.getDuration()))
                         .replace("%total_duration%", TimeUtil.formatDuration(punishment.getDuration()))

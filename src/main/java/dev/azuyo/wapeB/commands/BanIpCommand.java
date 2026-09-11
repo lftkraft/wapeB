@@ -50,16 +50,15 @@ public class BanIpCommand implements CommandExecutor {
             targetIp = dev.azuyo.wapeB.utils.IPUtil.normalizeCidr(targetIdentifier);
         } else {
             targetPlayer = Bukkit.getOfflinePlayer(targetIdentifier);
-            if (!targetPlayer.hasPlayedBefore() && !targetPlayer.isOnline()) {
-                sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.player-not-found", "&cPlayer not found."), null));
-                return true;
-            }
-
             finalTargetName = targetPlayer.getName() != null ? targetPlayer.getName() : targetIdentifier;
             if (targetPlayer.isOnline()) {
                 targetIp = targetPlayer.getPlayer().getAddress().getAddress().getHostAddress();
             } else {
                 targetIp = playerDataManager.getLastKnownIp(targetPlayer.getUniqueId());
+            }
+            if (targetIp == null && !targetPlayer.hasPlayedBefore() && !targetPlayer.isOnline()) {
+                sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.player-not-found", "&cPlayer not found."), null));
+                return true;
             }
         }
         

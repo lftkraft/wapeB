@@ -213,11 +213,16 @@ public class YamlDataManager implements DataManager {
 
     @Override
     public Punishment getActivePunishment(UUID playerUuid, String ipAddress, List<Punishment.PunishmentType> types) {
-        return getActivePunishment(playerUuid, ipAddress, null, types);
+        return getActivePunishment(playerUuid, null, ipAddress, null, types);
     }
 
     @Override
     public Punishment getActivePunishment(UUID playerUuid, String ipAddress, List<UUID> altUuids, List<Punishment.PunishmentType> types) {
+        return getActivePunishment(playerUuid, null, ipAddress, altUuids, types);
+    }
+
+    @Override
+    public Punishment getActivePunishment(UUID playerUuid, String playerName, String ipAddress, List<UUID> altUuids, List<Punishment.PunishmentType> types) {
         ConfigurationSection section = punishmentsConfig.getConfigurationSection("punishments");
         if (section == null) return null;
 
@@ -233,13 +238,15 @@ public class YamlDataManager implements DataManager {
                 if (types.contains(storedType)) {
                     String storedUuidStr = punishmentsConfig.getString(path + ".playerUuid");
                     UUID storedUuid = storedUuidStr != null ? UUID.fromString(storedUuidStr) : null;
+                    String storedName = punishmentsConfig.getString(path + ".playerName");
                     String storedIp = punishmentsConfig.getString(path + ".ipAddress");
 
                     boolean uuidMatch = playerUuid != null && playerUuid.equals(storedUuid);
+                    boolean nameMatch = playerName != null && !playerName.isEmpty() && storedName != null && storedName.equalsIgnoreCase(playerName);
                     boolean ipMatch = ipAddress != null && !ipAddress.isEmpty() && storedIp != null && (ipAddress.equals(storedIp) || dev.azuyo.wapeB.utils.IPUtil.isIpInCidr(ipAddress, storedIp));
                     boolean altMatch = altUuids != null && storedUuid != null && altUuids.contains(storedUuid);
 
-                    if (uuidMatch || ipMatch || altMatch) {
+                    if (uuidMatch || nameMatch || ipMatch || altMatch) {
                         Punishment p = buildPunishment(path);
                         if (p.getDuration() == -1 || p.getEnd() > System.currentTimeMillis()) {
                             return p;

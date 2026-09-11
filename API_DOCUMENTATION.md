@@ -1,6 +1,6 @@
-# 📚 wapeB API - Complete Developer Documentation (v1.0.11)
+# 📚 wapeB API - Complete Developer Documentation (v1.0.12)
 
-This documentation provides a comprehensive guide to the **wapeB** Minecraft punishment system's **Java API**, **Bukkit Events**, **Dynamic Command Overrides**, and **HTTP REST Web API**.
+This documentation provides a comprehensive guide to the **wapeB** Minecraft punishment system's **Java API**, **Bukkit Events**, **Dynamic Command Overrides**, **Message Placeholders**, and **HTTP REST Web API**.
 
 ---
 
@@ -12,6 +12,8 @@ This documentation provides a comprehensive guide to the **wapeB** Minecraft pun
    - [B) Staff History & Action Recording Methods](#b-staff-history--action-recording-methods)
    - [C) Execution Methods](#c-execution-methods)
    - [D) Command Alias Methods](#d-command-alias-methods)
+   - [E) Message Placeholders & Duration Formatting](#e-message-placeholders--duration-formatting)
+   - [F) Smart Player & Active Punishment Lookup](#f-smart-player--active-punishment-lookup)
 4. [Bukkit Custom Events](#4-bukkit-custom-events)
 5. [Integration Examples & Code Snippets](#5-integration-examples--code-snippets)
    - [Example 1: Custom Mute Command (GMute)](#example-1-custom-mute-command-gmute)
@@ -36,7 +38,7 @@ repositories {
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.8-R0.1-SNAPSHOT")
-    compileOnly("com.github.lftkraft:wapeB:v1.0.11")
+    compileOnly("com.github.lftkraft:wapeB:v1.0.12")
 }
 ```
 
@@ -48,7 +50,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'com.github.lftkraft:wapeB:v1.0.8'
+    compileOnly 'com.github.lftkraft:wapeB:v1.0.12'
 }
 ```
 
@@ -65,7 +67,7 @@ dependencies {
     <dependency>
         <groupId>com.github.lftkraft</groupId>
         <artifactId>wapeB</artifactId>
-        <version>v1.0.8</version>
+        <version>v1.0.12</version>
         <scope>provided</scope>
     </dependency>
 </dependencies>
@@ -331,6 +333,38 @@ api.registerCommandAlias("ban", "kitiltas");
 // Get registered custom aliases
 List<String> aliases = api.getCommandAliases("ban");
 ```
+
+---
+
+### G) Message Placeholders & Duration Formatting
+
+wapeB provides rich placeholder replacement across all in-game messages, kick screens, broadcast messages, and Discord webhooks.
+
+#### Supported Placeholders:
+- `%time%` / `%duration%` / `%remaining%` / `%remaining_duration%` / `%time_left%` / `%expires_in%`: Returns formatted remaining time until expiration (e.g. `14d`, `2h 15m`).
+- `%detailed_duration%` / `%detailed_remaining%`: Returns detailed remaining time (e.g. `14 days 2 hours`).
+- `%original_duration%` / `%total_duration%`: Returns original assigned punishment duration.
+- `%detailed_original_duration%`: Returns detailed original assigned duration.
+- `%player%`: Target player username.
+- `%executor%`: Staff member / executor name.
+- `%reason%`: Punishment reason.
+- `%type%`: Display name of the punishment type (e.g. `Ban`, `Temp-Mute`).
+- `%punishment_id%`: Numeric ID of the punishment record.
+- `%date%`: Formatted issuance date (`yyyy-MM-dd HH:mm:ss`).
+- `%end_date%`: Formatted expiration date (`yyyy-MM-dd HH:mm:ss`) or `Permanent`.
+
+#### ⏱️ Ceiling Duration Rounding (v1.0.12+):
+Remaining seconds are rounded **upward** `((millis + 999) / 1000)` so that newly issued punishments immediately show the exact full duration (e.g. a 14-day ban instantly displays as `14d` rather than `13d 23h 59m 59s`).
+
+---
+
+### H) Smart Player & Active Punishment Lookup
+
+In v1.0.12+, wapeB commands (`/unban`, `/unmute`, `/checkban`, `/checkmute`, `/history`, `/warnings`, `/unwarn`, `/ban`, `/mute`, `/banip`, `/muteip`, `/warn`) and Java API methods resolve players and active punishments using multi-criteria queries:
+- **Case-Insensitive Username Resolution**: Matches player names regardless of capitalization.
+- **UUID & IP Resolution**: Automatically resolves offline player UUIDs and recorded IP addresses.
+- **Alt Account Linkage**: Queries linked alt accounts when evaluating active bans/mutes.
+- **No Restrictive Bukkit Blocking**: Removes legacy `hasPlayedBefore()` restrictions so that offline/unban/unmute operations always succeed when active database records exist.
 
 ---
 

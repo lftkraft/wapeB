@@ -86,16 +86,11 @@ public class BanCommand implements CommandExecutor {
         }
 
         OfflinePlayer target = Bukkit.getOfflinePlayer(targetName);
-        if (!target.hasPlayedBefore() && !target.isOnline()) {
-             sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.player-not-found", "&cPlayer not found."), null));
-             return true;
-        }
-
         String executorName = (sender instanceof Player) ? sender.getName() : configManager.getString("console-name", "Console");
 
-        boolean success = plugin.getApi().banPlayer(target.getUniqueId(), reason, executorName, duration, silent, ipBan);
+        boolean success = plugin.getApi().banPlayer(targetName, reason, executorName, duration, silent, ipBan);
         if (success) {
-            Punishment ban = plugin.getApi().getActiveBan(target.getUniqueId());
+            Punishment ban = plugin.getApi().getActiveBan(targetName);
             sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.ban.success", "&aSuccessfully banned %player%."), ban));
         }
 

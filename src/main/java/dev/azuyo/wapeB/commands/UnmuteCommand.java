@@ -15,6 +15,7 @@ import org.bukkit.entity.Player;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 public class UnmuteCommand implements CommandExecutor {
@@ -65,21 +66,13 @@ public class UnmuteCommand implements CommandExecutor {
 
         if (isIp) {
             targetIp = targetIdentifier;
-            activeMute = dataManager.getActivePunishment(null, targetIp, ipMuteTypes);
+            activeMute = dataManager.getActivePunishment(null, null, targetIp, null, ipMuteTypes);
         } else {
             targetPlayer = Bukkit.getOfflinePlayer(targetIdentifier);
-            if (!targetPlayer.hasPlayedBefore() && !targetPlayer.isOnline()) {
-                sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.player-not-found", "&cPlayer not found."), null));
-                return true;
-            }
-
-            activeMute = dataManager.getActivePunishment(targetPlayer.getUniqueId(), null, muteTypes);
-            if (activeMute == null) {
-                targetIp = playerDataManager.getLastKnownIp(targetPlayer.getUniqueId());
-                if (targetIp != null) {
-                    activeMute = dataManager.getActivePunishment(null, targetIp, ipMuteTypes);
-                }
-            }
+            UUID targetUuid = targetPlayer != null ? targetPlayer.getUniqueId() : null;
+            targetIp = targetUuid != null ? playerDataManager.getLastKnownIp(targetUuid) : null;
+            List<UUID> alts = (targetIp != null && !targetIp.isEmpty()) ? playerDataManager.getPlayersByIp(targetIp) : null;
+            activeMute = dataManager.getActivePunishment(targetUuid, targetIdentifier, targetIp, alts, muteTypes);
         }
         
         if (activeMute == null) {
@@ -95,12 +88,16 @@ public class UnmuteCommand implements CommandExecutor {
         }
         if (reason.isEmpty()) reason = "Unmuted";
 
-        boolean success = plugin.getApi().unmutePlayer(activeMute.getPlayerUuid(), reason, executorName);
+        boolean success = isIp ? plugin.getApi().revokePunishment(activeMute.getId(), executorName) : plugin.getApi().unmutePlayer(targetIdentifier, reason, executorName);
+        if (!success) {
+            success = plugin.getApi().revokePunishment(activeMute.getId(), executorName);
+        }
+
         if (success) {
             Punishment unmutePunishment = new Punishment(
                 activeMute.getId(), 
                 activeMute.getPlayerUuid(), 
-                activeMute.getPlayerName(), 
+                activeMute.getPlayerName() != null ? activeMute.getPlayerName() : targetIdentifier, 
                 activeMute.getIpAddress(), 
                 activeMute.getType(), 
                 reason, 
@@ -109,6 +106,8 @@ public class UnmuteCommand implements CommandExecutor {
                 0
             );
             sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.unmute.success", "&aSuccessfully unmuted %player%."), unmutePunishment));
+        } else {
+            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.not-muted", "&cPlayer/IP is not muted."), null));
         }
 
         return true;

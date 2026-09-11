@@ -35,12 +35,7 @@ public class WarnCommand implements CommandExecutor {
             return true;
         }
 
-        OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
-        if (!target.hasPlayedBefore() && !target.isOnline()) {
-            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.player-not-found", "&cPlayer not found."), null));
-            return true;
-        }
-
+        String targetNameInput = args[0];
         boolean silent = args[args.length - 1].equalsIgnoreCase("-s");
         String reasonStr = String.join(" ", silent ? Arrays.copyOfRange(args, 1, args.length - 1) : Arrays.copyOfRange(args, 1, args.length));
 
@@ -60,8 +55,9 @@ public class WarnCommand implements CommandExecutor {
 
         String executorName = (sender instanceof Player) ? sender.getName() : configManager.getString("console-name", "Console");
 
-        boolean success = plugin.getApi().warnPlayer(target.getUniqueId(), reason, executorName, silent);
+        boolean success = plugin.getApi().warnPlayer(targetNameInput, reason, executorName, silent);
         if (success) {
+            OfflinePlayer target = Bukkit.getOfflinePlayer(targetNameInput);
             Punishment p = new Punishment(-1, target.getUniqueId(), target.getName(), Punishment.PunishmentType.WARN, reason, executorName, System.currentTimeMillis(), -1);
             sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.warn.success", "&aSuccessfully warned %player%."), p));
         }
