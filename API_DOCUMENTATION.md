@@ -1,6 +1,6 @@
-# 📚 wapeB API - Complete Developer Documentation (v1.0.12)
+# 📚 wapeB API - Complete Developer Documentation (v1.0.13-alpha.1)
 
-This documentation provides a comprehensive guide to the **wapeB** Minecraft punishment system's **Java API**, **Bukkit Events**, **Dynamic Command Overrides**, **Message Placeholders**, and **HTTP REST Web API**.
+This documentation provides a comprehensive guide to the **wapeB** Minecraft punishment system's **Java API**, **Bukkit Events**, **Dynamic Command Overrides**, **Message Placeholders**, **Cross-Server / Velocity Synchronization**, and **HTTP REST Web API**.
 
 ---
 
@@ -10,17 +10,21 @@ This documentation provides a comprehensive guide to the **wapeB** Minecraft pun
 3. [Detailed Java API Reference](#3-detailed-java-api-reference)
    - [A) Query Methods](#a-query-methods)
    - [B) Staff History & Action Recording Methods](#b-staff-history--action-recording-methods)
-   - [C) Execution Methods](#c-execution-methods)
-   - [D) Command Alias Methods](#d-command-alias-methods)
-   - [E) Message Placeholders & Duration Formatting](#e-message-placeholders--duration-formatting)
-   - [F) Smart Player & Active Punishment Lookup](#f-smart-player--active-punishment-lookup)
+   - [C) Execution Methods & Multi-Server Scoping](#c-execution-methods--multi-server-scoping)
+   - [D) CIDR Subnet & GeoIP API Methods](#d-cidr-subnet--geoip-api-methods)
+   - [E) Punishment Templates API Methods](#e-punishment-templates-api-methods)
+   - [F) Warn-Action Escalation API Methods](#f-warn-action-escalation-api-methods)
+   - [G) Command Alias Methods](#g-command-alias-methods)
+   - [H) Message Placeholders & Duration Formatting](#h-message-placeholders--duration-formatting)
+   - [I) Smart Player & Active Punishment Lookup](#i-smart-player--active-punishment-lookup)
 4. [Bukkit Custom Events](#4-bukkit-custom-events)
-5. [Integration Examples & Code Snippets](#5-integration-examples--code-snippets)
+5. [Cross-Server & Velocity Architecture](#5-cross-server--velocity-architecture)
+6. [Integration Examples & Code Snippets](#6-integration-examples--code-snippets)
    - [Example 1: Custom Mute Command (GMute)](#example-1-custom-mute-command-gmute)
-   - [Example 2: Discord Bot (SyncCord / DiscordSRV) Executor Override](#example-2-discord-bot-synccord--discordsrv-executor-override)
+   - [Example 2: Discord Bot (SyncCord / DiscordSRV) Executor Override](#example-2-discord-bot-synccord--discordsrv-override)
    - [Example 3: External Staff History Recording](#example-3-external-staff-history-recording)
    - [Example 4: Chat Listener & Mute Notice](#example-4-chat-listener--mute-notice)
-6. [HTTP REST Web API Reference](#6-http-rest-web-api-reference)
+7. [HTTP REST Web API Reference](#7-http-rest-web-api-reference)
 
 ---
 
@@ -38,7 +42,7 @@ repositories {
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.8-R0.1-SNAPSHOT")
-    compileOnly("com.github.lftkraft:wapeB:v1.0.12")
+    compileOnly("com.github.lftkraft:wapeB:v1.0.13-alpha.1")
 }
 ```
 
@@ -50,7 +54,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'com.github.lftkraft:wapeB:v1.0.12'
+    compileOnly 'com.github.lftkraft:wapeB:v1.0.13-alpha.1'
 }
 ```
 
@@ -67,7 +71,7 @@ dependencies {
     <dependency>
         <groupId>com.github.lftkraft</groupId>
         <artifactId>wapeB</artifactId>
-        <version>v1.0.12</version>
+        <version>v1.0.13-alpha.1</version>
         <scope>provided</scope>
     </dependency>
 </dependencies>
@@ -206,42 +210,72 @@ boolean recorded = api.addStaffHistoryEntry("ywxlol", punishment);
 
 ---
 
-### C) Execution Methods
+### C) Execution Methods & Multi-Server Scoping
 
 All execution methods trigger wapeB's `PlayerPunishEvent`. If a listener cancels the event (`event.setCancelled(true)`), the method returns `false`.
 
+#### Multi-Server Scoping Architecture (v1.0.13-alpha.1+)
+Starting in v1.0.13, wapeB cleanly separates the **Origin Server** (`server` - where the command or API was triggered) and the **Target Enforcement Scope** (`activeServer` - where the punishment is actually enforced):
+- **`activeServer = "global"`**: Punishment is enforced on all servers across the network.
+- **`activeServer = "survival"`**: Punishment is only enforced on the `survival` server.
+- **`activeServer = "server1,server2"`**: Comma-separated list of target servers.
+- **`server`**: The origin server name (defaults to `server-name` from `config.yml`).
+
 #### `banPlayer`
 ```java
+// Full overload with multi-server scoping:
 boolean success = api.banPlayer(
     "PlayerName",             // Target name or UUID
     "Cheating / Hacking",      // Reason
     "Console",                // Executor name (custom string)
     86400000L,                // Duration in ms (-1 = Permanent)
     false,                    // Silent announcement?
-    false                     // IP ban?
+    false,                    // IP ban?
+    "global",                 // Target scope (e.g. "global", "server2", or "server1,server2")
+    "lobby"                   // Origin server (where the action was initiated)
 );
+
+// Convenience overloads (defaults to activeServer="global" and local server name):
+api.banPlayer("PlayerName", "Cheating", "Console", 86400000L, false, false);
+api.banPlayer("PlayerName", "Cheating", "Console", 86400000L, false, false, "server2");
 ```
 
 #### `mutePlayer`
 ```java
+// Full overload with multi-server scoping:
 boolean success = api.mutePlayer(
     "PlayerName", 
     "Chat Spam", 
     "ywxlol - DISCORD",       // Custom executor override
     3600000L,                 // Duration: 1 hour (ms)
     false,                    // Silent
-    false                     // IP mute
+    false,                    // IP mute
+    "global",                 // Target scope
+    "lobby"                   // Origin server
 );
+
+// Convenience overloads:
+api.mutePlayer("PlayerName", "Chat Spam", "Admin", 3600000L, false, false);
+api.mutePlayer("PlayerName", "Chat Spam", "Admin", 3600000L, false, false, "survival");
 ```
 
 #### `warnPlayer`
 ```java
-boolean success = api.warnPlayer("PlayerName", "Swearing", "AdminName", false);
+// Full overload:
+boolean success = api.warnPlayer("PlayerName", "Swearing", "AdminName", false, "global", "lobby");
+
+// Convenience overload:
+api.warnPlayer("PlayerName", "Swearing", "AdminName", false);
+api.warnPlayer("PlayerName", "Swearing", "AdminName", false, "minigames");
 ```
 
 #### `kickPlayer`
 ```java
-boolean success = api.kickPlayer("PlayerName", "AFK for too long", "System", false);
+// Full overload:
+boolean success = api.kickPlayer("PlayerName", "AFK for too long", "System", false, "global", "lobby");
+
+// Convenience overload:
+api.kickPlayer("PlayerName", "AFK for too long", "System", false);
 ```
 
 #### `freezePlayer` / `unfreezePlayer`
@@ -336,7 +370,7 @@ List<String> aliases = api.getCommandAliases("ban");
 
 ---
 
-### G) Message Placeholders & Duration Formatting
+### H) Message Placeholders & Duration Formatting
 
 wapeB provides rich placeholder replacement across all in-game messages, kick screens, broadcast messages, and Discord webhooks.
 
@@ -350,6 +384,8 @@ wapeB provides rich placeholder replacement across all in-game messages, kick sc
 - `%reason%`: Punishment reason.
 - `%type%`: Display name of the punishment type (e.g. `Ban`, `Temp-Mute`).
 - `%punishment_id%`: Numeric ID of the punishment record.
+- `%server%`: Origin server where the punishment was executed.
+- `%activeserver%` / `%active_server%`: Target server scope where the punishment applies (e.g. `global` or `survival,skyblock`).
 - `%date%`: Formatted issuance date (`yyyy-MM-dd HH:mm:ss`).
 - `%end_date%`: Formatted expiration date (`yyyy-MM-dd HH:mm:ss`) or `Permanent`.
 
@@ -358,7 +394,7 @@ Remaining seconds are rounded **upward** `((millis + 999) / 1000)` so that newly
 
 ---
 
-### H) Smart Player & Active Punishment Lookup
+### I) Smart Player & Active Punishment Lookup
 
 In v1.0.12+, wapeB commands (`/unban`, `/unmute`, `/checkban`, `/checkmute`, `/history`, `/warnings`, `/unwarn`, `/ban`, `/mute`, `/banip`, `/muteip`, `/warn`) and Java API methods resolve players and active punishments using multi-criteria queries:
 - **Case-Insensitive Username Resolution**: Matches player names regardless of capitalization.
@@ -381,6 +417,8 @@ Fires whenever a punishment is issued (via command, GUI, Web API, or code).
 - `getReason()` / `setReason(String)` – **Modifiable reason**
 - `getExecutor()` / `setExecutor(String)` – **Modifiable executor name** *(useful for Discord bot overrides)*
 - `getDuration()` / `setDuration(long)` – **Modifiable duration**
+- `getActiveServer()` / `setActiveServer(String)` – **Modifiable target server scope** *(e.g. "global", "survival")*
+- `getServer()` / `setServer(String)` – **Modifiable origin server name**
 - `isSilent()` / `setSilent(boolean)` – **Modifiable silent flag**
 - `isCancelled()` / `setCancelled(boolean)` – **Cancel punishment execution**
 
@@ -405,6 +443,11 @@ public class PunishListener implements Listener {
         if (event.getExecutor().equalsIgnoreCase("Console")) {
             event.setExecutor("Automated Protection System");
         }
+        
+        // Ensure network-wide scope:
+        if (event.getActiveServer() == null || event.getActiveServer().isEmpty()) {
+            event.setActiveServer("global");
+        }
     }
 }
 ```
@@ -416,22 +459,33 @@ Fires during Unban / Unmute / Unwarn:
 
 ---
 
-## 5. Integration Examples & Code Snippets
+## 5. Cross-Server & Velocity Architecture
+
+In v1.0.13-alpha.1+, wapeB integrates seamlessly with **Velocity** and **BungeeCord** proxies using the official companion plugin `wapeb-velocity`:
+
+- **Instant Plugin Messaging**: Broadcasts (`wapeb:channel`) forward instantly across backend servers without polling lag.
+- **Proxy-Level Disconnection**: When a player is banned or kicked with target scope `global` (or matching their current backend server), Velocity immediately disconnects them with the formatted kick screen.
+- **Smart Deduplication & Fallback**: Deduplication keys prevent duplicate chat broadcasts, while background MySQL synchronization guarantees that empty or rebooting servers stay perfectly synced.
+
+---
+
+## 6. Integration Examples & Code Snippets
 
 ### Example 1: Custom Mute Command (GMute)
-A lightweight command that mutes with a custom executor name:
+A lightweight command that mutes with a custom executor name and server scope:
 
 ```java
 public class GMuteCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        // /gmute <player> <reason> <executor>
+        // /gmute <player> <reason> <executor> [server]
         String target = args[0];
         String reason = args[1];
         String executor = args[2];
+        String activeServer = (args.length > 3) ? args[3] : "global";
 
-        WapeB.getApi().mutePlayer(target, reason, executor, -1, false, false);
-        sender.sendMessage("§aMuted successfully! Executor: " + executor);
+        WapeB.getApi().mutePlayer(target, reason, executor, -1, false, false, activeServer);
+        sender.sendMessage("§aMuted successfully! Scope: " + activeServer);
         return true;
     }
 }
@@ -466,7 +520,7 @@ public void onPlayerPunish(PlayerPunishEvent event) {
 ---
 
 ### Example 3: Chat Listener & Mute Notice
-Check if a player is muted when attempting to chat:
+Check if a player is muted on the current server when attempting to chat:
 
 ```java
 @EventHandler
@@ -484,7 +538,7 @@ public void onChat(AsyncPlayerChatEvent event) {
 
 ---
 
-## 6. HTTP REST Web API Reference
+## 7. HTTP REST Web API Reference
 
 wapeB includes a built-in HTTP REST server for remote management (e.g., Web Dashboards, Discord bots).
 
@@ -494,11 +548,12 @@ wapeB includes a built-in HTTP REST server for remote management (e.g., Web Dash
 
 | Endpoint | Method | Parameters | Description |
 |---|---|---|---|
-| `/api/player/punishments` | GET | `player=Name` | Fetch all punishments for a player as JSON array |
+| `/api/player/punishments` | GET | `player=Name` | Fetch all punishments for a player as JSON array (includes `activeServer` and `server`) |
 | `/api/player/checkban` | GET | `player=Name` | Active ban status and details |
 | `/api/player/checkmute` | GET | `player=Name` | Active mute status and details |
+| `/api/punish/active` | GET | - | Fetch all currently active punishments network-wide |
 | `/api/commands/list` | GET | - | List registered commands and aliases |
-| `/api/punish/execute` | GET/POST | `target=Name&type=BAN&reason=Reason&duration=1d` | Issue punishment via REST |
+| `/api/punish/execute` | GET/POST | `target=Name&type=BAN&reason=Reason&duration=1d&active_server=global&origin_server=web` | Issue punishment via REST with custom server scoping |
 | `/api/punish/remove` | GET/POST | `id=105` | Remove punishment by ID |
 | `/api/stats` | GET | - | Daily and hourly punishment statistics |
 | `/api/lockdown` | GET/POST | `action=on&reason=Maintenance` | Manage server lockdown state |

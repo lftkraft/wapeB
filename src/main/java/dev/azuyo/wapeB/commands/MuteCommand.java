@@ -44,6 +44,28 @@ public class MuteCommand implements CommandExecutor {
         boolean silent = arguments.remove("-s");
         boolean ipMute = arguments.remove("-ip");
 
+        String server = "global";
+        for (int i = arguments.size() - 1; i >= 0; i--) {
+            String arg = arguments.get(i);
+            if (arg.toLowerCase().startsWith("-server:")) {
+                server = arg.substring(8);
+                arguments.remove(i);
+                break;
+            } else if (arg.toLowerCase().startsWith("-srv:")) {
+                server = arg.substring(5);
+                arguments.remove(i);
+                break;
+            } else if (arg.toLowerCase().startsWith("-server=")) {
+                server = arg.substring(8);
+                arguments.remove(i);
+                break;
+            } else if (arg.startsWith("-") && arg.length() > 1 && !arg.equalsIgnoreCase("-s") && !arg.equalsIgnoreCase("-ip") && !arg.matches("^-\\d+$")) {
+                server = arg.substring(1);
+                arguments.remove(i);
+                break;
+            }
+        }
+
         long duration = -1;
         String reason = null;
 
@@ -88,9 +110,15 @@ public class MuteCommand implements CommandExecutor {
         OfflinePlayer target = Bukkit.getOfflinePlayer(targetName);
         String executorName = (sender instanceof Player) ? sender.getName() : configManager.getString("console-name", "Console");
 
-        boolean success = plugin.getApi().mutePlayer(targetName, reason, executorName, duration, silent, ipMute);
+        boolean success = plugin.getApi().mutePlayer(targetName, reason, executorName, duration, silent, ipMute, server);
         if (success) {
             Punishment mute = plugin.getApi().getActiveMute(targetName);
+            if (mute == null) {
+                Punishment.PunishmentType pType = ipMute 
+                        ? (duration == -1 ? Punishment.PunishmentType.IPMUTE : Punishment.PunishmentType.TEMPIPMUTE)
+                        : (duration == -1 ? Punishment.PunishmentType.MUTE : Punishment.PunishmentType.TEMPMUTE);
+                mute = new Punishment(-1, target.getUniqueId(), targetName, pType, reason, executorName, server, System.currentTimeMillis(), duration);
+            }
             sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.mute.success", "&aSuccessfully muted %player%."), mute));
         }
 

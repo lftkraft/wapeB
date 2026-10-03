@@ -69,29 +69,73 @@ public class MuteIpCommand implements CommandExecutor {
             return true;
         }
 
-        boolean silent = args.length > 1 && args[args.length - 1].equalsIgnoreCase("-s");
-        String[] reasonArgs = silent ? Arrays.copyOfRange(args, 1, args.length - 1) : Arrays.copyOfRange(args, 1, args.length);
-        long duration = -1;
-        String reason;
-
-        if (reasonArgs.length > 0) {
-            long parsedTime = TimeUtil.parseTime(reasonArgs[0]);
-            if (parsedTime != -1) {
-                duration = parsedTime;
-                reason = String.join(" ", Arrays.copyOfRange(reasonArgs, 1, reasonArgs.length));
-            } else {
-                reason = String.join(" ", reasonArgs);
+        java.util.List<String> arguments = new java.util.ArrayList<>(Arrays.asList(args).subList(1, args.length));
+        boolean silent = arguments.remove("-s");
+        String server = "global";
+        for (int i = arguments.size() - 1; i >= 0; i--) {
+            String arg = arguments.get(i);
+            if (arg.toLowerCase().startsWith("-server:")) {
+                server = arg.substring(8);
+                arguments.remove(i);
+                break;
+            } else if (arg.toLowerCase().startsWith("-srv:")) {
+                server = arg.substring(5);
+                arguments.remove(i);
+                break;
+            } else if (arg.toLowerCase().startsWith("-server=")) {
+                server = arg.substring(8);
+                arguments.remove(i);
+                break;
+            } else if (arg.startsWith("-") && arg.length() > 1 && !arg.equalsIgnoreCase("-s") && !arg.equalsIgnoreCase("-ip") && !arg.matches("^-\\d+$")) {
+                server = arg.substring(1);
+                arguments.remove(i);
+                break;
             }
-        } else {
-            reason = configManager.getString("messages.mute.default-reason", "You have been muted.");
         }
-        if (reason.isEmpty()) {
+
+        long duration = -1;
+        String reason = null;
+
+        if (!arguments.isEmpty()) {
+            String firstArg = arguments.get(0);
+            if (firstArg.startsWith("$")) {
+                dev.azuyo.wapeB.managers.TemplateManager.PunishmentTemplate template = plugin.getTemplateManager().getTemplate("mute", firstArg);
+                if (template != null) {
+                    reason = template.getReason();
+                    if (template.getDuration() != null && !template.getDuration().equalsIgnoreCase("perm")) {
+                        duration = TimeUtil.parseTime(template.getDuration());
+                    }
+                    arguments.remove(0);
+                }
+            } else {
+                long parsedTime = TimeUtil.parseTime(firstArg);
+                if (parsedTime != -1) {
+                    duration = parsedTime;
+                    arguments.remove(0);
+                }
+            }
+        }
+
+        if (reason == null || reason.isEmpty()) {
+            if (!arguments.isEmpty() && arguments.get(0).startsWith("$")) {
+                dev.azuyo.wapeB.managers.TemplateManager.PunishmentTemplate template = plugin.getTemplateManager().getTemplate("mute", arguments.get(0));
+                if (template != null) {
+                    reason = template.getReason();
+                    if (duration == -1 && template.getDuration() != null && !template.getDuration().equalsIgnoreCase("perm")) {
+                        duration = TimeUtil.parseTime(template.getDuration());
+                    }
+                }
+            } else {
+                reason = String.join(" ", arguments);
+            }
+        }
+        if (reason == null || reason.isEmpty()) {
             reason = configManager.getString("messages.mute.default-reason", "You have been muted.");
         }
 
         String executorName = (sender instanceof Player) ? sender.getName() : configManager.getString("console-name", "Console");
 
-        boolean success = plugin.getApi().mutePlayer(finalTargetName, reason, executorName, duration, silent, true);
+        boolean success = plugin.getApi().mutePlayer(finalTargetName, reason, executorName, duration, silent, true, server);
         if (success) {
             Punishment mute = plugin.getApi().getActiveMute(finalTargetName);
             sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.muteip.success", "&aSuccessfully IP-muted %player%."), mute));

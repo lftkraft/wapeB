@@ -82,6 +82,7 @@ public class YamlDataManager implements DataManager {
         punishmentsConfig.set(path + ".type", punishment.getType().toString());
         punishmentsConfig.set(path + ".reason", punishment.getReason());
         punishmentsConfig.set(path + ".executorName", punishment.getExecutorName());
+        punishmentsConfig.set(path + ".server", punishment.getServer() != null ? punishment.getServer() : "global");
         punishmentsConfig.set(path + ".date", punishment.getDate());
         punishmentsConfig.set(path + ".duration", punishment.getDuration());
         punishmentsConfig.set(path + ".end", punishment.getEnd());
@@ -149,10 +150,15 @@ public class YamlDataManager implements DataManager {
         ConfigurationSection section = punishmentsConfig.getConfigurationSection("punishments");
         if (section == null) return activeBans;
 
+        String currentServer = plugin.getConfigManager().getString("server-name", "Lobby");
+
         for (String id : section.getKeys(false)) {
             String path = "punishments." + id;
             Punishment punishment = buildPunishment(path);
             if (punishment != null && punishment.isActive() && allBanTypes.contains(punishment.getType())) {
+                boolean serverMatch = punishment.getServer() == null || punishment.getServer().equalsIgnoreCase("global") || punishment.getServer().equalsIgnoreCase("all") || punishment.getServer().equalsIgnoreCase(currentServer);
+                if (!serverMatch) continue;
+
                 if (punishment.getDuration() == -1 || punishment.getEnd() > System.currentTimeMillis()) {
                     activeBans.add(punishment);
                 } else {
@@ -226,11 +232,17 @@ public class YamlDataManager implements DataManager {
         ConfigurationSection section = punishmentsConfig.getConfigurationSection("punishments");
         if (section == null) return null;
 
+        String currentServer = plugin.getConfigManager().getString("server-name", "Lobby");
+
         List<String> keys = new ArrayList<>(section.getKeys(false));
         for (int i = keys.size() - 1; i >= 0; i--) {
             String id = keys.get(i);
             String path = "punishments." + id;
             if (punishmentsConfig.getBoolean(path + ".active", false)) {
+                String storedServer = punishmentsConfig.getString(path + ".server", "global");
+                boolean serverMatch = storedServer == null || storedServer.equalsIgnoreCase("global") || storedServer.equalsIgnoreCase("all") || storedServer.equalsIgnoreCase(currentServer);
+                if (!serverMatch) continue;
+
                 String storedTypeStr = punishmentsConfig.getString(path + ".type");
                 if (storedTypeStr == null) continue;
                 Punishment.PunishmentType storedType = Punishment.PunishmentType.valueOf(storedTypeStr);
@@ -309,6 +321,7 @@ public class YamlDataManager implements DataManager {
     private Punishment buildPunishment(String path) {
         String id = path.substring(path.lastIndexOf('.') + 1);
         String uuidString = punishmentsConfig.getString(path + ".playerUuid");
+        String server = punishmentsConfig.getString(path + ".server", "global");
         Punishment p = new Punishment(
                 Integer.parseInt(id),
                 uuidString != null ? UUID.fromString(uuidString) : null,
@@ -317,6 +330,7 @@ public class YamlDataManager implements DataManager {
                 Punishment.PunishmentType.valueOf(punishmentsConfig.getString(path + ".type")),
                 punishmentsConfig.getString(path + ".reason"),
                 punishmentsConfig.getString(path + ".executorName"),
+                server,
                 punishmentsConfig.getLong(path + ".date"),
                 punishmentsConfig.getLong(path + ".duration")
         );

@@ -36,8 +36,32 @@ public class WarnCommand implements CommandExecutor {
         }
 
         String targetNameInput = args[0];
-        boolean silent = args[args.length - 1].equalsIgnoreCase("-s");
-        String reasonStr = String.join(" ", silent ? Arrays.copyOfRange(args, 1, args.length - 1) : Arrays.copyOfRange(args, 1, args.length));
+        java.util.List<String> arguments = new java.util.ArrayList<>(Arrays.asList(args).subList(1, args.length));
+
+        boolean silent = arguments.remove("-s");
+        String server = "global";
+        for (int i = arguments.size() - 1; i >= 0; i--) {
+            String arg = arguments.get(i);
+            if (arg.toLowerCase().startsWith("-server:")) {
+                server = arg.substring(8);
+                arguments.remove(i);
+                break;
+            } else if (arg.toLowerCase().startsWith("-srv:")) {
+                server = arg.substring(5);
+                arguments.remove(i);
+                break;
+            } else if (arg.toLowerCase().startsWith("-server=")) {
+                server = arg.substring(8);
+                arguments.remove(i);
+                break;
+            } else if (arg.startsWith("-") && arg.length() > 1 && !arg.equalsIgnoreCase("-s") && !arg.matches("^-\\d+$")) {
+                server = arg.substring(1);
+                arguments.remove(i);
+                break;
+            }
+        }
+
+        String reasonStr = String.join(" ", arguments);
 
         if (reasonStr.startsWith("$")) {
             dev.azuyo.wapeB.managers.TemplateManager.PunishmentTemplate template = plugin.getTemplateManager().getTemplate("warn", reasonStr);
@@ -47,18 +71,17 @@ public class WarnCommand implements CommandExecutor {
         }
 
         if (reasonStr.isEmpty()) {
-            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.warn.usage", "&cUsage: /warn <player> <reason> [-s]"), null));
+            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.warn.usage", "&cUsage: /warn <player> <reason> [-s] [-server:<name>]"), null));
             return true;
         }
 
         String reason = reasonStr;
-
         String executorName = (sender instanceof Player) ? sender.getName() : configManager.getString("console-name", "Console");
 
-        boolean success = plugin.getApi().warnPlayer(targetNameInput, reason, executorName, silent);
+        boolean success = plugin.getApi().warnPlayer(targetNameInput, reason, executorName, silent, server);
         if (success) {
             OfflinePlayer target = Bukkit.getOfflinePlayer(targetNameInput);
-            Punishment p = new Punishment(-1, target.getUniqueId(), target.getName(), Punishment.PunishmentType.WARN, reason, executorName, System.currentTimeMillis(), -1);
+            Punishment p = new Punishment(-1, target.getUniqueId(), target.getName(), Punishment.PunishmentType.WARN, reason, executorName, server, System.currentTimeMillis(), -1);
             sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.warn.success", "&aSuccessfully warned %player%."), p));
         }
 

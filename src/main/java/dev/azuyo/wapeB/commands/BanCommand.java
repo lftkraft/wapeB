@@ -44,6 +44,28 @@ public class BanCommand implements CommandExecutor {
         boolean silent = arguments.remove("-s");
         boolean ipBan = arguments.remove("-ip");
 
+        String server = "global";
+        for (int i = arguments.size() - 1; i >= 0; i--) {
+            String arg = arguments.get(i);
+            if (arg.toLowerCase().startsWith("-server:")) {
+                server = arg.substring(8);
+                arguments.remove(i);
+                break;
+            } else if (arg.toLowerCase().startsWith("-srv:")) {
+                server = arg.substring(5);
+                arguments.remove(i);
+                break;
+            } else if (arg.toLowerCase().startsWith("-server=")) {
+                server = arg.substring(8);
+                arguments.remove(i);
+                break;
+            } else if (arg.startsWith("-") && arg.length() > 1 && !arg.equalsIgnoreCase("-s") && !arg.equalsIgnoreCase("-ip") && !arg.matches("^-\\d+$")) {
+                server = arg.substring(1);
+                arguments.remove(i);
+                break;
+            }
+        }
+
         long duration = -1;
         String reason = null;
 
@@ -88,9 +110,15 @@ public class BanCommand implements CommandExecutor {
         OfflinePlayer target = Bukkit.getOfflinePlayer(targetName);
         String executorName = (sender instanceof Player) ? sender.getName() : configManager.getString("console-name", "Console");
 
-        boolean success = plugin.getApi().banPlayer(targetName, reason, executorName, duration, silent, ipBan);
+        boolean success = plugin.getApi().banPlayer(targetName, reason, executorName, duration, silent, ipBan, server);
         if (success) {
             Punishment ban = plugin.getApi().getActiveBan(targetName);
+            if (ban == null) {
+                Punishment.PunishmentType pType = ipBan 
+                        ? (duration == -1 ? Punishment.PunishmentType.IPBAN : Punishment.PunishmentType.TEMPIPBAN)
+                        : (duration == -1 ? Punishment.PunishmentType.BAN : Punishment.PunishmentType.TEMPBAN);
+                ban = new Punishment(-1, target.getUniqueId(), targetName, pType, reason, executorName, server, System.currentTimeMillis(), duration);
+            }
             sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.ban.success", "&aSuccessfully banned %player%."), ban));
         }
 

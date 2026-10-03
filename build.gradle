@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'dev.azuyo'
-version = '1.0.12'
+version = '1.0.13-alpha.1'
 
 repositories {
     mavenCentral()
@@ -22,6 +22,11 @@ dependencies {
     
     // SQLite JDBC Driver
     implementation 'org.xerial:sqlite-jdbc:3.41.2.2'
+    // HikariCP Connection Pool
+    implementation 'com.zaxxer:HikariCP:5.1.0'
+    // MySQL / MariaDB Drivers
+    implementation 'com.mysql:mysql-connector-j:8.3.0'
+    implementation 'org.mariadb.jdbc:mariadb-java-client:3.3.3'
     // Gson for JSON serialization/deserialization
     implementation 'com.google.code.gson:gson:2.10.1'
     
@@ -32,6 +37,12 @@ dependencies {
 tasks {
     runServer {
         minecraftVersion("1.18.2")
+    }
+    jar {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        from {
+            configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+        }
     }
 }
 

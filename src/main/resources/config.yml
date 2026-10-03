@@ -1,7 +1,25 @@
 # wapeB Punishment Plugin Configuration
 
 # --- General Settings ---
-storage-method: sqlite # Available: yaml, sqlite
+server-name: "Lobby" # Az adott szerver neve a hálózaton (pl. Lobby, Survival, szerver1)
+storage-method: sqlite # Available: yaml, sqlite, mysql
+
+# --- Broadcast Settings ---
+broadcast:
+  show-remote-punishments: true # Kiírja-e a szankció értesítést, ha egy másik szerverre szólt a szankció
+
+
+# --- MySQL / MariaDB Database Settings ---
+mysql:
+  host: localhost
+  port: 3306
+  database: tesztszero
+  username: root
+  password: ''
+  pool-size: 10
+  connection-timeout: 5000
+  use-ssl: false
+
 prefix: <b><gradient:#C34338:#C63528>BÜNTETÉS</gradient></b> <dark_gray>»
 console-name: Hawaii # Konzol neve Sentinelre változtatva
 language: en # Available languages: en, hu, de, fr, es, pt, ru, ro, da, sv, custom

@@ -20,6 +20,8 @@ public class Punishment {
     private final PunishmentType type;
     private final String reason;
     private final String executorName;
+    private String activeServer; // The server scope where the punishment is active (e.g. "global", "szerver2", "szerver1,szerver2")
+    private String server;       // The server where the punishment took place (origin/source server, e.g. "szerver1")
     private final long date;
     private final long duration;
     private final long end;
@@ -27,10 +29,26 @@ public class Punishment {
 
     // Constructors
     public Punishment(int id, UUID playerUuid, String playerName, PunishmentType type, String reason, String executorName, long date, long duration) {
-        this(id, playerUuid, playerName, null, type, reason, executorName, date, duration);
+        this(id, playerUuid, playerName, null, type, reason, executorName, "global", "global", date, duration);
+    }
+
+    public Punishment(int id, UUID playerUuid, String playerName, PunishmentType type, String reason, String executorName, String activeServer, long date, long duration) {
+        this(id, playerUuid, playerName, null, type, reason, executorName, activeServer, "global", date, duration);
+    }
+
+    public Punishment(int id, UUID playerUuid, String playerName, PunishmentType type, String reason, String executorName, String activeServer, String server, long date, long duration) {
+        this(id, playerUuid, playerName, null, type, reason, executorName, activeServer, server, date, duration);
     }
 
     public Punishment(int id, UUID playerUuid, String playerName, String ipAddress, PunishmentType type, String reason, String executorName, long date, long duration) {
+        this(id, playerUuid, playerName, ipAddress, type, reason, executorName, "global", "global", date, duration);
+    }
+
+    public Punishment(int id, UUID playerUuid, String playerName, String ipAddress, PunishmentType type, String reason, String executorName, String activeServer, long date, long duration) {
+        this(id, playerUuid, playerName, ipAddress, type, reason, executorName, activeServer, "global", date, duration);
+    }
+
+    public Punishment(int id, UUID playerUuid, String playerName, String ipAddress, PunishmentType type, String reason, String executorName, String activeServer, String server, long date, long duration) {
         this.id = id;
         this.playerUuid = playerUuid;
         this.playerName = playerName;
@@ -38,10 +56,24 @@ public class Punishment {
         this.type = type;
         this.reason = reason;
         this.executorName = executorName;
+        this.activeServer = (activeServer != null && !activeServer.trim().isEmpty()) ? activeServer : "global";
+        this.server = (server != null && !server.trim().isEmpty()) ? server : "global";
         this.date = date;
         this.duration = duration;
         this.end = (duration == -1) ? -1 : date + duration;
         this.active = true;
+    }
+
+    public boolean isAppliesTo(String currentServerName) {
+        if (activeServer == null || activeServer.trim().isEmpty()) return true;
+        if (activeServer.equalsIgnoreCase("global") || activeServer.equalsIgnoreCase("all") || activeServer.equalsIgnoreCase("*")) return true;
+        if (currentServerName == null) return false;
+        for (String s : activeServer.split(",")) {
+            if (s.trim().equalsIgnoreCase(currentServerName.trim())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // Getters and Setters
@@ -53,6 +85,10 @@ public class Punishment {
     public PunishmentType getType() { return type; }
     public String getReason() { return reason; }
     public String getExecutorName() { return executorName; }
+    public String getActiveServer() { return activeServer != null ? activeServer : "global"; }
+    public void setActiveServer(String activeServer) { this.activeServer = (activeServer != null && !activeServer.trim().isEmpty()) ? activeServer : "global"; }
+    public String getServer() { return server != null ? server : "global"; }
+    public void setServer(String server) { this.server = (server != null && !server.trim().isEmpty()) ? server : "global"; }
     public long getDate() { return date; }
     public long getDuration() { return duration; }
     public long getEnd() { return end; }

@@ -360,6 +360,38 @@ public class WapeBAPIImpl implements WapeBAPI {
 
     @Override
     public boolean banPlayer(UUID target, String reason, String executor, long duration, boolean silent, boolean ipBan) {
+        String currentServer = configManager.getString("server-name", "Lobby");
+        return banPlayer(target, reason, executor, duration, silent, ipBan, "global", currentServer);
+    }
+
+    @Override
+    public boolean banPlayer(String targetName, String reason, String executor, long duration, boolean silent, boolean ipBan) {
+        OfflinePlayer op = Bukkit.getOfflinePlayer(targetName);
+        String currentServer = configManager.getString("server-name", "Lobby");
+        return banPlayer(op.getUniqueId(), reason, executor, duration, silent, ipBan, "global", currentServer);
+    }
+
+    @Override
+    public boolean banPlayer(String targetName, String reason, String executor, long duration, boolean silent, boolean ipBan, String activeServer) {
+        OfflinePlayer op = Bukkit.getOfflinePlayer(targetName);
+        String currentServer = configManager.getString("server-name", "Lobby");
+        return banPlayer(op.getUniqueId(), reason, executor, duration, silent, ipBan, activeServer, currentServer);
+    }
+
+    @Override
+    public boolean banPlayer(UUID target, String reason, String executor, long duration, boolean silent, boolean ipBan, String activeServer) {
+        String currentServer = configManager.getString("server-name", "Lobby");
+        return banPlayer(target, reason, executor, duration, silent, ipBan, activeServer, currentServer);
+    }
+
+    @Override
+    public boolean banPlayer(String targetName, String reason, String executor, long duration, boolean silent, boolean ipBan, String activeServer, String server) {
+        OfflinePlayer op = Bukkit.getOfflinePlayer(targetName);
+        return banPlayer(op.getUniqueId(), reason, executor, duration, silent, ipBan, activeServer, server);
+    }
+
+    @Override
+    public boolean banPlayer(UUID target, String reason, String executor, long duration, boolean silent, boolean ipBan, String activeServer, String server) {
         OfflinePlayer op = Bukkit.getOfflinePlayer(target);
         String targetName = op.getName() != null ? op.getName() : target.toString();
         String targetIp = op.isOnline() && ((Player)op).getAddress() != null 
@@ -373,9 +405,9 @@ public class WapeBAPIImpl implements WapeBAPI {
             type = (duration == -1) ? Punishment.PunishmentType.BAN : Punishment.PunishmentType.TEMPBAN;
         }
 
-        plugin.getLogger().info("[wapeB Debug] PlayerPunishEvent FIRED for " + targetName + " | Original Executor: '" + executor + "' | Type: " + type);
+        plugin.getLogger().info("[wapeB Debug] PlayerPunishEvent FIRED for " + targetName + " | Original Executor: '" + executor + "' | Type: " + type + " | ActiveServer: " + activeServer + " | Server: " + server);
 
-        PlayerPunishEvent event = new PlayerPunishEvent(target, targetName, targetIp, type, reason, executor, duration, silent);
+        PlayerPunishEvent event = new PlayerPunishEvent(target, targetName, targetIp, type, reason, executor, activeServer, server, duration, silent);
         Bukkit.getPluginManager().callEvent(event);
 
         plugin.getLogger().info("[wapeB Debug] PlayerPunishEvent PROCESSED for " + targetName + " | Final Executor: '" + event.getExecutor() + "' | Cancelled: " + event.isCancelled());
@@ -389,19 +421,30 @@ public class WapeBAPIImpl implements WapeBAPI {
             dataManager.savePunishment(existingBan);
         }
 
-        Punishment p = new Punishment(dataManager.getNextId(), target, targetName, targetIp, type, event.getReason(), event.getExecutor(), System.currentTimeMillis(), event.getDuration());
+        Punishment p = new Punishment(dataManager.getNextId(), target, targetName, targetIp, type, event.getReason(), event.getExecutor(), event.getActiveServer(), event.getServer(), System.currentTimeMillis(), event.getDuration());
         dataManager.savePunishment(p);
         WebhookUtil.sendPunishmentWebhook(p);
 
+        String broadcastMsg = configManager.getString("messages.ban.broadcast", "%prefix% %executor% banned %player%.");
+        if (plugin.getPluginMessageManager() != null) {
+            plugin.getPluginMessageManager().sendPunishmentBroadcast(type.name(), p, event.isSilent(), broadcastMsg);
+        }
+
         Bukkit.getScheduler().runTask(plugin, () -> {
-            if (op.isOnline()) {
+            String currentServer = configManager.getString("server-name", "Lobby");
+            boolean appliesToThisServer = p.isAppliesTo(currentServer);
+
+            if (op.isOnline() && appliesToThisServer) {
                 ((Player)op).kick(MessageUtil.formatKickScreen(configManager.getStringList("messages.ban.kick-screen"), p));
             }
-            String broadcastMsg = configManager.getString("messages.ban.broadcast", "%prefix% %executor% banned %player%.");
-            if (event.isSilent()) {
-                Bukkit.broadcast(MessageUtil.createComponent(configManager.getString("messages.ban.silent.prefix", "&7(Silent) ") + broadcastMsg, p), "wapeb.notify");
-            } else {
-                Bukkit.broadcast(MessageUtil.createComponent(broadcastMsg, p));
+
+            boolean showRemoteBroadcast = configManager.getBoolean("broadcast.show-remote-punishments", true);
+            if (appliesToThisServer || showRemoteBroadcast) {
+                if (event.isSilent()) {
+                    Bukkit.broadcast(MessageUtil.createComponent(configManager.getString("messages.ban.silent.prefix", "&7(Silent) ") + broadcastMsg, p), "wapeb.notify");
+                } else {
+                    Bukkit.broadcast(MessageUtil.createComponent(broadcastMsg, p));
+                }
             }
         });
 
@@ -409,13 +452,39 @@ public class WapeBAPIImpl implements WapeBAPI {
     }
 
     @Override
-    public boolean banPlayer(String targetName, String reason, String executor, long duration, boolean silent, boolean ipBan) {
-        OfflinePlayer op = Bukkit.getOfflinePlayer(targetName);
-        return banPlayer(op.getUniqueId(), reason, executor, duration, silent, ipBan);
+    public boolean mutePlayer(UUID target, String reason, String executor, long duration, boolean silent, boolean ipMute) {
+        String currentServer = configManager.getString("server-name", "Lobby");
+        return mutePlayer(target, reason, executor, duration, silent, ipMute, "global", currentServer);
     }
 
     @Override
-    public boolean mutePlayer(UUID target, String reason, String executor, long duration, boolean silent, boolean ipMute) {
+    public boolean mutePlayer(String targetName, String reason, String executor, long duration, boolean silent, boolean ipMute) {
+        OfflinePlayer op = Bukkit.getOfflinePlayer(targetName);
+        String currentServer = configManager.getString("server-name", "Lobby");
+        return mutePlayer(op.getUniqueId(), reason, executor, duration, silent, ipMute, "global", currentServer);
+    }
+
+    @Override
+    public boolean mutePlayer(String targetName, String reason, String executor, long duration, boolean silent, boolean ipMute, String activeServer) {
+        OfflinePlayer op = Bukkit.getOfflinePlayer(targetName);
+        String currentServer = configManager.getString("server-name", "Lobby");
+        return mutePlayer(op.getUniqueId(), reason, executor, duration, silent, ipMute, activeServer, currentServer);
+    }
+
+    @Override
+    public boolean mutePlayer(UUID target, String reason, String executor, long duration, boolean silent, boolean ipMute, String activeServer) {
+        String currentServer = configManager.getString("server-name", "Lobby");
+        return mutePlayer(target, reason, executor, duration, silent, ipMute, activeServer, currentServer);
+    }
+
+    @Override
+    public boolean mutePlayer(String targetName, String reason, String executor, long duration, boolean silent, boolean ipMute, String activeServer, String server) {
+        OfflinePlayer op = Bukkit.getOfflinePlayer(targetName);
+        return mutePlayer(op.getUniqueId(), reason, executor, duration, silent, ipMute, activeServer, server);
+    }
+
+    @Override
+    public boolean mutePlayer(UUID target, String reason, String executor, long duration, boolean silent, boolean ipMute, String activeServer, String server) {
         OfflinePlayer op = Bukkit.getOfflinePlayer(target);
         String targetName = op.getName() != null ? op.getName() : target.toString();
         String targetIp = op.isOnline() && ((Player)op).getAddress() != null 
@@ -429,9 +498,9 @@ public class WapeBAPIImpl implements WapeBAPI {
             type = (duration == -1) ? Punishment.PunishmentType.MUTE : Punishment.PunishmentType.TEMPMUTE;
         }
 
-        plugin.getLogger().info("[wapeB Debug] PlayerPunishEvent FIRED for " + targetName + " | Original Executor: '" + executor + "' | Type: " + type);
+        plugin.getLogger().info("[wapeB Debug] PlayerPunishEvent FIRED for " + targetName + " | Original Executor: '" + executor + "' | Type: " + type + " | ActiveServer: " + activeServer + " | Server: " + server);
 
-        PlayerPunishEvent event = new PlayerPunishEvent(target, targetName, targetIp, type, reason, executor, duration, silent);
+        PlayerPunishEvent event = new PlayerPunishEvent(target, targetName, targetIp, type, reason, executor, activeServer, server, duration, silent);
         Bukkit.getPluginManager().callEvent(event);
 
         plugin.getLogger().info("[wapeB Debug] PlayerPunishEvent PROCESSED for " + targetName + " | Final Executor: '" + event.getExecutor() + "' | Cancelled: " + event.isCancelled());
@@ -443,16 +512,26 @@ public class WapeBAPIImpl implements WapeBAPI {
             dataManager.savePunishment(existingMute);
         }
 
-        Punishment p = new Punishment(dataManager.getNextId(), target, targetName, targetIp, type, event.getReason(), event.getExecutor(), System.currentTimeMillis(), event.getDuration());
+        Punishment p = new Punishment(dataManager.getNextId(), target, targetName, targetIp, type, event.getReason(), event.getExecutor(), event.getActiveServer(), event.getServer(), System.currentTimeMillis(), event.getDuration());
         dataManager.savePunishment(p);
         WebhookUtil.sendPunishmentWebhook(p);
 
+        String broadcastMsg = configManager.getString("messages.mute.broadcast", "%prefix% %executor% muted %player%.");
+        if (plugin.getPluginMessageManager() != null) {
+            plugin.getPluginMessageManager().sendPunishmentBroadcast(type.name(), p, event.isSilent(), broadcastMsg);
+        }
+
         Bukkit.getScheduler().runTask(plugin, () -> {
-            String broadcastMsg = configManager.getString("messages.mute.broadcast", "%prefix% %executor% muted %player%.");
-            if (event.isSilent()) {
-                Bukkit.broadcast(MessageUtil.createComponent(configManager.getString("messages.mute.silent.prefix", "&7(Silent) ") + broadcastMsg, p), "wapeb.notify");
-            } else {
-                Bukkit.broadcast(MessageUtil.createComponent(broadcastMsg, p));
+            String currentServer = configManager.getString("server-name", "Lobby");
+            boolean appliesToThisServer = p.isAppliesTo(currentServer);
+
+            boolean showRemoteBroadcast = configManager.getBoolean("broadcast.show-remote-punishments", true);
+            if (appliesToThisServer || showRemoteBroadcast) {
+                if (event.isSilent()) {
+                    Bukkit.broadcast(MessageUtil.createComponent(configManager.getString("messages.mute.silent.prefix", "&7(Silent) ") + broadcastMsg, p), "wapeb.notify");
+                } else {
+                    Bukkit.broadcast(MessageUtil.createComponent(broadcastMsg, p));
+                }
             }
         });
 
@@ -460,91 +539,161 @@ public class WapeBAPIImpl implements WapeBAPI {
     }
 
     @Override
-    public boolean mutePlayer(String targetName, String reason, String executor, long duration, boolean silent, boolean ipMute) {
-        OfflinePlayer op = Bukkit.getOfflinePlayer(targetName);
-        return mutePlayer(op.getUniqueId(), reason, executor, duration, silent, ipMute);
+    public boolean warnPlayer(UUID target, String reason, String executor, boolean silent) {
+        String currentServer = configManager.getString("server-name", "Lobby");
+        return warnPlayer(target, reason, executor, silent, "global", currentServer);
     }
 
     @Override
-    public boolean warnPlayer(UUID target, String reason, String executor, boolean silent) {
+    public boolean warnPlayer(String targetName, String reason, String executor, boolean silent) {
+        OfflinePlayer op = Bukkit.getOfflinePlayer(targetName);
+        String currentServer = configManager.getString("server-name", "Lobby");
+        return warnPlayer(op.getUniqueId(), reason, executor, silent, "global", currentServer);
+    }
+
+    @Override
+    public boolean warnPlayer(String targetName, String reason, String executor, boolean silent, String activeServer) {
+        OfflinePlayer op = Bukkit.getOfflinePlayer(targetName);
+        String currentServer = configManager.getString("server-name", "Lobby");
+        return warnPlayer(op.getUniqueId(), reason, executor, silent, activeServer, currentServer);
+    }
+
+    @Override
+    public boolean warnPlayer(UUID target, String reason, String executor, boolean silent, String activeServer) {
+        String currentServer = configManager.getString("server-name", "Lobby");
+        return warnPlayer(target, reason, executor, silent, activeServer, currentServer);
+    }
+
+    @Override
+    public boolean warnPlayer(String targetName, String reason, String executor, boolean silent, String activeServer, String server) {
+        OfflinePlayer op = Bukkit.getOfflinePlayer(targetName);
+        return warnPlayer(op.getUniqueId(), reason, executor, silent, activeServer, server);
+    }
+
+    @Override
+    public boolean warnPlayer(UUID target, String reason, String executor, boolean silent, String activeServer, String server) {
         OfflinePlayer op = Bukkit.getOfflinePlayer(target);
         String targetName = op.getName() != null ? op.getName() : target.toString();
 
-        plugin.getLogger().info("[wapeB Debug] PlayerPunishEvent FIRED for " + targetName + " | Original Executor: '" + executor + "' | Type: WARN");
+        plugin.getLogger().info("[wapeB Debug] PlayerPunishEvent FIRED for " + targetName + " | Original Executor: '" + executor + "' | Type: WARN | ActiveServer: " + activeServer + " | Server: " + server);
 
-        PlayerPunishEvent event = new PlayerPunishEvent(target, targetName, null, Punishment.PunishmentType.WARN, reason, executor, -1, silent);
+        PlayerPunishEvent event = new PlayerPunishEvent(target, targetName, null, Punishment.PunishmentType.WARN, reason, executor, activeServer, server, -1, silent);
         Bukkit.getPluginManager().callEvent(event);
 
         plugin.getLogger().info("[wapeB Debug] PlayerPunishEvent PROCESSED for " + targetName + " | Final Executor: '" + event.getExecutor() + "' | Cancelled: " + event.isCancelled());
 
         if (event.isCancelled()) return false;
 
-        Punishment p = new Punishment(dataManager.getNextId(), target, targetName, Punishment.PunishmentType.WARN, event.getReason(), event.getExecutor(), System.currentTimeMillis(), -1);
+        Punishment p = new Punishment(dataManager.getNextId(), target, targetName, Punishment.PunishmentType.WARN, event.getReason(), event.getExecutor(), event.getActiveServer(), event.getServer(), System.currentTimeMillis(), -1);
         dataManager.savePunishment(p);
         WebhookUtil.sendPunishmentWebhook(p);
 
         checkWarnActions(target, targetName);
 
+        String broadcastMsg = configManager.getString("messages.warn.broadcast", "%prefix% %executor% warned %player%.");
+        if (plugin.getPluginMessageManager() != null) {
+            plugin.getPluginMessageManager().sendPunishmentBroadcast("WARN", p, event.isSilent(), broadcastMsg);
+        }
+
         Bukkit.getScheduler().runTask(plugin, () -> {
-            if (op.isOnline()) {
+            String currentServer = configManager.getString("server-name", "Lobby");
+            boolean appliesToThisServer = p.isAppliesTo(currentServer);
+
+            if (op.isOnline() && appliesToThisServer) {
                 ((Player)op).sendMessage(MessageUtil.createComponent(configManager.getString("messages.warn.target-notify", "&cYou have been warned for: %reason%"), p));
             }
-            String broadcastMsg = configManager.getString("messages.warn.broadcast", "%prefix% %executor% warned %player%.");
-            if (event.isSilent()) {
-                Bukkit.broadcast(MessageUtil.createComponent(configManager.getString("messages.warn.silent.prefix", "&7(Silent) ") + broadcastMsg, p), "wapeb.notify");
-            } else {
-                Bukkit.broadcast(MessageUtil.createComponent(broadcastMsg, p));
+            boolean showRemoteBroadcast = configManager.getBoolean("broadcast.show-remote-punishments", true);
+            if (appliesToThisServer || showRemoteBroadcast) {
+                if (event.isSilent()) {
+                    Bukkit.broadcast(MessageUtil.createComponent(configManager.getString("messages.warn.silent.prefix", "&7(Silent) ") + broadcastMsg, p), "wapeb.notify");
+                } else {
+                    Bukkit.broadcast(MessageUtil.createComponent(broadcastMsg, p));
+                }
             }
         });
 
         return true;
-    }
-
-    @Override
-    public boolean warnPlayer(String targetName, String reason, String executor, boolean silent) {
-        OfflinePlayer op = Bukkit.getOfflinePlayer(targetName);
-        return warnPlayer(op.getUniqueId(), reason, executor, silent);
     }
 
     @Override
     public boolean kickPlayer(UUID target, String reason, String executor, boolean silent) {
-        OfflinePlayer op = Bukkit.getOfflinePlayer(target);
-        if (!op.isOnline()) return false;
-
-        Player onlineTarget = (Player) op;
-
-        plugin.getLogger().info("[wapeB Debug] PlayerPunishEvent FIRED for " + onlineTarget.getName() + " | Original Executor: '" + executor + "' | Type: KICK");
-
-        PlayerPunishEvent event = new PlayerPunishEvent(target, onlineTarget.getName(), null, Punishment.PunishmentType.KICK, reason, executor, -1, silent);
-        Bukkit.getPluginManager().callEvent(event);
-
-        plugin.getLogger().info("[wapeB Debug] PlayerPunishEvent PROCESSED for " + onlineTarget.getName() + " | Final Executor: '" + event.getExecutor() + "' | Cancelled: " + event.isCancelled());
-
-        if (event.isCancelled()) return false;
-
-        Punishment p = new Punishment(dataManager.getNextId(), target, onlineTarget.getName(), Punishment.PunishmentType.KICK, event.getReason(), event.getExecutor(), System.currentTimeMillis(), -1);
-        p.setActive(false);
-        dataManager.savePunishment(p);
-        WebhookUtil.sendPunishmentWebhook(p);
-
-        Bukkit.getScheduler().runTask(plugin, () -> {
-            onlineTarget.kick(MessageUtil.formatKickScreen(configManager.getStringList("messages.kick.kick-screen"), p));
-            String broadcastMsg = configManager.getString("messages.kick.broadcast", "%prefix% %executor% kicked %player%.");
-            if (event.isSilent()) {
-                Bukkit.broadcast(MessageUtil.createComponent(configManager.getString("messages.kick.silent.prefix", "&7(Silent) ") + broadcastMsg, p), "wapeb.notify");
-            } else {
-                Bukkit.broadcast(MessageUtil.createComponent(broadcastMsg, p));
-            }
-        });
-
-        return true;
+        String currentServer = configManager.getString("server-name", "Lobby");
+        return kickPlayer(target, reason, executor, silent, "global", currentServer);
     }
 
     @Override
     public boolean kickPlayer(String targetName, String reason, String executor, boolean silent) {
         Player player = Bukkit.getPlayer(targetName);
         if (player == null) return false;
-        return kickPlayer(player.getUniqueId(), reason, executor, silent);
+        String currentServer = configManager.getString("server-name", "Lobby");
+        return kickPlayer(player.getUniqueId(), reason, executor, silent, "global", currentServer);
+    }
+
+    @Override
+    public boolean kickPlayer(String targetName, String reason, String executor, boolean silent, String activeServer) {
+        Player player = Bukkit.getPlayer(targetName);
+        if (player == null) return false;
+        String currentServer = configManager.getString("server-name", "Lobby");
+        return kickPlayer(player.getUniqueId(), reason, executor, silent, activeServer, currentServer);
+    }
+
+    @Override
+    public boolean kickPlayer(UUID target, String reason, String executor, boolean silent, String activeServer) {
+        String currentServer = configManager.getString("server-name", "Lobby");
+        return kickPlayer(target, reason, executor, silent, activeServer, currentServer);
+    }
+
+    @Override
+    public boolean kickPlayer(String targetName, String reason, String executor, boolean silent, String activeServer, String server) {
+        Player player = Bukkit.getPlayer(targetName);
+        if (player == null) return false;
+        return kickPlayer(player.getUniqueId(), reason, executor, silent, activeServer, server);
+    }
+
+    @Override
+    public boolean kickPlayer(UUID target, String reason, String executor, boolean silent, String activeServer, String server) {
+        OfflinePlayer op = Bukkit.getOfflinePlayer(target);
+        if (!op.isOnline()) return false;
+
+        Player onlineTarget = (Player) op;
+
+        plugin.getLogger().info("[wapeB Debug] PlayerPunishEvent FIRED for " + onlineTarget.getName() + " | Original Executor: '" + executor + "' | Type: KICK | ActiveServer: " + activeServer + " | Server: " + server);
+
+        PlayerPunishEvent event = new PlayerPunishEvent(target, onlineTarget.getName(), null, Punishment.PunishmentType.KICK, reason, executor, activeServer, server, -1, silent);
+        Bukkit.getPluginManager().callEvent(event);
+
+        plugin.getLogger().info("[wapeB Debug] PlayerPunishEvent PROCESSED for " + onlineTarget.getName() + " | Final Executor: '" + event.getExecutor() + "' | Cancelled: " + event.isCancelled());
+
+        if (event.isCancelled()) return false;
+
+        Punishment p = new Punishment(dataManager.getNextId(), target, onlineTarget.getName(), Punishment.PunishmentType.KICK, event.getReason(), event.getExecutor(), event.getActiveServer(), event.getServer(), System.currentTimeMillis(), -1);
+        p.setActive(false);
+        dataManager.savePunishment(p);
+        WebhookUtil.sendPunishmentWebhook(p);
+
+        String broadcastMsg = configManager.getString("messages.kick.broadcast", "%prefix% %executor% kicked %player%.");
+        if (plugin.getPluginMessageManager() != null) {
+            plugin.getPluginMessageManager().sendPunishmentBroadcast("KICK", p, event.isSilent(), broadcastMsg);
+        }
+
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            String currentServer = configManager.getString("server-name", "Lobby");
+            boolean appliesToThisServer = p.isAppliesTo(currentServer);
+
+            if (appliesToThisServer) {
+                onlineTarget.kick(MessageUtil.formatKickScreen(configManager.getStringList("messages.kick.kick-screen"), p));
+            }
+            boolean showRemoteBroadcast = configManager.getBoolean("broadcast.show-remote-punishments", true);
+            if (appliesToThisServer || showRemoteBroadcast) {
+                if (event.isSilent()) {
+                    Bukkit.broadcast(MessageUtil.createComponent(configManager.getString("messages.kick.silent.prefix", "&7(Silent) ") + broadcastMsg, p), "wapeb.notify");
+                } else {
+                    Bukkit.broadcast(MessageUtil.createComponent(broadcastMsg, p));
+                }
+            }
+        });
+
+        return true;
     }
 
     @Override
@@ -621,11 +770,22 @@ public class WapeBAPIImpl implements WapeBAPI {
         activeBan.setActive(false);
         dataManager.savePunishment(activeBan);
 
+        String broadcastMsg = configManager.getString("messages.unban.broadcast", "%prefix% %executor% unbanned %player%.");
+        Punishment temp = new Punishment(activeBan.getId(), activeBan.getPlayerUuid(), activeBan.getPlayerName(), activeBan.getIpAddress(), activeBan.getType(), reason, executor, activeBan.getServer(), activeBan.getDate(), activeBan.getDuration());
+
+        if (plugin.getPluginMessageManager() != null && !broadcastMsg.isEmpty()) {
+            plugin.getPluginMessageManager().sendPunishmentBroadcast("UNBAN", temp, false, broadcastMsg);
+        }
+
         Bukkit.getScheduler().runTask(plugin, () -> {
-            String broadcastMsg = configManager.getString("messages.unban.broadcast", "%prefix% %executor% unbanned %player%.");
-            if (!broadcastMsg.isEmpty()) {
-                Punishment temp = new Punishment(activeBan.getId(), activeBan.getPlayerUuid(), activeBan.getPlayerName(), activeBan.getIpAddress(), activeBan.getType(), reason, executor, activeBan.getDate(), activeBan.getDuration());
-                Bukkit.broadcast(MessageUtil.createComponent(broadcastMsg, temp));
+            String currentServer = configManager.getString("server-name", "Lobby");
+            boolean appliesToThisServer = activeBan.getServer() == null || activeBan.getServer().equalsIgnoreCase("global") || activeBan.getServer().equalsIgnoreCase("all") || activeBan.getServer().equalsIgnoreCase(currentServer);
+
+            boolean showRemoteBroadcast = configManager.getBoolean("broadcast.show-remote-punishments", true);
+            if (appliesToThisServer || showRemoteBroadcast) {
+                if (!broadcastMsg.isEmpty()) {
+                    Bukkit.broadcast(MessageUtil.createComponent(broadcastMsg, temp));
+                }
             }
         });
 
@@ -664,11 +824,22 @@ public class WapeBAPIImpl implements WapeBAPI {
         activeMute.setActive(false);
         dataManager.savePunishment(activeMute);
 
+        String broadcastMsg = configManager.getString("messages.unmute.broadcast", "%prefix% %executor% unmuted %player%.");
+        Punishment temp = new Punishment(activeMute.getId(), activeMute.getPlayerUuid(), activeMute.getPlayerName(), activeMute.getIpAddress(), activeMute.getType(), reason, executor, activeMute.getServer(), activeMute.getDate(), activeMute.getDuration());
+
+        if (plugin.getPluginMessageManager() != null && !broadcastMsg.isEmpty()) {
+            plugin.getPluginMessageManager().sendPunishmentBroadcast("UNMUTE", temp, false, broadcastMsg);
+        }
+
         Bukkit.getScheduler().runTask(plugin, () -> {
-            String broadcastMsg = configManager.getString("messages.unmute.broadcast", "%prefix% %executor% unmuted %player%.");
-            if (!broadcastMsg.isEmpty()) {
-                Punishment temp = new Punishment(activeMute.getId(), activeMute.getPlayerUuid(), activeMute.getPlayerName(), activeMute.getIpAddress(), activeMute.getType(), reason, executor, activeMute.getDate(), activeMute.getDuration());
-                Bukkit.broadcast(MessageUtil.createComponent(broadcastMsg, temp));
+            String currentServer = configManager.getString("server-name", "Lobby");
+            boolean appliesToThisServer = activeMute.getServer() == null || activeMute.getServer().equalsIgnoreCase("global") || activeMute.getServer().equalsIgnoreCase("all") || activeMute.getServer().equalsIgnoreCase(currentServer);
+
+            boolean showRemoteBroadcast = configManager.getBoolean("broadcast.show-remote-punishments", true);
+            if (appliesToThisServer || showRemoteBroadcast) {
+                if (!broadcastMsg.isEmpty()) {
+                    Bukkit.broadcast(MessageUtil.createComponent(broadcastMsg, temp));
+                }
             }
         });
 

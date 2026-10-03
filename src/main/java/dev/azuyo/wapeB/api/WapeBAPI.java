@@ -79,15 +79,31 @@ public interface WapeBAPI {
 
     boolean banPlayer(UUID target, String reason, String executor, long duration, boolean silent, boolean ipBan);
     boolean banPlayer(String targetName, String reason, String executor, long duration, boolean silent, boolean ipBan);
+    boolean banPlayer(UUID target, String reason, String executor, long duration, boolean silent, boolean ipBan, String activeServer);
+    boolean banPlayer(String targetName, String reason, String executor, long duration, boolean silent, boolean ipBan, String activeServer);
+    boolean banPlayer(UUID target, String reason, String executor, long duration, boolean silent, boolean ipBan, String activeServer, String server);
+    boolean banPlayer(String targetName, String reason, String executor, long duration, boolean silent, boolean ipBan, String activeServer, String server);
 
     boolean mutePlayer(UUID target, String reason, String executor, long duration, boolean silent, boolean ipMute);
     boolean mutePlayer(String targetName, String reason, String executor, long duration, boolean silent, boolean ipMute);
+    boolean mutePlayer(UUID target, String reason, String executor, long duration, boolean silent, boolean ipMute, String activeServer);
+    boolean mutePlayer(String targetName, String reason, String executor, long duration, boolean silent, boolean ipMute, String activeServer);
+    boolean mutePlayer(UUID target, String reason, String executor, long duration, boolean silent, boolean ipMute, String activeServer, String server);
+    boolean mutePlayer(String targetName, String reason, String executor, long duration, boolean silent, boolean ipMute, String activeServer, String server);
 
     boolean warnPlayer(UUID target, String reason, String executor, boolean silent);
     boolean warnPlayer(String targetName, String reason, String executor, boolean silent);
+    boolean warnPlayer(UUID target, String reason, String executor, boolean silent, String activeServer);
+    boolean warnPlayer(String targetName, String reason, String executor, boolean silent, String activeServer);
+    boolean warnPlayer(UUID target, String reason, String executor, boolean silent, String activeServer, String server);
+    boolean warnPlayer(String targetName, String reason, String executor, boolean silent, String activeServer, String server);
 
     boolean kickPlayer(UUID target, String reason, String executor, boolean silent);
     boolean kickPlayer(String targetName, String reason, String executor, boolean silent);
+    boolean kickPlayer(UUID target, String reason, String executor, boolean silent, String activeServer);
+    boolean kickPlayer(String targetName, String reason, String executor, boolean silent, String activeServer);
+    boolean kickPlayer(UUID target, String reason, String executor, boolean silent, String activeServer, String server);
+    boolean kickPlayer(String targetName, String reason, String executor, boolean silent, String activeServer, String server);
 
     boolean freezePlayer(UUID target, String reason, String executor);
     boolean freezePlayer(String targetName, String reason, String executor);

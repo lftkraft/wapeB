@@ -415,6 +415,7 @@ public class WebAPIManager {
                 po.addProperty("type", p.getType().name());
                 po.addProperty("reason", p.getReason());
                 po.addProperty("executor", p.getExecutorName());
+                po.addProperty("server", p.getServer());
                 po.addProperty("date", p.getDate());
                 po.addProperty("active", p.isActive());
                 historyArr.add(po);
@@ -434,6 +435,18 @@ public class WebAPIManager {
             String typeStr = params.get("type");
             String reason = params.get("reason");
             String durationStr = params.get("duration");
+            String activeServer = params.get("active_server");
+            if (activeServer == null) activeServer = params.get("activeserver");
+            if (activeServer == null) activeServer = params.get("activeServer");
+            if (activeServer == null) activeServer = params.get("server");
+            if (activeServer == null || activeServer.trim().isEmpty()) activeServer = "global";
+
+            String originServer = params.get("origin_server");
+            if (originServer == null) originServer = params.get("server_origin");
+            if (originServer == null || originServer.trim().isEmpty()) {
+                originServer = plugin.getConfigManager().getString("server-name", "Web");
+            }
+
             boolean silent = "true".equalsIgnoreCase(params.get("silent"));
             
             if (adminUuidStr == null) {
@@ -453,7 +466,7 @@ public class WebAPIManager {
             long duration = (durationStr == null || durationStr.isEmpty() || durationStr.equals("-1")) ? -1 : TimeUtil.parseTime(durationStr);
             String targetIp = target.isOnline() ? ((Player)target).getAddress().getAddress().getHostAddress() : plugin.getPlayerDataManager().getLastKnownIp(target.getUniqueId());
             
-            Punishment p = new Punishment(plugin.getDataManager().getNextId(), target.getUniqueId(), target.getName(), targetIp, type, reason, getAdminName(adminUuid), System.currentTimeMillis(), duration);
+            Punishment p = new Punishment(plugin.getDataManager().getNextId(), target.getUniqueId(), target.getName(), targetIp, type, reason, getAdminName(adminUuid), activeServer, originServer, System.currentTimeMillis(), duration);
             
             // KICK esetén alapból inaktív legyen
             if (type == Punishment.PunishmentType.KICK) {
@@ -470,7 +483,10 @@ public class WebAPIManager {
             
             final String finalTypeKey = typeKey;
             Bukkit.getScheduler().runTask(plugin, () -> {
-                if (target.isOnline() && (type == Punishment.PunishmentType.BAN || type == Punishment.PunishmentType.TEMPBAN || type == Punishment.PunishmentType.KICK)) {
+                String currentServer = plugin.getConfigManager().getString("server-name", "Lobby");
+                boolean appliesToThisServer = p.isAppliesTo(currentServer);
+
+                if (target.isOnline() && appliesToThisServer && (type == Punishment.PunishmentType.BAN || type == Punishment.PunishmentType.TEMPBAN || type == Punishment.PunishmentType.KICK)) {
                     ((Player)target).kick(MessageUtil.formatKickScreen(plugin.getConfigManager().getStringList("messages." + finalTypeKey + ".kick-screen"), p));
                 }
                 String broadcastMsg = plugin.getConfigManager().getString("messages." + finalTypeKey + ".broadcast", "");
@@ -510,7 +526,7 @@ public class WebAPIManager {
 
                     String broadcastMsg = plugin.getConfigManager().getString("messages." + unKey + ".broadcast", "");
                     if (!broadcastMsg.isEmpty()) {
-                        Punishment temp = new Punishment(p.getId(), p.getPlayerUuid(), p.getPlayerName(), p.getType(), p.getReason(), getAdminName(adminUuid), p.getDate(), p.getDuration());
+                        Punishment temp = new Punishment(p.getId(), p.getPlayerUuid(), p.getPlayerName(), p.getType(), p.getReason(), getAdminName(adminUuid), p.getActiveServer(), p.getServer(), p.getDate(), p.getDuration());
                         Bukkit.broadcast(MessageUtil.createComponent(broadcastMsg, temp));
                     }
                 });
@@ -536,6 +552,9 @@ public class WebAPIManager {
                     po.addProperty("type", p.getType().name());
                     po.addProperty("reason", p.getReason());
                     po.addProperty("executor", p.getExecutorName());
+                    po.addProperty("activeServer", p.getActiveServer());
+                    po.addProperty("active_server", p.getActiveServer());
+                    po.addProperty("server", p.getServer());
                     po.addProperty("date", p.getDate());
                     po.addProperty("duration", p.getDuration());
                     po.addProperty("active", p.isActive());
@@ -568,6 +587,9 @@ public class WebAPIManager {
                 obj.addProperty("type", p.getType().name());
                 obj.addProperty("reason", p.getReason());
                 obj.addProperty("executor", p.getExecutorName());
+                obj.addProperty("activeServer", p.getActiveServer());
+                obj.addProperty("active_server", p.getActiveServer());
+                obj.addProperty("server", p.getServer());
                 obj.addProperty("date", p.getDate());
                 obj.addProperty("duration", p.getDuration());
                 obj.addProperty("active", p.isActive());
@@ -599,6 +621,9 @@ public class WebAPIManager {
                 obj.addProperty("type", activeBan.getType().name());
                 obj.addProperty("reason", activeBan.getReason());
                 obj.addProperty("executor", activeBan.getExecutorName());
+                obj.addProperty("activeServer", activeBan.getActiveServer());
+                obj.addProperty("active_server", activeBan.getActiveServer());
+                obj.addProperty("server", activeBan.getServer());
                 obj.addProperty("date", activeBan.getDate());
                 obj.addProperty("end", activeBan.getEnd());
                 sendResponse(exchange, 200, obj.toString());
@@ -628,6 +653,9 @@ public class WebAPIManager {
                 obj.addProperty("type", activeMute.getType().name());
                 obj.addProperty("reason", activeMute.getReason());
                 obj.addProperty("executor", activeMute.getExecutorName());
+                obj.addProperty("activeServer", activeMute.getActiveServer());
+                obj.addProperty("active_server", activeMute.getActiveServer());
+                obj.addProperty("server", activeMute.getServer());
                 obj.addProperty("date", activeMute.getDate());
                 obj.addProperty("end", activeMute.getEnd());
                 sendResponse(exchange, 200, obj.toString());

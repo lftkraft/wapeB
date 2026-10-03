@@ -73,6 +73,7 @@ public class PlayerLoginListener implements Listener {
                 Punishment kickPunishment = new Punishment(
                     activeBan.getId(), activeBan.getPlayerUuid(), playerName, activeBan.getIpAddress(),
                     activeBan.getType(), activeBan.getReason(), activeBan.getExecutorName(),
+                    activeBan.getServer(),
                     activeBan.getDate(), activeBan.getDuration()
                 );
                 

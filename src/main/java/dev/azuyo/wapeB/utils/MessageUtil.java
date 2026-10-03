@@ -109,6 +109,13 @@ public class MessageUtil {
             String originalStr = TimeUtil.formatDuration(punishment.getDuration());
             String detailedOriginalStr = TimeUtil.formatDetailedDuration(punishment.getDuration());
 
+            String originServerName = (punishment.getServer() != null && !punishment.getServer().isEmpty()) 
+                    ? punishment.getServer() 
+                    : (WapeB.getInstance() != null && WapeB.getInstance().getConfigManager() != null ? WapeB.getInstance().getConfigManager().getString("server-name", "global") : "global");
+            String activeServerName = (punishment.getActiveServer() != null && !punishment.getActiveServer().isEmpty())
+                    ? punishment.getActiveServer()
+                    : "global";
+
             result = result
                     .replace("%time%", remainingStr)
                     .replace("%duration%", remainingStr)
@@ -125,6 +132,9 @@ public class MessageUtil {
                     .replace("%executor%", punishment.getExecutorName() != null ? punishment.getExecutorName() : "N/A")
                     .replace("%reason%", punishment.getReason() != null ? punishment.getReason() : "N/A")
                     .replace("%type%", typeName)
+                    .replace("%server%", originServerName)
+                    .replace("%activeserver%", activeServerName)
+                    .replace("%active_server%", activeServerName)
                     .replace("%punishment_id%", String.valueOf(punishment.getId()))
                     .replace("%date%", DATE_FORMAT.format(new Date(punishment.getDate())))
                     .replace("%end_date%", (punishment.getEnd() == -1) ? "Permanent" : DATE_FORMAT.format(new Date(punishment.getEnd())));
@@ -139,6 +149,12 @@ public class MessageUtil {
         }
 
         if (punishment == null) {
+            String currentServer = WapeB.getInstance() != null && WapeB.getInstance().getConfigManager() != null 
+                    ? WapeB.getInstance().getConfigManager().getString("server-name", "global") 
+                    : "global";
+            result = result.replace("%server%", currentServer)
+                    .replace("%activeserver%", "global")
+                    .replace("%active_server%", "global");
             // Replace remaining standard placeholders with empty string if no punishment object
             String[] placeholders = {
                     "%player%", "%executor%", "%reason%", "%type%", "%punishment_id%",

@@ -40,9 +40,32 @@ public class KickCommand implements CommandExecutor {
             return true;
         }
 
-        boolean silent = args.length > 1 && args[args.length - 1].equalsIgnoreCase("-s");
-        String[] reasonArgs = silent ? Arrays.copyOfRange(args, 1, args.length - 1) : Arrays.copyOfRange(args, 1, args.length);
-        String reason = String.join(" ", reasonArgs);
+        java.util.List<String> arguments = new java.util.ArrayList<>(Arrays.asList(args).subList(1, args.length));
+
+        boolean silent = arguments.remove("-s");
+        String server = "global";
+        for (int i = arguments.size() - 1; i >= 0; i--) {
+            String arg = arguments.get(i);
+            if (arg.toLowerCase().startsWith("-server:")) {
+                server = arg.substring(8);
+                arguments.remove(i);
+                break;
+            } else if (arg.toLowerCase().startsWith("-srv:")) {
+                server = arg.substring(5);
+                arguments.remove(i);
+                break;
+            } else if (arg.toLowerCase().startsWith("-server=")) {
+                server = arg.substring(8);
+                arguments.remove(i);
+                break;
+            } else if (arg.startsWith("-") && arg.length() > 1 && !arg.equalsIgnoreCase("-s") && !arg.matches("^-\\d+$")) {
+                server = arg.substring(1);
+                arguments.remove(i);
+                break;
+            }
+        }
+
+        String reason = String.join(" ", arguments);
 
         if (reason.isEmpty()) {
             reason = configManager.getString("messages.kick.default-reason", "You have been kicked.");
@@ -50,9 +73,9 @@ public class KickCommand implements CommandExecutor {
 
         String executorName = (sender instanceof Player) ? sender.getName() : configManager.getString("console-name", "Console");
 
-        boolean success = plugin.getApi().kickPlayer(target.getUniqueId(), reason, executorName, silent);
+        boolean success = plugin.getApi().kickPlayer(target.getUniqueId(), reason, executorName, silent, server);
         if (success) {
-            Punishment p = new Punishment(0, target.getUniqueId(), target.getName(), Punishment.PunishmentType.KICK, reason, executorName, System.currentTimeMillis(), 0);
+            Punishment p = new Punishment(0, target.getUniqueId(), target.getName(), Punishment.PunishmentType.KICK, reason, executorName, server, System.currentTimeMillis(), 0);
             sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.kick.success", "&aSuccessfully kicked %player%."), p));
         }
 

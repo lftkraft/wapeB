@@ -25,6 +25,7 @@ public final class WapeB extends JavaPlugin {
     private SentinelManager sentinelManager;
     private CommandManager commandManager;
     private TemplateManager templateManager;
+    private PluginMessageManager pluginMessageManager;
 
     @Override
     public void onEnable() {
@@ -36,6 +37,9 @@ public final class WapeB extends JavaPlugin {
 
         // Initialize Template Manager
         templateManager = new TemplateManager(this);
+
+        // Initialize Plugin Message Manager for Velocity proxy communication
+        pluginMessageManager = new PluginMessageManager(this);
 
         // Initialize TimeUtil from config
         ConfigurationSection timeSection = configManager.getConfigurationSection("time-formats");
@@ -52,8 +56,10 @@ public final class WapeB extends JavaPlugin {
         }
 
         // Initialize data manager based on config
-        String storageMethod = configManager.getString("storage-method", "yaml");
-        if (storageMethod.equalsIgnoreCase("sqlite")) {
+        String storageMethod = configManager.getString("storage-method", "sqlite");
+        if (storageMethod.equalsIgnoreCase("mysql") || storageMethod.equalsIgnoreCase("mariadb")) {
+            dataManager = new MysqlDataManager(this);
+        } else if (storageMethod.equalsIgnoreCase("sqlite")) {
             dataManager = new SqliteDataManager(this);
         } else {
             dataManager = new YamlDataManager(this);
@@ -89,6 +95,9 @@ public final class WapeB extends JavaPlugin {
     public void onDisable() {
         if (webAPIManager != null) {
             webAPIManager.stopServer();
+        }
+        if (dataManager != null) {
+            dataManager.close();
         }
         getLogger().info("wapeB has been disabled!");
     }
@@ -175,5 +184,9 @@ public final class WapeB extends JavaPlugin {
 
     public TemplateManager getTemplateManager() {
         return templateManager;
+    }
+
+    public PluginMessageManager getPluginMessageManager() {
+        return pluginMessageManager;
     }
 }

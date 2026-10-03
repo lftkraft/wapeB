@@ -56,6 +56,8 @@ public class SqliteDataManager implements DataManager {
                 "type TEXT NOT NULL," +
                 "reason TEXT," +
                 "executorName TEXT NOT NULL," +
+                "active_server TEXT DEFAULT 'global'," +
+                "server TEXT DEFAULT 'global'," +
                 "date INTEGER NOT NULL," +
                 "duration INTEGER NOT NULL," +
                 "end INTEGER NOT NULL," +
@@ -70,6 +72,14 @@ public class SqliteDataManager implements DataManager {
         try (Statement stmt = connection.createStatement()) {
             stmt.execute(sql);
             stmt.execute(webUsersSql);
+            try {
+                stmt.execute("ALTER TABLE punishments ADD COLUMN server TEXT DEFAULT 'global'");
+            } catch (SQLException ignored) {
+            }
+            try {
+                stmt.execute("ALTER TABLE punishments ADD COLUMN active_server TEXT DEFAULT 'global'");
+            } catch (SQLException ignored) {
+            }
         } catch (SQLException e) {
             plugin.getLogger().severe("Could not create tables!");
             e.printStackTrace();
@@ -81,9 +91,9 @@ public class SqliteDataManager implements DataManager {
         boolean isUpdate = (punishment.getId() != 0 && getPunishment(punishment.getId()) != null);
         String sql;
         if (isUpdate) {
-            sql = "UPDATE punishments SET active = ?, playerUuid = ?, playerName = ?, ipAddress = ?, type = ?, reason = ?, executorName = ?, date = ?, duration = ?, end = ? WHERE id = ?";
+            sql = "UPDATE punishments SET active = ?, playerUuid = ?, playerName = ?, ipAddress = ?, type = ?, reason = ?, executorName = ?, active_server = ?, server = ?, date = ?, duration = ?, end = ? WHERE id = ?";
         } else {
-            sql = "INSERT INTO punishments(playerUuid, playerName, ipAddress, type, reason, executorName, date, duration, end, active) VALUES(?,?,?,?,?,?,?,?,?,?)";
+            sql = "INSERT INTO punishments(playerUuid, playerName, ipAddress, type, reason, executorName, active_server, server, date, duration, end, active) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)";
         }
 
         try (PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -95,10 +105,12 @@ public class SqliteDataManager implements DataManager {
                 pstmt.setString(5, punishment.getType().toString());
                 pstmt.setString(6, punishment.getReason());
                 pstmt.setString(7, punishment.getExecutorName());
-                pstmt.setLong(8, punishment.getDate());
-                pstmt.setLong(9, punishment.getDuration());
-                pstmt.setLong(10, punishment.getEnd());
-                pstmt.setInt(11, punishment.getId());
+                pstmt.setString(8, punishment.getActiveServer() != null ? punishment.getActiveServer() : "global");
+                pstmt.setString(9, punishment.getServer() != null ? punishment.getServer() : "global");
+                pstmt.setLong(10, punishment.getDate());
+                pstmt.setLong(11, punishment.getDuration());
+                pstmt.setLong(12, punishment.getEnd());
+                pstmt.setInt(13, punishment.getId());
             } else { // INSERT
                 pstmt.setString(1, punishment.getPlayerUuid() != null ? punishment.getPlayerUuid().toString() : null);
                 pstmt.setString(2, punishment.getPlayerName());
@@ -106,10 +118,12 @@ public class SqliteDataManager implements DataManager {
                 pstmt.setString(4, punishment.getType().toString());
                 pstmt.setString(5, punishment.getReason());
                 pstmt.setString(6, punishment.getExecutorName());
-                pstmt.setLong(7, punishment.getDate());
-                pstmt.setLong(8, punishment.getDuration());
-                pstmt.setLong(9, punishment.getEnd());
-                pstmt.setBoolean(10, punishment.isActive());
+                pstmt.setString(7, punishment.getActiveServer() != null ? punishment.getActiveServer() : "global");
+                pstmt.setString(8, punishment.getServer() != null ? punishment.getServer() : "global");
+                pstmt.setLong(9, punishment.getDate());
+                pstmt.setLong(10, punishment.getDuration());
+                pstmt.setLong(11, punishment.getEnd());
+                pstmt.setBoolean(12, punishment.isActive());
             }
             
             pstmt.executeUpdate();
@@ -190,6 +204,7 @@ public class SqliteDataManager implements DataManager {
     @Override
     public synchronized List<Punishment> getAllActiveBans() {
         List<Punishment> activeBans = new ArrayList<>();
+        String currentServer = plugin.getConfigManager().getString("server-name", "Lobby");
         String types = allBanTypes.stream()
                 .map(type -> "'" + type.toString() + "'")
                 .collect(Collectors.joining(","));
@@ -198,6 +213,9 @@ public class SqliteDataManager implements DataManager {
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
                 Punishment punishment = buildPunishmentFromResultSet(rs);
+                if (!punishment.isAppliesTo(currentServer)) {
+                    continue;
+                }
                 if (punishment.getDuration() == -1 || punishment.getEnd() > System.currentTimeMillis()) {
                     activeBans.add(punishment);
                 } else {
@@ -266,6 +284,8 @@ public class SqliteDataManager implements DataManager {
             return null;
         }
 
+        String currentServer = plugin.getConfigManager().getString("server-name", "Lobby");
+
         StringBuilder sqlBuilder = new StringBuilder("SELECT * FROM punishments WHERE active = 1 AND (");
         List<String> conditions = new ArrayList<>();
         if (playerUuid != null) {
@@ -310,6 +330,9 @@ public class SqliteDataManager implements DataManager {
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
                 Punishment p = buildPunishmentFromResultSet(rs);
+                if (!p.isAppliesTo(currentServer)) {
+                    continue;
+                }
                 if (p.getDuration() == -1 || p.getEnd() > System.currentTimeMillis()) {
                     return p;
                 } else {
@@ -326,6 +349,9 @@ public class SqliteDataManager implements DataManager {
                     ResultSet cidrRs = cidrStmt.executeQuery();
                     while (cidrRs.next()) {
                         Punishment p = buildPunishmentFromResultSet(cidrRs);
+                        if (!p.isAppliesTo(currentServer)) {
+                            continue;
+                        }
                         if (dev.azuyo.wapeB.utils.IPUtil.isIpInCidr(ipAddress, p.getIpAddress())) {
                             if (p.getDuration() == -1 || p.getEnd() > System.currentTimeMillis()) {
                                 return p;
@@ -438,11 +464,21 @@ public class SqliteDataManager implements DataManager {
         Punishment.PunishmentType type = Punishment.PunishmentType.valueOf(rs.getString("type"));
         String reason = rs.getString("reason");
         String executorName = rs.getString("executorName");
+        String activeServer = "global";
+        try {
+            activeServer = rs.getString("active_server");
+            if (activeServer == null || activeServer.isEmpty()) activeServer = "global";
+        } catch (SQLException ignored) {}
+        String server = "global";
+        try {
+            server = rs.getString("server");
+            if (server == null || server.isEmpty()) server = "global";
+        } catch (SQLException ignored) {}
         long date = rs.getLong("date");
         long duration = rs.getLong("duration");
         boolean active = rs.getBoolean("active");
 
-        Punishment p = new Punishment(id, playerUuid, playerName, ipAddress, type, reason, executorName, date, duration);
+        Punishment p = new Punishment(id, playerUuid, playerName, ipAddress, type, reason, executorName, activeServer, server, date, duration);
         p.setActive(active);
         return p;
     }

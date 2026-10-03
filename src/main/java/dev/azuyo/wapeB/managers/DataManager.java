@@ -38,4 +38,6 @@ public interface DataManager {
     // Web Password Methods
     void setWebPassword(UUID uuid, String hashedPassword);
     String getWebPassword(UUID uuid);
+
+    default void close() {}
 }

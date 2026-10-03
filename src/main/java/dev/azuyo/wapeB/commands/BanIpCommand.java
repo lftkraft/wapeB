@@ -69,13 +69,35 @@ public class BanIpCommand implements CommandExecutor {
             return true;
         }
 
-        boolean silent = args.length > 1 && args[args.length - 1].equalsIgnoreCase("-s");
-        String[] reasonArgs = silent ? Arrays.copyOfRange(args, 1, args.length - 1) : Arrays.copyOfRange(args, 1, args.length);
+        java.util.List<String> arguments = new java.util.ArrayList<>(Arrays.asList(args).subList(1, args.length));
+        boolean silent = arguments.remove("-s");
+        String server = "global";
+        for (int i = arguments.size() - 1; i >= 0; i--) {
+            String arg = arguments.get(i);
+            if (arg.toLowerCase().startsWith("-server:")) {
+                server = arg.substring(8);
+                arguments.remove(i);
+                break;
+            } else if (arg.toLowerCase().startsWith("-srv:")) {
+                server = arg.substring(5);
+                arguments.remove(i);
+                break;
+            } else if (arg.toLowerCase().startsWith("-server=")) {
+                server = arg.substring(8);
+                arguments.remove(i);
+                break;
+            } else if (arg.startsWith("-") && arg.length() > 1 && !arg.equalsIgnoreCase("-s") && !arg.equalsIgnoreCase("-ip") && !arg.matches("^-\\d+$")) {
+                server = arg.substring(1);
+                arguments.remove(i);
+                break;
+            }
+        }
+
         long duration = -1;
         String reason = null;
 
-        if (reasonArgs.length > 0) {
-            String firstArg = reasonArgs[0];
+        if (!arguments.isEmpty()) {
+            String firstArg = arguments.get(0);
             if (firstArg.startsWith("$")) {
                 dev.azuyo.wapeB.managers.TemplateManager.PunishmentTemplate template = plugin.getTemplateManager().getTemplate("ban", firstArg);
                 if (template != null) {
@@ -83,20 +105,20 @@ public class BanIpCommand implements CommandExecutor {
                     if (template.getDuration() != null && !template.getDuration().equalsIgnoreCase("perm")) {
                         duration = TimeUtil.parseTime(template.getDuration());
                     }
-                    reasonArgs = Arrays.copyOfRange(reasonArgs, 1, reasonArgs.length);
+                    arguments.remove(0);
                 }
             } else {
                 long parsedTime = TimeUtil.parseTime(firstArg);
                 if (parsedTime != -1) {
                     duration = parsedTime;
-                    reasonArgs = Arrays.copyOfRange(reasonArgs, 1, reasonArgs.length);
+                    arguments.remove(0);
                 }
             }
         }
 
         if (reason == null || reason.isEmpty()) {
-            if (reasonArgs.length > 0 && reasonArgs[0].startsWith("$")) {
-                dev.azuyo.wapeB.managers.TemplateManager.PunishmentTemplate template = plugin.getTemplateManager().getTemplate("ban", reasonArgs[0]);
+            if (!arguments.isEmpty() && arguments.get(0).startsWith("$")) {
+                dev.azuyo.wapeB.managers.TemplateManager.PunishmentTemplate template = plugin.getTemplateManager().getTemplate("ban", arguments.get(0));
                 if (template != null) {
                     reason = template.getReason();
                     if (duration == -1 && template.getDuration() != null && !template.getDuration().equalsIgnoreCase("perm")) {
@@ -104,7 +126,7 @@ public class BanIpCommand implements CommandExecutor {
                     }
                 }
             } else {
-                reason = String.join(" ", reasonArgs);
+                reason = String.join(" ", arguments);
             }
         }
         if (reason == null || reason.isEmpty()) {
@@ -113,9 +135,13 @@ public class BanIpCommand implements CommandExecutor {
 
         String executorName = (sender instanceof Player) ? sender.getName() : configManager.getString("console-name", "Console");
 
-        boolean success = plugin.getApi().banPlayer(finalTargetName, reason, executorName, duration, silent, true);
+        boolean success = plugin.getApi().banPlayer(finalTargetName, reason, executorName, duration, silent, true, server);
         if (success) {
             Punishment ban = plugin.getApi().getActiveBan(finalTargetName);
+            if (ban == null) {
+                Punishment.PunishmentType pType = (duration == -1 ? Punishment.PunishmentType.IPBAN : Punishment.PunishmentType.TEMPIPBAN);
+                ban = new Punishment(-1, targetPlayer != null ? targetPlayer.getUniqueId() : null, finalTargetName, targetIp, pType, reason, executorName, server, System.currentTimeMillis(), duration);
+            }
             sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.banip.success", "&aSuccessfully IP-banned %player%."), ban));
         }
 
