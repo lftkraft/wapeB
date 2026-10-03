@@ -20,29 +20,23 @@ dependencies {
     // LuckPerms API
     compileOnly("net.luckperms:api:5.4")
     
-    // SQLite JDBC Driver
-    implementation 'org.xerial:sqlite-jdbc:3.41.2.2'
-    // HikariCP Connection Pool
-    implementation 'com.zaxxer:HikariCP:5.1.0'
-    // MySQL / MariaDB Drivers
-    implementation 'com.mysql:mysql-connector-j:8.3.0'
-    implementation 'org.mariadb.jdbc:mariadb-java-client:3.3.3'
-    // Gson for JSON serialization/deserialization
-    implementation 'com.google.code.gson:gson:2.10.1'
+    // SQLite JDBC Driver (provided by Paper/Spigot)
+    compileOnly 'org.xerial:sqlite-jdbc:3.41.2.2'
+    // HikariCP Connection Pool (loaded via plugin.yml libraries)
+    compileOnly 'com.zaxxer:HikariCP:5.1.0'
+    // MySQL / MariaDB Drivers (loaded via plugin.yml libraries)
+    compileOnly 'com.mysql:mysql-connector-j:8.3.0'
+    compileOnly 'org.mariadb.jdbc:mariadb-java-client:3.3.3'
+    // Gson (provided by Paper/Spigot)
+    compileOnly 'com.google.code.gson:gson:2.10.1'
     
-    // BCrypt for password hashing
-    implementation 'org.mindrot:jbcrypt:0.4'
+    // BCrypt for password hashing (loaded via plugin.yml libraries)
+    compileOnly 'org.mindrot:jbcrypt:0.4'
 }
 
 tasks {
     runServer {
         minecraftVersion("1.18.2")
-    }
-    jar {
-        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-        from {
-            configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-        }
     }
 }
 
