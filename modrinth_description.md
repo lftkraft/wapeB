@@ -1,19 +1,22 @@
-# 🔨 wapeB - Ultimate Minecraft Punishment System, AI Sentinel & Developer API
+# 🔨 wapeB - Ultimate Minecraft Punishment System, Velocity Bridge & Developer API
 
+[![Velocity](https://img.shields.io/badge/Velocity%20Proxy-Companion%20Bridge%20Included-6366f1?logo=velocity&logoColor=white)](https://github.com/lftkraft/wapeB)
 [![GitHub](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/lftkraft/wapeB)
 [![Version](https://img.shields.io/badge/version-v1.0.13--alpha.1-orange?logo=github)](https://github.com/lftkraft/wapeB/releases)
 [![JitPack](https://jitpack.io/v/lftkraft/wapeB.svg)](https://jitpack.io/#lftkraft/wapeB)
 [![Java](https://img.shields.io/badge/Java-17%2B-red?logo=openjdk)](https://adoptium.net/)
 
-**wapeB** is a modern, high-performance Paper/Spigot punishment management system built for Minecraft **1.18.2 – 1.21.x** with full **Velocity Proxy** support. It combines an advanced punishment suite, AI-powered automatic chat moderation, multi-server scoping, a comprehensive Java API, Bukkit Custom Events, dynamic command overrides, and a built-in HTTP REST Web API.
+**wapeB** is a complete, high-performance Minecraft punishment and moderation ecosystem built for **Paper/Spigot (1.18.2 – 1.21.x)** and powered by the official **`wapeb-velocity`** proxy companion bridge. 
+
+It provides instant cross-server network synchronization (`wapeb:channel`), intelligent multi-server scoping (`activeserver` vs `server`), AI-driven automatic chat moderation (Sentinel), an advanced Java API, Bukkit Custom Events, dynamic command overrides, and a built-in HTTP REST Web API.
 
 ---
 
 ## ✨ Key Features
 
+- ⚡ **Official Velocity Companion (`wapeb-velocity`)**: High-speed, non-blocking cross-server synchronization via native Minecraft plugin messaging (`wapeb:channel`) with proxy-level kick enforcement.
+- 🌐 **Intelligent Multi-Server Scoping (`activeserver` vs `server`)**: Target specific sub-servers (`survival`, `server1,server2`) or enforce network-wide (`global`), while preserving the exact origin server audit trail.
 - 🔨 **Complete Punishment Suite**: Ban, TempBan, IP-Ban, Temp-IP-Ban, Mute, TempMute, IP-Mute, Temp-IP-Mute, Warn, Kick, KickAll, Freeze, and Lockdown.
-- ⚡ **Velocity Proxy Support & Companion Plugin**: Instant cross-server plugin messaging (`wapeb:channel`) and proxy-level disconnects with `wapeb-velocity`.
-- 🌐 **Multi-Server Scoping (`activeserver` vs `server`)**: Target specific servers (`survival`, `server1,server2`) or apply network-wide (`global`), while preserving the origin server audit trail.
 - 🤖 **Sentinel AI Auto-Moderation**: Integrates with Groq AI to detect toxicity, swearing, and chat violations automatically in real time with zero server lag.
 - 🎨 **Included Cyberpunk Web Panel**: A modern Neon/Glassmorphism web interface with in-game 2FA login, Chart.js statistics, and live punishment management.
 - 🥶 **Advanced Freeze / Screenshare System**: Prevents movement, PvP, block breaking, and item drops while frozen, with automatic logout enforcement.

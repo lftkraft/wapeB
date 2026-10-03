@@ -1,8 +1,10 @@
-# 🔨 wapeB - Comprehensive Minecraft Punishment System & API
+# 🔨 wapeB - Comprehensive Minecraft Punishment System & Velocity Bridge
 
-A powerful, modern Paper/Spigot punishment plugin featuring a comprehensive **Java API**, **Bukkit Event System**, **Dynamic Command Overrides**, and **HTTP REST Web API**.
+A powerful, modern Paper/Spigot punishment plugin featuring full **Velocity Proxy integration (`wapeb-velocity`)**, **Java API**, **Bukkit Event System**, **Dynamic Command Overrides**, and **HTTP REST Web API**.
 
-[![Release](https://img.shields.io/github/v/tag/lftkraft/wapeB?label=version)](https://github.com/lftkraft/wapeB/releases) [![JitPack](https://jitpack.io/v/lftkraft/wapeB.svg)](https://jitpack.io/#lftkraft/wapeB)
+[![Velocity](https://img.shields.io/badge/Velocity%20Proxy-Companion%20Bridge%20Included-6366f1?logo=velocity&logoColor=white)](https://github.com/lftkraft/wapeB)
+[![Release](https://img.shields.io/github/v/tag/lftkraft/wapeB?label=version)](https://github.com/lftkraft/wapeB/releases)
+[![JitPack](https://jitpack.io/v/lftkraft/wapeB.svg)](https://jitpack.io/#lftkraft/wapeB)
 
 > 📖 **Complete Developer API Documentation:** [API_DOCUMENTATION.md](file:///e:/pluginok/wapeB/API_DOCUMENTATION.md)  
 > 📝 **Changelog:** [CHANGELOG.md](file:///e:/pluginok/wapeB/CHANGELOG.md)
