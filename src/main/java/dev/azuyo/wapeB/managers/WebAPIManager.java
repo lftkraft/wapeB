@@ -415,6 +415,8 @@ public class WebAPIManager {
                 po.addProperty("type", p.getType().name());
                 po.addProperty("reason", p.getReason());
                 po.addProperty("executor", p.getExecutorName());
+                po.addProperty("activeServer", p.getActiveServer());
+                po.addProperty("active_server", p.getActiveServer());
                 po.addProperty("server", p.getServer());
                 po.addProperty("date", p.getDate());
                 po.addProperty("active", p.isActive());

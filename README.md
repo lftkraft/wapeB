@@ -2,9 +2,10 @@
 
 A powerful, modern Paper/Spigot punishment plugin featuring a comprehensive **Java API**, **Bukkit Event System**, **Dynamic Command Overrides**, and **HTTP REST Web API**.
 
-[![JitPack](https://jitpack.io/v/lftkraft/wapeB.svg)](https://jitpack.io/#lftkraft/wapeB)
+[![Release](https://img.shields.io/github/v/tag/lftkraft/wapeB?label=version)](https://github.com/lftkraft/wapeB/releases) [![JitPack](https://jitpack.io/v/lftkraft/wapeB.svg)](https://jitpack.io/#lftkraft/wapeB)
 
-> 📖 **Complete Developer API Documentation:** [API_DOCUMENTATION.md](file:///e:/pluginok/wapeB/API_DOCUMENTATION.md)
+> 📖 **Complete Developer API Documentation:** [API_DOCUMENTATION.md](file:///e:/pluginok/wapeB/API_DOCUMENTATION.md)  
+> 📝 **Changelog:** [CHANGELOG.md](file:///e:/pluginok/wapeB/CHANGELOG.md)
 
 ---
 
