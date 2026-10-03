@@ -1,6 +1,6 @@
 # 🔨 wapeB - Ultimate Minecraft Punishment System, Velocity Bridge & Developer API
 
-[![Velocity](https://img.shields.io/badge/Velocity%20Proxy-Companion%20Bridge%20Included-6366f1?logo=velocity&logoColor=white)](https://github.com/lftkraft/wapeB)
+[![Velocity](https://img.shields.io/badge/Velocity%20Proxy-Companion%20Bridge%20(wapeb--velocity)-6366f1?logo=velocity&logoColor=white)](https://github.com/lftkraft/wapeb-velocity)
 [![GitHub](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/lftkraft/wapeB)
 [![Version](https://img.shields.io/badge/version-v1.0.13--alpha.1-orange?logo=github)](https://github.com/lftkraft/wapeB/releases)
 [![JitPack](https://jitpack.io/v/lftkraft/wapeB.svg)](https://jitpack.io/#lftkraft/wapeB)

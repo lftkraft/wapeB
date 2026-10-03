@@ -2,7 +2,7 @@
 
 A powerful, modern Paper/Spigot punishment plugin featuring full **Velocity Proxy integration (`wapeb-velocity`)**, **Java API**, **Bukkit Event System**, **Dynamic Command Overrides**, and **HTTP REST Web API**.
 
-[![Velocity](https://img.shields.io/badge/Velocity%20Proxy-Companion%20Bridge%20Included-6366f1?logo=velocity&logoColor=white)](https://github.com/lftkraft/wapeB)
+[![Velocity](https://img.shields.io/badge/Velocity%20Proxy-Companion%20Bridge%20(wapeb--velocity)-6366f1?logo=velocity&logoColor=white)](https://github.com/lftkraft/wapeb-velocity)
 [![Release](https://img.shields.io/github/v/tag/lftkraft/wapeB?label=version)](https://github.com/lftkraft/wapeB/releases)
 [![JitPack](https://jitpack.io/v/lftkraft/wapeB.svg)](https://jitpack.io/#lftkraft/wapeB)
 
