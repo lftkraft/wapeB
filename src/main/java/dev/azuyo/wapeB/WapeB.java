@@ -102,6 +102,9 @@ public final class WapeB extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        if (commandManager != null) {
+            commandManager.unregisterAll();
+        }
         if (webAPIManager != null) {
             webAPIManager.stopServer();
         }
