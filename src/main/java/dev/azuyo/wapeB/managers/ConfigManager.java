@@ -66,6 +66,10 @@ public class ConfigManager {
         try {
             YamlConfiguration yaml = YamlConfiguration.loadConfiguration(file);
             boolean synced = syncConfigDefaults(file, yaml, "messages/" + lang + ".yml");
+            if (!lang.equalsIgnoreCase("en")) {
+                boolean fallbackSynced = syncConfigDefaults(file, yaml, "messages/en.yml");
+                if (fallbackSynced) synced = true;
+            }
             if (synced && messagesFile != null && messagesFile.equals(file)) {
                 this.messagesConfig = yaml;
             }
@@ -93,7 +97,7 @@ public class ConfigManager {
 
             if (modified) {
                 targetConfig.save(targetFile);
-                plugin.getLogger().info("Automatically synchronized " + addedKeys + " missing configuration/message key(s) in " + targetFile.getName());
+                plugin.getLogger().info("Automatically synchronized " + addedKeys + " missing configuration/message key(s) in " + targetFile.getName() + " from " + resourcePath);
                 return true;
             }
         } catch (Exception e) {
@@ -113,6 +117,9 @@ public class ConfigManager {
         if (messagesFile.exists()) {
             messagesConfig = YamlConfiguration.loadConfiguration(messagesFile);
             syncConfigDefaults(messagesFile, messagesConfig, "messages/" + lang + ".yml");
+            if (!lang.equalsIgnoreCase("en")) {
+                syncConfigDefaults(messagesFile, messagesConfig, "messages/en.yml");
+            }
         } else {
             messagesConfig = new YamlConfiguration();
         }
