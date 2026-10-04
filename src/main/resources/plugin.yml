@@ -49,14 +49,26 @@ commands:
     description: Shadow mutes a player (messages visible only to themselves).
     usage: /shadowmute <player> [time] [reason] [-s]
     aliases: [smute, szellemnemitas]
+  smute:
+    description: Shadow mutes a player (messages visible only to themselves).
+    usage: /smute <player> [time] [reason] [-s]
+    aliases: []
   tempshadowmute:
     description: Temporarily shadow mutes a player.
     usage: /tempshadowmute <player> <time> [reason] [-s]
     aliases: [tsmute, tsm]
+  tsmute:
+    description: Temporarily shadow mutes a player.
+    usage: /tsmute <player> <time> [reason] [-s]
+    aliases: []
   shadowmuteip:
     description: Shadow mutes a player's IP address.
     usage: /shadowmuteip <player/ip> [time] [reason] [-s]
     aliases: [smuteip, smi, ipshadowmute]
+  smuteip:
+    description: Shadow mutes a player's IP address.
+    usage: /smuteip <player/ip> [time] [reason] [-s]
+    aliases: []
   tempshadowmuteip:
     description: Temporarily shadow mutes a player's IP address.
     usage: /tempshadowmuteip <player/ip> <time> [reason] [-s]

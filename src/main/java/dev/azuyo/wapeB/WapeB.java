@@ -123,14 +123,26 @@ public final class WapeB extends JavaPlugin {
             Objects.requireNonNull(getCommand("shadowmute")).setExecutor(shadowMuteCommand);
             Objects.requireNonNull(getCommand("shadowmute")).setTabCompleter(shadowMuteCommand);
         }
+        if (getCommand("smute") != null) {
+            Objects.requireNonNull(getCommand("smute")).setExecutor(shadowMuteCommand);
+            Objects.requireNonNull(getCommand("smute")).setTabCompleter(shadowMuteCommand);
+        }
         if (getCommand("tempshadowmute") != null) {
             Objects.requireNonNull(getCommand("tempshadowmute")).setExecutor(shadowMuteCommand);
             Objects.requireNonNull(getCommand("tempshadowmute")).setTabCompleter(shadowMuteCommand);
+        }
+        if (getCommand("tsmute") != null) {
+            Objects.requireNonNull(getCommand("tsmute")).setExecutor(shadowMuteCommand);
+            Objects.requireNonNull(getCommand("tsmute")).setTabCompleter(shadowMuteCommand);
         }
         ShadowMuteIpCommand shadowMuteIpCommand = new ShadowMuteIpCommand(this);
         if (getCommand("shadowmuteip") != null) {
             Objects.requireNonNull(getCommand("shadowmuteip")).setExecutor(shadowMuteIpCommand);
             Objects.requireNonNull(getCommand("shadowmuteip")).setTabCompleter(shadowMuteIpCommand);
+        }
+        if (getCommand("smuteip") != null) {
+            Objects.requireNonNull(getCommand("smuteip")).setExecutor(shadowMuteIpCommand);
+            Objects.requireNonNull(getCommand("smuteip")).setTabCompleter(shadowMuteIpCommand);
         }
         if (getCommand("tempshadowmuteip") != null) {
             Objects.requireNonNull(getCommand("tempshadowmuteip")).setExecutor(shadowMuteIpCommand);
