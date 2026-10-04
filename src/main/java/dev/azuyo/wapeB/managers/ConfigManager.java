@@ -7,8 +7,12 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 public class ConfigManager {
 
@@ -40,6 +44,9 @@ public class ConfigManager {
                     plugin.saveResource("messages/" + lang + ".yml", false);
                 } catch (Exception ignored) {
                 }
+            } else {
+                // Auto-sync missing keys in existing bundled language files
+                syncLanguageFile(lang, langFile);
             }
         }
 
@@ -49,9 +56,50 @@ public class ConfigManager {
             plugin.saveResource("config.yml", false);
         }
         config = YamlConfiguration.loadConfiguration(configFile);
+        syncConfigDefaults(configFile, config, "config.yml");
 
         // 3. Load active language file
         loadMessagesConfig();
+    }
+
+    private void syncLanguageFile(String lang, File file) {
+        try {
+            YamlConfiguration yaml = YamlConfiguration.loadConfiguration(file);
+            boolean synced = syncConfigDefaults(file, yaml, "messages/" + lang + ".yml");
+            if (synced && messagesFile != null && messagesFile.equals(file)) {
+                this.messagesConfig = yaml;
+            }
+        } catch (Exception e) {
+            plugin.getLogger().warning("Could not sync language file messages/" + lang + ".yml: " + e.getMessage());
+        }
+    }
+
+    private boolean syncConfigDefaults(File targetFile, FileConfiguration targetConfig, String resourcePath) {
+        try (InputStream in = plugin.getResource(resourcePath)) {
+            if (in == null) return false;
+
+            YamlConfiguration defaultYaml = YamlConfiguration.loadConfiguration(new InputStreamReader(in, StandardCharsets.UTF_8));
+            Set<String> defaultKeys = defaultYaml.getKeys(true);
+            boolean modified = false;
+            int addedKeys = 0;
+
+            for (String key : defaultKeys) {
+                if (!targetConfig.contains(key)) {
+                    targetConfig.set(key, defaultYaml.get(key));
+                    modified = true;
+                    addedKeys++;
+                }
+            }
+
+            if (modified) {
+                targetConfig.save(targetFile);
+                plugin.getLogger().info("Automatically synchronized " + addedKeys + " missing configuration/message key(s) in " + targetFile.getName());
+                return true;
+            }
+        } catch (Exception e) {
+            plugin.getLogger().warning("Failed to auto-sync defaults for " + targetFile.getName() + ": " + e.getMessage());
+        }
+        return false;
     }
 
     private void loadMessagesConfig() {
@@ -64,6 +112,7 @@ public class ConfigManager {
 
         if (messagesFile.exists()) {
             messagesConfig = YamlConfiguration.loadConfiguration(messagesFile);
+            syncConfigDefaults(messagesFile, messagesConfig, "messages/" + lang + ".yml");
         } else {
             messagesConfig = new YamlConfiguration();
         }
@@ -81,6 +130,7 @@ public class ConfigManager {
             configFile = new File(plugin.getDataFolder(), "config.yml");
         }
         config = YamlConfiguration.loadConfiguration(configFile);
+        syncConfigDefaults(configFile, config, "config.yml");
         loadMessagesConfig();
         plugin.getLogger().info("Configuration and language messages reloaded.");
     }
@@ -114,6 +164,9 @@ public class ConfigManager {
             if (val != null && !val.isEmpty()) {
                 return val;
             }
+        }
+        if (defaultValue != null && !defaultValue.isEmpty()) {
+            return defaultValue;
         }
         return "<red>Missing message: " + path + "</red>";
     }
