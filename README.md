@@ -1,17 +1,67 @@
-# 🔨 wapeB - Comprehensive Minecraft Punishment System & Velocity Bridge
+# 🔨 wapeB - Ultimate Minecraft Punishment System, AI Sentinel & Developer API
+newest: alpha.2-1.0.13-autosync
 
-A powerful, modern Paper/Spigot punishment plugin featuring full **Velocity Proxy integration (`wapeb-velocity`)**, **Java API**, **Bukkit Event System**, **Dynamic Command Overrides**, and **HTTP REST Web API**.
-
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/lftkraft/wapeB)
+[![Discord](https://img.shields.io/badge/Discord-Community-5865F2?logo=discord&logoColor=white)](https://dc.coolnw.eu)
 [![Velocity](https://img.shields.io/badge/Velocity%20Proxy-Companion%20Bridge%20(wapeb--velocity)-6366f1?logo=velocity&logoColor=white)](https://github.com/lftkraft/wapeb-velocity)
-[![Release](https://img.shields.io/github/v/tag/lftkraft/wapeB?label=version)](https://github.com/lftkraft/wapeB/releases)
+[![Version](https://img.shields.io/github/v/tag/lftkraft/wapeB?label=Version)](https://github.com/lftkraft/wapeB/releases)
 [![JitPack](https://jitpack.io/v/lftkraft/wapeB.svg)](https://jitpack.io/#lftkraft/wapeB)
+[![Java](https://img.shields.io/badge/Java-17%2B-red?logo=openjdk)](https://adoptium.net/)
 
-> 📖 **Complete Developer API Documentation:** [API_DOCUMENTATION.md](file:///e:/pluginok/wapeB/API_DOCUMENTATION.md)  
-> 📝 **Changelog:** [CHANGELOG.md](file:///e:/pluginok/wapeB/CHANGELOG.md)
+**wapeB** is a modern, high-performance Paper/Spigot punishment management system built for Minecraft **1.18.2 – 1.21.x** with full **Velocity Proxy** support. It combines an advanced punishment suite, AI-powered automatic chat moderation, multi-server scoping, a comprehensive Java API, Bukkit Custom Events, dynamic command overrides, and a built-in HTTP REST Web API.
 
 ---
 
-## 📌 Installation / Dependency Setup
+## ✨ Key Features
+
+- 🔨 **Complete Punishment Suite**: Ban, TempBan, IP-Ban, Temp-IP-Ban, Mute, TempMute, IP-Mute, Temp-IP-Mute, Warn, Kick, KickAll, Freeze, and Lockdown.
+- ⚡ **Velocity Proxy Support & Companion Plugin**: Instant cross-server plugin messaging (`wapeb:channel`) and proxy-level disconnects with `wapeb-velocity`.
+- 🌐 **Multi-Server Scoping (`activeserver` vs `server`)**: Target specific servers (`survival`, `server1,server2`) or apply network-wide (`global`), while preserving the origin server audit trail.
+- 🤖 **Sentinel AI Auto-Moderation**: Integrates with Groq AI to detect toxicity, swearing, and chat violations automatically in real time with zero server lag.
+- 🎨 **Included Cyberpunk Web Panel**: A modern Neon/Glassmorphism web interface with in-game 2FA login, Chart.js statistics, and live punishment management.
+- 🥶 **Advanced Freeze / Screenshare System**: Prevents movement, PvP, block breaking, and item drops while frozen, with automatic logout enforcement.
+- 🔒 **Server Lockdown Mode (`/lockdown`)**: Instantly restrict server entry during maintenance or bot raids with customizable kick messages.
+- ⏱️ **Smart Dynamic Duration**: `%duration%` automatically calculates the exact remaining time until expiration in real time with ceiling rounding.
+- ⚙️ **Dynamic Command Aliases**: Customize or translate any command (e.g. `/ban` → `/kitiltas`, `/mute` → `/nemit`) via `config.yml` or runtime API.
+- 🔌 **Developer Java API & Custom Events**: Full event cancellation, executor name overrides, and seamless integration for external plugins (DiscordSRV, SyncCord, custom bots).
+- 🌐 **Built-in HTTP REST Web API**: Remote punishment administration with `X-API-Key` authentication for web dashboards and external services.
+- 📜 **Staff & Player History Tracking**: Track staff member performance (`/staffhistory`) and full player punishment history (`/history`).
+- 👥 **Advanced Alt-Account & CIDR Detection**: Detect alternative accounts linked by IP or `/24` subnets with whitelist exemption support (`/alts`, `/altexempt`).
+- 💾 **Multi-Storage Backend**: Supports MySQL / MariaDB (HikariCP connection pool), SQLite, and YAML storage.
+
+---
+
+## 📜 Commands & Permissions
+
+| Command | Usage | Description | Permission |
+| :--- | :--- | :--- | :--- |
+| `/ban` | `/ban <player/ip> [time] [reason] [-s] [-server]` | Ban or Temp-Ban a player | `wapeb.ban` |
+| `/banip` | `/banip <player/ip> [time] [reason] [-s] [-server]` | IP/CIDR Subnet Ban | `wapeb.banip` |
+| `/mute` | `/mute <player/ip> [time] [reason] [-s] [-server]` | Mute or Temp-Mute a player | `wapeb.mute` |
+| `/muteip` | `/muteip <player/ip> [time] [reason] [-s] [-server]` | IP-Mute a player | `wapeb.muteip` |
+| `/warn` | `/warn <player> [reason] [-s] [-server]` | Warn a player | `wapeb.warn` |
+| `/kick` | `/kick <player> [reason] [-s]` | Kick a player from the server | `wapeb.kick` |
+| `/kickall` | `/kickall [reason]` | Kick all non-staff players | `wapeb.kickall` |
+| `/unban` | `/unban <player/ip> [reason] [-s]` | Unban a player or IP address | `wapeb.unban` |
+| `/unmute` | `/unmute <player/ip> [reason] [-s]` | Unmute a player or IP address | `wapeb.unmute` |
+| `/unwarn` | `/unwarn <player> [id/all]` | Remove warnings from a player | `wapeb.unwarn` |
+| `/freeze` | `/freeze <player> [reason]` | Freeze/unfreeze player for screenshare | `wapeb.freeze` |
+| `/checkban` | `/checkban <player/ip>` | Inspect active ban status | `wapeb.checkban` |
+| `/checkmute` | `/checkmute <player/ip>` | Inspect active mute status | `wapeb.checkmute` |
+| `/history` | `/history <player>` | View full punishment history of a player | `wapeb.history` |
+| `/staffhistory` | `/staffhistory <staff>` | View staff member punishment actions | `wapeb.staffhistory` |
+| `/alts` | `/alts <player>` | View alternative accounts linked by IP/CIDR | `wapeb.alts` |
+| `/altexempt` | `/altexempt <player> [add/remove]` | Whitelist accounts from alt detection | `wapeb.altexempt` |
+| `/lockdown` | `/lockdown [on/off] [reason]` | Toggle server lockdown mode | `wapeb.lockdown` |
+| `/punish-rollback` | `/punish-rollback <id>` | Undo specific punishment | `wapeb.rollback` |
+| `/punish` | `/punish <player>` | Open punishment GUI / template selection | `wapeb.punish` |
+| `/wapeb` | `/wapeb [reload/status]` | Main plugin management command | `wapeb.admin` |
+
+---
+
+## ☕ Developer API & JitPack Setup
+
+> 📖 **Full API Reference:** [GitHub API Documentation](https://github.com/lftkraft/wapeB/blob/main/API_DOCUMENTATION.md)
 
 ### Gradle (`build.gradle`)
 ```groovy
@@ -21,163 +71,58 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'com.github.lftkraft:wapeB:v1.0.13-alpha.1'
+    compileOnly 'com.github.lftkraft:wapeB:v1.0.13-alpha.2'
 }
 ```
 
 ### Maven (`pom.xml`)
 ```xml
-<repositories>
-    <repository>
-        <id>jitpack.io</id>
-        <url>https://jitpack.io</url>
-    </repository>
-</repositories>
-
 <dependencies>
     <dependency>
         <groupId>com.github.lftkraft</groupId>
         <artifactId>wapeB</artifactId>
-        <version>v1.0.13-alpha.1</version>
+        <version>v1.0.13-alpha.2</version>
         <scope>provided</scope>
     </dependency>
 </dependencies>
 ```
 
-### `plugin.yml`
-```yaml
-name: MyPlugin
-version: 1.0.0
-main: dev.example.myplugin.Main
-depend: [wapeB]
-```
-
----
-
-## ☕ Java API Usage
-
-### Accessing the API
+### Java API Example
 ```java
 import dev.azuyo.wapeB.WapeB;
 import dev.azuyo.wapeB.api.WapeBAPI;
-import dev.azuyo.wapeB.api.WapeBAPIProvider;
 
-// Option 1:
 WapeBAPI api = WapeB.getApi();
 
-// Option 2:
-WapeBAPI api = WapeBAPIProvider.getAPI();
-```
+// Check if a player or alt account is banned
+boolean isBanned = api.isBannedForPlayerOrAlt("PlayerName");
 
-### Key API Methods
+// Issue a network-wide ban
+api.banPlayer("PlayerName", "Cheating detected", "Console", 86400000L, false, false, "global");
 
-#### Querying Status & Punishments
-```java
-// Check active states
-boolean isBanned = api.isBanned("PlayerName");
-boolean isMuted = api.isMuted("PlayerName");
-boolean isFrozen = api.isFrozen("PlayerName");
-
-// Get active punishment details
-Punishment activeBan = api.getActiveBan("PlayerName");
-Punishment activeMute = api.getActiveMute("PlayerName");
-
-// Get all punishments & history
-List<Punishment> history = api.getHistory("PlayerName");
-List<String> alts = api.getAlts("PlayerName");
-```
-
-#### Executing Sanctions
-```java
-// Ban player (duration in ms, -1 for permanent)
-api.banPlayer("PlayerName", "Cheating", "Console", 86400000L, false, false);
-
-// Mute player
-api.mutePlayer("PlayerName", "Spam", "Admin", 3600000L, false, false);
-
-// Warn player
-api.warnPlayer("PlayerName", "Swearing", "Staff", false);
-
-// Kick player
-api.kickPlayer("PlayerName", "AFK", "System", false);
-
-// Freeze / Unfreeze
-api.freezePlayer("PlayerName", "ScreenShare", "Staff");
-api.unfreezePlayer("PlayerName", "Staff");
-
-// Revoke punishments
-api.unbanPlayer("PlayerName", "Appeal accepted", "Admin");
-api.unmutePlayer("PlayerName", "Appeal accepted", "Admin");
+// Issue a server-specific mute
+api.mutePlayer("PlayerName", "Chat Spam", "Admin", 3600000L, false, false, "survival");
 ```
 
 ---
 
-## ⚡ Bukkit Custom Events
+## 🌐 HTTP REST Web API
 
-Listen to wapeB events in your plugin:
+wapeB includes a built-in HTTP REST server for remote web dashboards and external bots.
 
-```java
-import dev.azuyo.wapeB.api.events.PlayerPunishEvent;
-import dev.azuyo.wapeB.api.events.PlayerUnpunishEvent;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-
-public class MyPunishListener implements Listener {
-
-    @EventHandler
-    public void onPunish(PlayerPunishEvent event) {
-        // Inspect or modify punishment details before execution
-        if (event.getPlayerName().startsWith("VIP_")) {
-            event.setCancelled(true); // Cancel punishment for VIPs
-        }
-
-        // Override executor name on the fly
-        event.setExecutor("Custom AntiCheat System");
-    }
-
-    @EventHandler
-    public void onUnpunish(PlayerUnpunishEvent event) {
-        System.out.println("Punishment revoked: " + event.getPunishment().getId());
-    }
-}
-```
+- **Authentication Header**: `X-API-Key: YOUR_API_KEY_HERE`
+- `GET /api/player/checkban?player=PlayerName`
+- `GET /api/player/checkmute?player=PlayerName`
+- `GET /api/player/punishments?player=PlayerName`
+- `GET /api/punish/active`
+- `POST /api/punish/execute` (supports `active_server` & `origin_server`)
+- `POST /api/punish/remove`
+- `POST /api/lockdown`
 
 ---
 
-## ⚙️ Dynamic Command Overrides
-
-Admins can configure custom command aliases in `config.yml`:
-
-```yaml
-command-overrides:
-  ban:
-    - kitiltas
-    - b
-  mute:
-    - nemit
-  freeze:
-    - lefagyaszt
-```
-
-Or programmatically via Java API:
-```java
-WapeB.getApi().registerCommandAlias("ban", "szankcio-ban");
-```
-
----
-
-## 🌐 Web REST API Endpoints
-
-wapeB includes a lightweight HTTP REST server. Pass header `X-API-Key: YOUR_API_KEY`.
-
-- `GET /api/player/punishments?player=PlayerName` - Fetch all punishments for a player.
-- `GET /api/player/checkban?player=PlayerName` - Check active ban status.
-- `GET /api/player/checkmute?player=PlayerName` - Check active mute status.
-- `GET /api/commands/list` - List registered commands and custom aliases.
-- `POST /api/punish/execute` - Execute a punishment via REST.
-- `POST /api/punish/remove` - Remove a punishment via REST.
-
----
-
-## 📜 License
-Developed for Spigot/Paper Minecraft Servers.
+## 📜 Compatibility & Support
+- **Discord Community**: [dc.coolnw.eu](https://dc.coolnw.eu)
+- **Supported Platforms**: Paper, Purpur, Spigot (1.18.2 – 1.21.x) & Velocity Proxy
+- **Java Requirement**: Java 17+
+- **Source Code & Issue Tracker**: [GitHub Repository](https://github.com/lftkraft/wapeB)
