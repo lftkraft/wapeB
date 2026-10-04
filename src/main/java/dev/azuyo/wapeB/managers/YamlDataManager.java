@@ -83,6 +83,7 @@ public class YamlDataManager implements DataManager {
         punishmentsConfig.set(path + ".reason", punishment.getReason());
         punishmentsConfig.set(path + ".executorName", punishment.getExecutorName());
         punishmentsConfig.set(path + ".server", punishment.getServer() != null ? punishment.getServer() : "global");
+        punishmentsConfig.set(path + ".proof", punishment.getProof());
         punishmentsConfig.set(path + ".date", punishment.getDate());
         punishmentsConfig.set(path + ".duration", punishment.getDuration());
         punishmentsConfig.set(path + ".end", punishment.getEnd());
@@ -322,6 +323,7 @@ public class YamlDataManager implements DataManager {
         String id = path.substring(path.lastIndexOf('.') + 1);
         String uuidString = punishmentsConfig.getString(path + ".playerUuid");
         String server = punishmentsConfig.getString(path + ".server", "global");
+        String proof = punishmentsConfig.getString(path + ".proof", null);
         Punishment p = new Punishment(
                 Integer.parseInt(id),
                 uuidString != null ? UUID.fromString(uuidString) : null,
@@ -330,7 +332,9 @@ public class YamlDataManager implements DataManager {
                 Punishment.PunishmentType.valueOf(punishmentsConfig.getString(path + ".type")),
                 punishmentsConfig.getString(path + ".reason"),
                 punishmentsConfig.getString(path + ".executorName"),
+                "global",
                 server,
+                proof,
                 punishmentsConfig.getLong(path + ".date"),
                 punishmentsConfig.getLong(path + ".duration")
         );

@@ -41,54 +41,59 @@ public class HistoryCommand implements CommandExecutor {
         }
 
         String targetNameInput = args[0];
-        OfflinePlayer target = Bukkit.getOfflinePlayer(targetNameInput);
-        List<Punishment> history = plugin.getApi().getHistory(targetNameInput);
+        String argPage = args.length > 1 ? args[1] : null;
 
-        if (history.isEmpty() && !target.hasPlayedBefore() && !target.isOnline()) {
-            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.player-not-found", ""), null));
-            return true;
-        }
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            OfflinePlayer target = Bukkit.getOfflinePlayer(targetNameInput);
+            List<Punishment> history = plugin.getApi().getHistory(targetNameInput);
 
-        int page = 1;
-        if (args.length > 1) {
-            try {
-                page = Integer.parseInt(args[1]);
-            } catch (NumberFormatException ignored) {}
-        }
+            if (history.isEmpty() && !target.hasPlayedBefore() && !target.isOnline()) {
+                sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.player-not-found", ""), null));
+                return;
+            }
 
-        Collections.reverse(history); // Show newest first
+            int page = 1;
+            if (argPage != null) {
+                try {
+                    page = Integer.parseInt(argPage);
+                } catch (NumberFormatException ignored) {}
+            }
 
-        if (history.isEmpty()) {
-            String targetDisplayName = target.getName() != null ? target.getName() : targetNameInput;
-            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.no-history", ""), null, Collections.singletonMap("%player%", targetDisplayName)));
-            return true;
-        }
+            history.sort((a, b) -> Integer.compare(b.getId(), a.getId())); // Always show newest punishments first
 
-        int pageSize = 5;
-        int maxPage = (int) Math.ceil((double) history.size() / pageSize);
-        if (page < 1) page = 1;
-        if (page > maxPage) page = maxPage;
+            if (history.isEmpty()) {
+                String targetDisplayName = target.getName() != null ? target.getName() : targetNameInput;
+                sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.no-history", ""), null, Collections.singletonMap("%player%", targetDisplayName)));
+                return;
+            }
 
-        Map<String, String> globalPlaceholders = new HashMap<>();
-        globalPlaceholders.put("%player%", target.getName());
-        globalPlaceholders.put("%page%", String.valueOf(page));
-        globalPlaceholders.put("%max_page%", String.valueOf(maxPage));
+            int pageSize = 5;
+            int maxPage = (int) Math.ceil((double) history.size() / pageSize);
+            if (page < 1) page = 1;
+            if (page > maxPage) page = maxPage;
 
-        // Header
-        sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.history.header", ""), null, globalPlaceholders));
+            Map<String, String> globalPlaceholders = new HashMap<>();
+            globalPlaceholders.put("%player%", target.getName() != null ? target.getName() : targetNameInput);
+            globalPlaceholders.put("%page%", String.valueOf(page));
+            globalPlaceholders.put("%max_page%", String.valueOf(maxPage));
+            globalPlaceholders.put("%total%", String.valueOf(history.size()));
 
-        // Lines
-        String lineFormat = configManager.getString("messages.history.line", "");
-        int start = (page - 1) * pageSize;
-        int end = Math.min(start + pageSize, history.size());
+            // Header
+            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.history.header", ""), null, globalPlaceholders));
 
-        for (int i = start; i < end; i++) {
-            Punishment p = history.get(i);
-            sender.sendMessage(MessageUtil.createComponent(lineFormat, p, globalPlaceholders));
-        }
+            // Lines
+            String lineFormat = configManager.getString("messages.history.line", "");
+            int start = (page - 1) * pageSize;
+            int end = Math.min(start + pageSize, history.size());
 
-        // Footer
-        sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.history.footer", ""), null, globalPlaceholders));
+            for (int i = start; i < end; i++) {
+                Punishment p = history.get(i);
+                sender.sendMessage(MessageUtil.createComponent(lineFormat, p, globalPlaceholders));
+            }
+
+            // Footer
+            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.history.footer", ""), null, globalPlaceholders));
+        });
 
         return true;
     }

@@ -44,78 +44,82 @@ public class AltsCommand implements CommandExecutor {
             return true;
         }
 
-        OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
-        if (!target.hasPlayedBefore() && !target.isOnline()) {
-            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.player-not-found", "&cPlayer not found."), null));
-            return true;
-        }
+        String argName = args[0];
 
-        String targetName = target.getName() != null ? target.getName() : args[0];
-        String targetIp = playerDataManager.getLastKnownIp(target.getUniqueId());
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            OfflinePlayer target = Bukkit.getOfflinePlayer(argName);
+            if (!target.hasPlayedBefore() && !target.isOnline()) {
+                sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.player-not-found", "&cPlayer not found."), null));
+                return;
+            }
 
-        List<AltInfo> alts = playerDataManager.getDetailedAlts(target.getUniqueId());
+            String targetName = target.getName() != null ? target.getName() : argName;
+            String targetIp = playerDataManager.getLastKnownIp(target.getUniqueId());
 
-        if (alts.isEmpty()) {
-            String noAltsMsg = configManager.getString("messages.no-alts-found", "&cNo alternative accounts found for %player%.")
-                    .replace("%player%", targetName);
-            sender.sendMessage(MessageUtil.createComponent(noAltsMsg, null));
-            return true;
-        }
+            List<AltInfo> alts = playerDataManager.getDetailedAlts(target.getUniqueId());
 
-        // Header
-        Map<String, String> headerPlaceholders = new HashMap<>();
-        headerPlaceholders.put("%player%", targetName);
-        headerPlaceholders.put("%ip_address%", targetIp != null ? targetIp : "N/A");
-        headerPlaceholders.put("%alt_count%", String.valueOf(alts.size()));
+            if (alts.isEmpty()) {
+                String noAltsMsg = configManager.getString("messages.no-alts-found", "&cNo alternative accounts found for %player%.")
+                        .replace("%player%", targetName);
+                sender.sendMessage(MessageUtil.createComponent(noAltsMsg, null));
+                return;
+            }
 
-        String header = configManager.getString("messages.alts.header", "<dark_gray><st>------------------</st> <gradient:#FF00D9:#B300FF>Alt Fiókok: %player% (%alt_count%)</gradient> <dark_gray><st>------------------");
-        sender.sendMessage(MessageUtil.createComponent(header, null, headerPlaceholders));
+            // Header
+            Map<String, String> headerPlaceholders = new HashMap<>();
+            headerPlaceholders.put("%player%", targetName);
+            headerPlaceholders.put("%ip_address%", targetIp != null ? targetIp : "N/A");
+            headerPlaceholders.put("%alt_count%", String.valueOf(alts.size()));
 
-        // Lines
-        String lineFormat = configManager.getString("messages.alts.line", "<dark_gray>- %status% <color:#C34338>%alt_player%</color> %tags% <gray>(Utoljára: %last_seen%)");
-        
-        for (AltInfo alt : alts) {
-            Map<String, String> linePlaceholders = new HashMap<>();
-            linePlaceholders.put("%alt_player%", alt.getPlayerName());
-            linePlaceholders.put("%ip_address%", alt.getLastIp() != null ? alt.getLastIp() : "N/A");
+            String header = configManager.getString("messages.alts.header", "<dark_gray><st>------------------</st> <gradient:#FF00D9:#B300FF>Alt Fiókok: %player% (%alt_count%)</gradient> <dark_gray><st>------------------");
+            sender.sendMessage(MessageUtil.createComponent(header, null, headerPlaceholders));
+
+            // Lines
+            String lineFormat = configManager.getString("messages.alts.line", "<dark_gray>- %status% <color:#C34338>%alt_player%</color> %tags% <gray>(Utoljára: %last_seen%)");
             
-            String status;
-            Punishment activePunishment = null;
+            for (AltInfo alt : alts) {
+                Map<String, String> linePlaceholders = new HashMap<>();
+                linePlaceholders.put("%alt_player%", alt.getPlayerName());
+                linePlaceholders.put("%ip_address%", alt.getLastIp() != null ? alt.getLastIp() : "N/A");
+                
+                String status;
+                Punishment activePunishment = null;
 
-            if (alt.isBanned()) {
-                activePunishment = alt.getActiveBan();
-                status = configManager.getString("messages.alts.status.banned", "<red><bold>[BANNED]</bold></red>");
-            } else if (alt.isMuted()) {
-                activePunishment = alt.getActiveMute();
-                status = configManager.getString("messages.alts.status.muted", "<yellow><bold>[MUTED]</bold></yellow>");
-            } else {
-                OfflinePlayer op = Bukkit.getOfflinePlayer(alt.getUuid());
-                if (op.isOnline()) {
-                    status = configManager.getString("messages.alts.status.online", "<green>[ONLINE]</green>");
+                if (alt.isBanned()) {
+                    activePunishment = alt.getActiveBan();
+                    status = configManager.getString("messages.alts.status.banned", "<red><bold>[BANNED]</bold></red>");
+                } else if (alt.isMuted()) {
+                    activePunishment = alt.getActiveMute();
+                    status = configManager.getString("messages.alts.status.muted", "<yellow><bold>[MUTED]</bold></yellow>");
                 } else {
-                    status = configManager.getString("messages.alts.status.clean", "<gray>[CLEAN]</gray>");
+                    OfflinePlayer op = Bukkit.getOfflinePlayer(alt.getUuid());
+                    if (op.isOnline()) {
+                        status = configManager.getString("messages.alts.status.online", "<green>[ONLINE]</green>");
+                    } else {
+                        status = configManager.getString("messages.alts.status.clean", "<gray>[CLEAN]</gray>");
+                    }
                 }
+
+                StringBuilder tags = new StringBuilder();
+                if (alt.isExempt()) {
+                    tags.append(" ").append(configManager.getString("messages.alts.tags.exempt", "<gradient:#00FFCC:#0099FF>[🛡️ KIVÉTEL]</gradient>"));
+                }
+                if (alt.getMatchType() == AltInfo.MatchType.CIDR_SUBNET) {
+                    tags.append(" ").append(configManager.getString("messages.alts.tags.cidr", "<dark_purple>[CIDR /24]</dark_purple>"));
+                }
+
+                linePlaceholders.put("%status%", status);
+                linePlaceholders.put("%tags%", tags.toString());
+                linePlaceholders.put("%last_seen%", alt.getLastSeen() > 0 ? dateFormat.format(new Date(alt.getLastSeen())) : "Ismeretlen");
+
+                String line = lineFormat;
+                sender.sendMessage(MessageUtil.createComponent(line, activePunishment, linePlaceholders));
             }
 
-            StringBuilder tags = new StringBuilder();
-            if (alt.isExempt()) {
-                tags.append(" ").append(configManager.getString("messages.alts.tags.exempt", "<gradient:#00FFCC:#0099FF>[🛡️ KIVÉTEL]</gradient>"));
-            }
-            if (alt.getMatchType() == AltInfo.MatchType.CIDR_SUBNET) {
-                tags.append(" ").append(configManager.getString("messages.alts.tags.cidr", "<dark_purple>[CIDR /24]</dark_purple>"));
-            }
-
-            linePlaceholders.put("%status%", status);
-            linePlaceholders.put("%tags%", tags.toString());
-            linePlaceholders.put("%last_seen%", alt.getLastSeen() > 0 ? dateFormat.format(new Date(alt.getLastSeen())) : "Ismeretlen");
-
-            String line = lineFormat;
-            sender.sendMessage(MessageUtil.createComponent(line, activePunishment, linePlaceholders));
-        }
-
-        // Footer
-        String footer = configManager.getString("messages.alts.footer", "<dark_gray><st>----------------------------------------------------");
-        sender.sendMessage(MessageUtil.createComponent(footer, null, headerPlaceholders));
+            // Footer
+            String footer = configManager.getString("messages.alts.footer", "<dark_gray><st>----------------------------------------------------");
+            sender.sendMessage(MessageUtil.createComponent(footer, null, headerPlaceholders));
+        });
 
         return true;
     }

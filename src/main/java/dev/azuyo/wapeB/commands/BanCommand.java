@@ -44,6 +44,20 @@ public class BanCommand implements CommandExecutor {
         boolean silent = arguments.remove("-s");
         boolean ipBan = arguments.remove("-ip");
 
+        String proof = null;
+        for (int i = arguments.size() - 1; i >= 0; i--) {
+            String arg = arguments.get(i);
+            if (arg.toLowerCase().startsWith("-proof:")) {
+                proof = arg.substring(7);
+                arguments.remove(i);
+                break;
+            } else if (arg.toLowerCase().startsWith("-proof=")) {
+                proof = arg.substring(7);
+                arguments.remove(i);
+                break;
+            }
+        }
+
         String server = "global";
         for (int i = arguments.size() - 1; i >= 0; i--) {
             String arg = arguments.get(i);
@@ -110,17 +124,26 @@ public class BanCommand implements CommandExecutor {
         OfflinePlayer target = Bukkit.getOfflinePlayer(targetName);
         String executorName = (sender instanceof Player) ? sender.getName() : configManager.getString("console-name", "Console");
 
-        boolean success = plugin.getApi().banPlayer(targetName, reason, executorName, duration, silent, ipBan, server);
-        if (success) {
-            Punishment ban = plugin.getApi().getActiveBan(targetName);
-            if (ban == null) {
-                Punishment.PunishmentType pType = ipBan 
-                        ? (duration == -1 ? Punishment.PunishmentType.IPBAN : Punishment.PunishmentType.TEMPIPBAN)
-                        : (duration == -1 ? Punishment.PunishmentType.BAN : Punishment.PunishmentType.TEMPBAN);
-                ban = new Punishment(-1, target.getUniqueId(), targetName, pType, reason, executorName, server, System.currentTimeMillis(), duration);
+        final String finalReason = reason;
+        final long finalDuration = duration;
+        final String finalServer = server;
+        final String finalProof = proof;
+        final boolean finalSilent = silent;
+        final boolean finalIpBan = ipBan;
+
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            boolean success = plugin.getApi().banPlayer(targetName, finalReason, executorName, finalDuration, finalSilent, finalIpBan, finalServer, finalServer, finalProof);
+            if (success) {
+                Punishment ban = plugin.getApi().getActiveBan(targetName);
+                if (ban == null) {
+                    Punishment.PunishmentType pType = finalIpBan 
+                            ? (finalDuration == -1 ? Punishment.PunishmentType.IPBAN : Punishment.PunishmentType.TEMPIPBAN)
+                            : (finalDuration == -1 ? Punishment.PunishmentType.BAN : Punishment.PunishmentType.TEMPBAN);
+                    ban = new Punishment(-1, target.getUniqueId(), targetName, null, pType, finalReason, executorName, finalServer, finalServer, finalProof, System.currentTimeMillis(), finalDuration);
+                }
+                sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.ban.success", "&aSuccessfully banned %player%."), ban));
             }
-            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.ban.success", "&aSuccessfully banned %player%."), ban));
-        }
+        });
 
         return true;
     }

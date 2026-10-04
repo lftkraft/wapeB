@@ -71,6 +71,21 @@ public class MuteIpCommand implements CommandExecutor {
 
         java.util.List<String> arguments = new java.util.ArrayList<>(Arrays.asList(args).subList(1, args.length));
         boolean silent = arguments.remove("-s");
+
+        String proof = null;
+        for (int i = arguments.size() - 1; i >= 0; i--) {
+            String arg = arguments.get(i);
+            if (arg.toLowerCase().startsWith("-proof:")) {
+                proof = arg.substring(7);
+                arguments.remove(i);
+                break;
+            } else if (arg.toLowerCase().startsWith("-proof=")) {
+                proof = arg.substring(7);
+                arguments.remove(i);
+                break;
+            }
+        }
+
         String server = "global";
         for (int i = arguments.size() - 1; i >= 0; i--) {
             String arg = arguments.get(i);
@@ -135,11 +150,20 @@ public class MuteIpCommand implements CommandExecutor {
 
         String executorName = (sender instanceof Player) ? sender.getName() : configManager.getString("console-name", "Console");
 
-        boolean success = plugin.getApi().mutePlayer(finalTargetName, reason, executorName, duration, silent, true, server);
-        if (success) {
-            Punishment mute = plugin.getApi().getActiveMute(finalTargetName);
-            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.muteip.success", "&aSuccessfully IP-muted %player%."), mute));
-        }
+        final String finalReason = reason;
+        final long finalDuration = duration;
+        final String finalServer = server;
+        final String finalProof = proof;
+        final boolean finalSilent = silent;
+        final String targetToMute = finalTargetName;
+
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            boolean success = plugin.getApi().mutePlayer(targetToMute, finalReason, executorName, finalDuration, finalSilent, true, finalServer, finalServer, finalProof);
+            if (success) {
+                Punishment mute = plugin.getApi().getActiveMute(targetToMute);
+                sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.muteip.success", "&aSuccessfully IP-muted %player%."), mute));
+            }
+        });
 
         return true;
     }

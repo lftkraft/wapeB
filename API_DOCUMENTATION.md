@@ -1,6 +1,6 @@
-# 📚 wapeB API - Complete Developer Documentation (v1.0.13-alpha.1)
+# 📚 wapeB API - Complete Developer Documentation (v1.0.13-alpha.2)
 
-This documentation provides a comprehensive guide to the **wapeB** Minecraft punishment system's **Java API**, **Bukkit Events**, **Dynamic Command Overrides**, **Message Placeholders**, **Cross-Server / Velocity Synchronization**, and **HTTP REST Web API**.
+This documentation provides a comprehensive guide to the **wapeB** Minecraft punishment system's **Java API**, **Bukkit Events**, **Dynamic Command Overrides**, **Message Placeholders**, **Proof (Evidence) System**, **Cross-Server / Velocity Synchronization**, and **HTTP REST Web API**.
 
 ---
 
@@ -11,40 +11,29 @@ This documentation provides a comprehensive guide to the **wapeB** Minecraft pun
    - [A) Query Methods](#a-query-methods)
    - [B) Staff History & Action Recording Methods](#b-staff-history--action-recording-methods)
    - [C) Execution Methods & Multi-Server Scoping](#c-execution-methods--multi-server-scoping)
-   - [D) CIDR Subnet & GeoIP API Methods](#d-cidr-subnet--geoip-api-methods)
-   - [E) Punishment Templates API Methods](#e-punishment-templates-api-methods)
-   - [F) Warn-Action Escalation API Methods](#f-warn-action-escalation-api-methods)
-   - [G) Command Alias Methods](#g-command-alias-methods)
-   - [H) Message Placeholders & Duration Formatting](#h-message-placeholders--duration-formatting)
-   - [I) Smart Player & Active Punishment Lookup](#i-smart-player--active-punishment-lookup)
+   - [D) Proof (Evidence) API Methods](#d-proof-evidence-api-methods)
+   - [E) Chat Snapshot API Methods](#e-chat-snapshot-api-methods-v1013-alpha2)
+   - [F) CIDR Subnet & GeoIP API Methods](#f-cidr-subnet--geoip-api-methods)
+   - [G) Punishment Templates API Methods](#g-punishment-templates-api-methods)
+   - [H) Warn-Action Escalation API Methods](#h-warn-action-escalation-api-methods)
+   - [I) Command Alias Methods](#i-command-alias-methods)
+   - [J) Message Placeholders & Duration Formatting](#j-message-placeholders--duration-formatting)
+   - [K) Smart Player & Active Punishment Lookup](#k-smart-player--active-punishment-lookup)
 4. [Bukkit Custom Events](#4-bukkit-custom-events)
 5. [Cross-Server & Velocity Architecture](#5-cross-server--velocity-architecture)
-6. [Integration Examples & Code Snippets](#6-integration-examples--code-snippets)
+6. [In-Game Commands & Proof Flags](#6-in-game-commands--proof-flags)
+7. [Integration Examples & Code Snippets](#7-integration-examples--code-snippets)
    - [Example 1: Custom Mute Command (GMute)](#example-1-custom-mute-command-gmute)
    - [Example 2: Discord Bot (SyncCord / DiscordSRV) Executor Override](#example-2-discord-bot-synccord--discordsrv-override)
-   - [Example 3: External Staff History Recording](#example-3-external-staff-history-recording)
+   - [Example 3: Punishing with Proof from Code](#example-3-punishing-with-proof-from-code)
    - [Example 4: Chat Listener & Mute Notice](#example-4-chat-listener--mute-notice)
-7. [HTTP REST Web API Reference](#7-http-rest-web-api-reference)
+8. [HTTP REST Web API Reference](#8-http-rest-web-api-reference)
 
 ---
 
 ## 1. Setup & Dependencies
 
 The wapeB API is available via **JitPack** or local Maven repository (`.m2`).
-
-### 🐘 Gradle (Kotlin DSL - `build.gradle.kts`)
-```kotlin
-repositories {
-    mavenCentral()
-    maven("https://jitpack.io")
-    maven("https://repo.papermc.io/repository/maven-public/")
-}
-
-dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.21.8-R0.1-SNAPSHOT")
-    compileOnly("com.github.lftkraft:wapeB:v1.0.13-alpha.1")
-}
-```
 
 ### 🐘 Gradle (Groovy DSL - `build.gradle`)
 ```groovy
@@ -54,7 +43,19 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'com.github.lftkraft:wapeB:v1.0.13-alpha.1'
+    compileOnly 'com.github.lftkraft:wapeB:v1.0.13-alpha.2'
+}
+```
+
+### 🐘 Gradle (Kotlin DSL - `build.gradle.kts`)
+```kotlin
+repositories {
+    mavenCentral()
+    maven("https://jitpack.io")
+}
+
+dependencies {
+    compileOnly("com.github.lftkraft:wapeB:v1.0.13-alpha.2")
 }
 ```
 
@@ -71,7 +72,7 @@ dependencies {
     <dependency>
         <groupId>com.github.lftkraft</groupId>
         <artifactId>wapeB</artifactId>
-        <version>v1.0.13-alpha.1</version>
+        <version>v1.0.13-alpha.2</version>
         <scope>provided</scope>
     </dependency>
 </dependencies>
@@ -118,7 +119,7 @@ WapeBAPI api = WapeBAPIProvider.getAPI();
 ```
 
 ### ⚠️ Thread Safety Guidelines
-- **Query Methods** (`isBanned`, `getActiveBan`, `getPunishments`, `getAlts`) are thread-safe and can be queried safely on async threads (e.g., in Discord bot events).
+- **Query Methods** (`isBanned`, `getActiveBan`, `getPunishments`, `getAlts`, `getProof`) are thread-safe and can be queried safely on async threads (e.g., in Discord bot events).
 - **Execution Methods** (`banPlayer`, `mutePlayer`, `kickPlayer`, `freezePlayer`) must run on the Server Main Thread, as they trigger Bukkit events and kick/affect online players. If invoking from a Discord JDA or async thread, wrap execution in `Bukkit.getScheduler().runTask(plugin, ...)`.
 
 ---
@@ -214,8 +215,8 @@ boolean recorded = api.addStaffHistoryEntry("ywxlol", punishment);
 
 All execution methods trigger wapeB's `PlayerPunishEvent`. If a listener cancels the event (`event.setCancelled(true)`), the method returns `false`.
 
-#### Multi-Server Scoping Architecture (v1.0.13-alpha.1+)
-Starting in v1.0.13, wapeB cleanly separates the **Origin Server** (`server` - where the command or API was triggered) and the **Target Enforcement Scope** (`activeServer` - where the punishment is actually enforced):
+#### Multi-Server Scoping Architecture (v1.0.13+)
+wapeB cleanly separates the **Origin Server** (`server` - where the command or API was triggered) and the **Target Enforcement Scope** (`activeServer` - where the punishment is actually enforced):
 - **`activeServer = "global"`**: Punishment is enforced on all servers across the network.
 - **`activeServer = "survival"`**: Punishment is only enforced on the `survival` server.
 - **`activeServer = "server1,server2"`**: Comma-separated list of target servers.
@@ -223,7 +224,7 @@ Starting in v1.0.13, wapeB cleanly separates the **Origin Server** (`server` - w
 
 #### `banPlayer`
 ```java
-// Full overload with multi-server scoping:
+// Full overload with multi-server scoping and proof attachment (v1.0.13-alpha.2):
 boolean success = api.banPlayer(
     "PlayerName",             // Target name or UUID
     "Cheating / Hacking",      // Reason
@@ -232,17 +233,19 @@ boolean success = api.banPlayer(
     false,                    // Silent announcement?
     false,                    // IP ban?
     "global",                 // Target scope (e.g. "global", "server2", or "server1,server2")
-    "lobby"                   // Origin server (where the action was initiated)
+    "lobby",                  // Origin server (where the action was initiated)
+    "https://imgur.com/evidence123.png" // Proof URL / evidence
 );
 
-// Convenience overloads (defaults to activeServer="global" and local server name):
+// Convenience overloads:
 api.banPlayer("PlayerName", "Cheating", "Console", 86400000L, false, false);
 api.banPlayer("PlayerName", "Cheating", "Console", 86400000L, false, false, "server2");
+api.banPlayer("PlayerName", "Cheating", "Console", 86400000L, false, false, "global", "lobby");
 ```
 
 #### `mutePlayer`
 ```java
-// Full overload with multi-server scoping:
+// Full overload with multi-server scoping and proof:
 boolean success = api.mutePlayer(
     "PlayerName", 
     "Chat Spam", 
@@ -251,7 +254,8 @@ boolean success = api.mutePlayer(
     false,                    // Silent
     false,                    // IP mute
     "global",                 // Target scope
-    "lobby"                   // Origin server
+    "lobby",                  // Origin server
+    "https://gyazo.com/spam_proof.png" // Proof URL
 );
 
 // Convenience overloads:
@@ -261,18 +265,18 @@ api.mutePlayer("PlayerName", "Chat Spam", "Admin", 3600000L, false, false, "surv
 
 #### `warnPlayer`
 ```java
-// Full overload:
-boolean success = api.warnPlayer("PlayerName", "Swearing", "AdminName", false, "global", "lobby");
+// Full overload with proof:
+boolean success = api.warnPlayer("PlayerName", "Swearing", "AdminName", false, "global", "lobby", "https://i.imgur.com/chat.png");
 
-// Convenience overload:
+// Convenience overloads:
 api.warnPlayer("PlayerName", "Swearing", "AdminName", false);
 api.warnPlayer("PlayerName", "Swearing", "AdminName", false, "minigames");
 ```
 
 #### `kickPlayer`
 ```java
-// Full overload:
-boolean success = api.kickPlayer("PlayerName", "AFK for too long", "System", false, "global", "lobby");
+// Full overload with proof:
+boolean success = api.kickPlayer("PlayerName", "AFK for too long", "System", false, "global", "lobby", null);
 
 // Convenience overload:
 api.kickPlayer("PlayerName", "AFK for too long", "System", false);
@@ -293,9 +297,52 @@ api.revokePunishment(105, "Admin"); // Remove punishment by ID
 
 ---
 
+### D) Proof (Evidence) API Methods (v1.0.13-alpha.2+)
+
+wapeB provides dedicated API methods for attaching, updating, querying, and deleting proof links/evidence (e.g. Imgur, YouTube, Gyazo URLs) associated with any punishment:
+
+```java
+// 1. Fetch attached proof URL for a punishment ID (returns null or String):
+String proofUrl = api.getProof(105);
+
+// 2. Attach or update proof URL for a punishment:
+boolean updated = api.setProof(105, "https://imgur.com/evidence123.png");
+
+// 3. Remove proof from a punishment:
+boolean removed = api.removeProof(105);
+```
+
 ---
 
-### C) CIDR Subnet & GeoIP API Methods
+### E) Chat Snapshot API Methods (v1.0.13-alpha.2+)
+
+wapeB automatically maintains a rolling in-memory buffer of recent chat messages and creates a frozen snapshot whenever a player receives a punishment:
+
+```java
+// 1. Fetch chat snapshot object for a punishment:
+ChatSnapshot snapshot = api.getChatSnapshot(105);
+if (snapshot != null) {
+    for (ChatMessage msg : snapshot.getMessages()) {
+        System.out.println("[" + msg.getPlayerName() + "]: " + msg.getMessage());
+    }
+}
+
+// 2. Check if a snapshot exists:
+boolean hasSnapshot = api.hasChatSnapshot(105);
+
+// 3. Delete a local snapshot:
+boolean deleted = api.deleteChatSnapshot(105);
+
+// 4. Query live recent chat from memory (e.g. for custom automod before punishing):
+List<ChatMessage> recentChat = api.getRecentChat(playerUuid, 30);
+
+// 5. Manually capture a snapshot on-demand:
+ChatSnapshot liveSnapshot = api.captureChatSnapshot(playerUuid, 30);
+```
+
+---
+
+### F) CIDR Subnet & GeoIP API Methods
 
 Manage CIDR IP subnet bans (`192.168.1.0/24` or `192.168.1.*`) and fetch GeoIP information asynchronously:
 
@@ -319,7 +366,7 @@ String location = geo.getFormatted(); // e.g. "Australia (AU) | City: Sydney | I
 
 ---
 
-### D) Punishment Templates API Methods
+### G) Punishment Templates API Methods
 
 Query and apply pre-defined punishment templates from `templates.yml`:
 
@@ -340,7 +387,7 @@ api.punishWithTemplate("PlayerName", "mute", "spam", "ModName", false);
 
 ---
 
-### E) Warn-Action Escalation API Methods
+### H) Warn-Action Escalation API Methods
 
 Query warning thresholds and trigger automated escalation actions:
 
@@ -357,7 +404,7 @@ api.triggerWarnActionCheck(playerUuid);
 
 ---
 
-### F) Command Alias Methods
+### I) Command Alias Methods
 
 Register dynamic command aliases at runtime:
 ```java
@@ -370,11 +417,12 @@ List<String> aliases = api.getCommandAliases("ban");
 
 ---
 
-### H) Message Placeholders & Duration Formatting
+### J) Message Placeholders & Duration Formatting
 
 wapeB provides rich placeholder replacement across all in-game messages, kick screens, broadcast messages, and Discord webhooks.
 
 #### Supported Placeholders:
+- `%proof%`: Attached proof URL or text (or localized `none` indicator). *(v1.0.13-alpha.2+)*
 - `%time%` / `%duration%` / `%remaining%` / `%remaining_duration%` / `%time_left%` / `%expires_in%`: Returns formatted remaining time until expiration (e.g. `14d`, `2h 15m`).
 - `%detailed_duration%` / `%detailed_remaining%`: Returns detailed remaining time (e.g. `14 days 2 hours`).
 - `%original_duration%` / `%total_duration%`: Returns original assigned punishment duration.
@@ -389,14 +437,14 @@ wapeB provides rich placeholder replacement across all in-game messages, kick sc
 - `%date%`: Formatted issuance date (`yyyy-MM-dd HH:mm:ss`).
 - `%end_date%`: Formatted expiration date (`yyyy-MM-dd HH:mm:ss`) or `Permanent`.
 
-#### ⏱️ Ceiling Duration Rounding (v1.0.12+):
+#### ⏱️ Ceiling Duration Rounding:
 Remaining seconds are rounded **upward** `((millis + 999) / 1000)` so that newly issued punishments immediately show the exact full duration (e.g. a 14-day ban instantly displays as `14d` rather than `13d 23h 59m 59s`).
 
 ---
 
-### I) Smart Player & Active Punishment Lookup
+### K) Smart Player & Active Punishment Lookup
 
-In v1.0.12+, wapeB commands (`/unban`, `/unmute`, `/checkban`, `/checkmute`, `/history`, `/warnings`, `/unwarn`, `/ban`, `/mute`, `/banip`, `/muteip`, `/warn`) and Java API methods resolve players and active punishments using multi-criteria queries:
+wapeB commands (`/unban`, `/unmute`, `/checkban`, `/checkmute`, `/history`, `/warnings`, `/unwarn`, `/ban`, `/mute`, `/banip`, `/muteip`, `/warn`, `/proof`) and Java API methods resolve players and active punishments using multi-criteria queries:
 - **Case-Insensitive Username Resolution**: Matches player names regardless of capitalization.
 - **UUID & IP Resolution**: Automatically resolves offline player UUIDs and recorded IP addresses.
 - **Alt Account Linkage**: Queries linked alt accounts when evaluating active bans/mutes.
@@ -416,6 +464,7 @@ Fires whenever a punishment is issued (via command, GUI, Web API, or code).
 - `getType()` – `PunishmentType` (BAN, TEMPBAN, MUTE, WARN, KICK, etc.)
 - `getReason()` / `setReason(String)` – **Modifiable reason**
 - `getExecutor()` / `setExecutor(String)` – **Modifiable executor name** *(useful for Discord bot overrides)*
+- `getProof()` / `setProof(String)` – **Modifiable proof URL / evidence** *(v1.0.13-alpha.2+)*
 - `getDuration()` / `setDuration(long)` – **Modifiable duration**
 - `getActiveServer()` / `setActiveServer(String)` – **Modifiable target server scope** *(e.g. "global", "survival")*
 - `getServer()` / `setServer(String)` – **Modifiable origin server name**
@@ -437,6 +486,11 @@ public class PunishListener implements Listener {
         if (event.getPlayerName().startsWith("VIP_") && event.getType().name().contains("BAN")) {
             event.setCancelled(true);
             return;
+        }
+
+        // Automatically inject proof if empty:
+        if (event.getProof() == null || event.getProof().isEmpty()) {
+            event.setProof("https://panel.myserver.net/logs/" + event.getPlayerName());
         }
 
         // Override executor name dynamically:
@@ -461,7 +515,7 @@ Fires during Unban / Unmute / Unwarn:
 
 ## 5. Cross-Server & Velocity Architecture
 
-In v1.0.13-alpha.1+, wapeB integrates seamlessly with **Velocity** and **BungeeCord** proxies using the official companion plugin `wapeb-velocity`:
+In v1.0.13+, wapeB integrates seamlessly with **Velocity** and **BungeeCord** proxies using the official companion plugin `wapeb-velocity`:
 
 - **Instant Plugin Messaging**: Broadcasts (`wapeb:channel`) forward instantly across backend servers without polling lag.
 - **Proxy-Level Disconnection**: When a player is banned or kicked with target scope `global` (or matching their current backend server), Velocity immediately disconnects them with the formatted kick screen.
@@ -469,7 +523,28 @@ In v1.0.13-alpha.1+, wapeB integrates seamlessly with **Velocity** and **BungeeC
 
 ---
 
-## 6. Integration Examples & Code Snippets
+## 6. In-Game Commands & Proof Flags (v1.0.13-alpha.2+)
+
+### A) Punishment Commands with `-proof` Flag
+All punishment commands (`/ban`, `/banip`, `/mute`, `/muteip`, `/warn`, `/kick`) support inline `-proof:<url>` and `-proof=<url>` flags anywhere in the reason:
+
+```text
+/ban Player123 7d Hacking -proof:https://youtu.be/example -s
+/mute Spammer 1h Chat Flood -proof:https://imgur.com/screenshot.png
+/warn ToxicPlayer Swearing -proof:https://gyazo.com/chat.png
+```
+
+### B) Dedicated `/punish-proof` Command (Alias: `/proof`)
+Manage and inspect proof URLs for existing punishments by ID:
+
+- `/proof set <id> <url>` – Attaches or updates the proof URL for punishment `#<id>`.
+- `/proof remove <id>` – Removes attached proof from punishment `#<id>`.
+- `/proof reset <id> <url>` – Resets the proof URL for punishment `#<id>`.
+- `/proof check <id>` – Displays complete punishment information (Player, Executor, Type, Reason, Status, Date) along with the attached proof URL.
+
+---
+
+## 7. Integration Examples & Code Snippets
 
 ### Example 1: Custom Mute Command (GMute)
 A lightweight command that mutes with a custom executor name and server scope:
@@ -519,7 +594,25 @@ public void onPlayerPunish(PlayerPunishEvent event) {
 
 ---
 
-### Example 3: Chat Listener & Mute Notice
+### Example 3: Punishing with Proof from Code
+```java
+// Ban player with direct proof attachment:
+WapeB.getApi().banPlayer(
+    "Cheater99",
+    "Fly / Speed Hack",
+    "StaffBot",
+    30 * 86400000L, // 30 days
+    false,
+    false,
+    "global",
+    "lobby",
+    "https://youtu.be/videoProof123"
+);
+```
+
+---
+
+### Example 4: Chat Listener & Mute Notice
 Check if a player is muted on the current server when attempting to chat:
 
 ```java
@@ -538,7 +631,7 @@ public void onChat(AsyncPlayerChatEvent event) {
 
 ---
 
-## 7. HTTP REST Web API Reference
+## 8. HTTP REST Web API Reference
 
 wapeB includes a built-in HTTP REST server for remote management (e.g., Web Dashboards, Discord bots).
 
@@ -548,15 +641,40 @@ wapeB includes a built-in HTTP REST server for remote management (e.g., Web Dash
 
 | Endpoint | Method | Parameters | Description |
 |---|---|---|---|
-| `/api/player/punishments` | GET | `player=Name` | Fetch all punishments for a player as JSON array (includes `activeServer` and `server`) |
-| `/api/player/checkban` | GET | `player=Name` | Active ban status and details |
-| `/api/player/checkmute` | GET | `player=Name` | Active mute status and details |
-| `/api/punish/active` | GET | - | Fetch all currently active punishments network-wide |
+| `/api/player/punishments` | GET | `player=Name` | Fetch all punishments for a player as JSON array (includes `activeServer`, `server`, and `proof`) |
+| `/api/player/profile` | GET | `player=Name` | Fetch player profile and complete punishment history with `proof` |
+| `/api/player/checkban` | GET | `player=Name` | Active ban status and details (includes `proof`) |
+| `/api/player/checkmute` | GET | `player=Name` | Active mute status and details (includes `proof`) |
+| `/api/punish/active` | GET | - | Fetch all currently active punishments network-wide (includes `proof`) |
+| `/api/punish/proof` | GET/POST | `id=105&action=get\|set\|reset\|remove[&proof=url]` | Inspect, set, update, or remove proof URL for a punishment record *(v1.0.13-alpha.2+)* |
+| `/api/punish/snapshot` | GET | `id=105` | Fetch recorded JSON chat snapshot for punishment record *(v1.0.13-alpha.2+)* |
+| `/api/player/recentchat` | GET | `player=Name&limit=30` | Fetch recent in-memory chat messages for a player *(v1.0.13-alpha.2+)* |
 | `/api/commands/list` | GET | - | List registered commands and aliases |
-| `/api/punish/execute` | GET/POST | `target=Name&type=BAN&reason=Reason&duration=1d&active_server=global&origin_server=web` | Issue punishment via REST with custom server scoping |
+| `/api/punish/execute` | GET/POST | `target=Name&type=BAN&reason=Reason&duration=1d&active_server=global&origin_server=web&proof=url` | Issue punishment via REST with custom server scoping and proof |
 | `/api/punish/remove` | GET/POST | `id=105` | Remove punishment by ID |
 | `/api/stats` | GET | - | Daily and hourly punishment statistics |
 | `/api/lockdown` | GET/POST | `action=on&reason=Maintenance` | Manage server lockdown state |
+
+#### `/api/punish/proof` JSON Examples:
+
+**GET /api/punish/proof?id=12**
+```json
+{
+  "id": 12,
+  "player": "Cheater99",
+  "type": "BAN",
+  "proof": "https://imgur.com/evidence.png"
+}
+```
+
+**POST /api/punish/proof?id=12&action=set&proof=https://imgur.com/evidence.png**
+```json
+{
+  "success": true,
+  "id": 12,
+  "proof": "https://imgur.com/evidence.png"
+}
+```
 
 ---
 

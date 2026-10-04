@@ -1,6 +1,7 @@
 package dev.azuyo.wapeB.api.events;
 
 import dev.azuyo.wapeB.utils.Punishment;
+import org.bukkit.Bukkit;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
@@ -14,6 +15,7 @@ public class PlayerUnpunishEvent extends Event implements Cancellable {
     private boolean cancelled;
 
     public PlayerUnpunishEvent(Punishment punishment, String executor) {
+        super(!Bukkit.isPrimaryThread());
         this.punishment = punishment;
         this.executor = executor;
         this.cancelled = false;

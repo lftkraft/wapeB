@@ -82,6 +82,7 @@ public class WebhookUtil {
                         .replace("%duration%", TimeUtil.formatDuration(remainingMillis))
                         .replace("%original_duration%", TimeUtil.formatDuration(punishment.getDuration()))
                         .replace("%total_duration%", TimeUtil.formatDuration(punishment.getDuration()))
+                        .replace("%proof%", punishment.hasProof() ? punishment.getProof() : "N/A")
                         .replace("%punishment_id%", String.valueOf(punishment.getId()));
 
                 embed.addProperty("title", title);

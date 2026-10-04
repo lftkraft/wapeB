@@ -163,3 +163,18 @@ sentinel:
     retry-delay-seconds: 30
     ai-mute-duration: 20m
     ai-mute-reason-prefix: 'Chat helytelen használata - '
+
+# --- Chat Snapshot Settings ---
+chat-snapshot:
+  enabled: true
+  history-lines: 30
+  # How long to keep chat snapshots before automatic deletion
+  # Supported formats: "1h", "2h", "12h", "1d", "7d", "30d" (0 = disabled)
+  retention: "1h"
+  local-storage:
+    enabled: true
+  velocity-storage:
+    enabled: false
+    queue-enabled: true
+
+

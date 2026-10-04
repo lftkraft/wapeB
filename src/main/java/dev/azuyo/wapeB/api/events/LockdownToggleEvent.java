@@ -1,5 +1,6 @@
 package dev.azuyo.wapeB.api.events;
 
+import org.bukkit.Bukkit;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
@@ -13,6 +14,7 @@ public class LockdownToggleEvent extends Event implements Cancellable {
     private boolean cancelled;
 
     public LockdownToggleEvent(boolean enabled, String reason) {
+        super(!Bukkit.isPrimaryThread());
         this.enabled = enabled;
         this.reason = reason;
         this.cancelled = false;

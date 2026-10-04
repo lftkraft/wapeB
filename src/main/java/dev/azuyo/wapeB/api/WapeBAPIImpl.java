@@ -386,12 +386,22 @@ public class WapeBAPIImpl implements WapeBAPI {
 
     @Override
     public boolean banPlayer(String targetName, String reason, String executor, long duration, boolean silent, boolean ipBan, String activeServer, String server) {
-        OfflinePlayer op = Bukkit.getOfflinePlayer(targetName);
-        return banPlayer(op.getUniqueId(), reason, executor, duration, silent, ipBan, activeServer, server);
+        return banPlayer(targetName, reason, executor, duration, silent, ipBan, activeServer, server, null);
     }
 
     @Override
     public boolean banPlayer(UUID target, String reason, String executor, long duration, boolean silent, boolean ipBan, String activeServer, String server) {
+        return banPlayer(target, reason, executor, duration, silent, ipBan, activeServer, server, null);
+    }
+
+    @Override
+    public boolean banPlayer(String targetName, String reason, String executor, long duration, boolean silent, boolean ipBan, String activeServer, String server, String proof) {
+        OfflinePlayer op = Bukkit.getOfflinePlayer(targetName);
+        return banPlayer(op.getUniqueId(), reason, executor, duration, silent, ipBan, activeServer, server, proof);
+    }
+
+    @Override
+    public boolean banPlayer(UUID target, String reason, String executor, long duration, boolean silent, boolean ipBan, String activeServer, String server, String proof) {
         OfflinePlayer op = Bukkit.getOfflinePlayer(target);
         String targetName = op.getName() != null ? op.getName() : target.toString();
         String targetIp = op.isOnline() && ((Player)op).getAddress() != null 
@@ -405,9 +415,9 @@ public class WapeBAPIImpl implements WapeBAPI {
             type = (duration == -1) ? Punishment.PunishmentType.BAN : Punishment.PunishmentType.TEMPBAN;
         }
 
-        plugin.getLogger().info("[wapeB Debug] PlayerPunishEvent FIRED for " + targetName + " | Original Executor: '" + executor + "' | Type: " + type + " | ActiveServer: " + activeServer + " | Server: " + server);
+        plugin.getLogger().info("[wapeB Debug] PlayerPunishEvent FIRED for " + targetName + " | Original Executor: '" + executor + "' | Type: " + type + " | ActiveServer: " + activeServer + " | Server: " + server + " | Proof: " + proof);
 
-        PlayerPunishEvent event = new PlayerPunishEvent(target, targetName, targetIp, type, reason, executor, activeServer, server, duration, silent);
+        PlayerPunishEvent event = new PlayerPunishEvent(target, targetName, targetIp, type, reason, executor, activeServer, server, proof, duration, silent);
         Bukkit.getPluginManager().callEvent(event);
 
         plugin.getLogger().info("[wapeB Debug] PlayerPunishEvent PROCESSED for " + targetName + " | Final Executor: '" + event.getExecutor() + "' | Cancelled: " + event.isCancelled());
@@ -421,9 +431,16 @@ public class WapeBAPIImpl implements WapeBAPI {
             dataManager.savePunishment(existingBan);
         }
 
-        Punishment p = new Punishment(dataManager.getNextId(), target, targetName, targetIp, type, event.getReason(), event.getExecutor(), event.getActiveServer(), event.getServer(), System.currentTimeMillis(), event.getDuration());
+        Punishment p = new Punishment(dataManager.getNextId(), target, targetName, targetIp, type, event.getReason(), event.getExecutor(), event.getActiveServer(), event.getServer(), event.getProof(), System.currentTimeMillis(), event.getDuration());
         dataManager.savePunishment(p);
         WebhookUtil.sendPunishmentWebhook(p);
+
+        if (plugin.getChatSnapshotManager() != null) {
+            dev.azuyo.wapeB.utils.ChatSnapshot snapshot = event.getChatSnapshot() != null ? event.getChatSnapshot() : plugin.getChatSnapshotManager().captureSnapshot(p);
+            if (snapshot != null) {
+                plugin.getChatSnapshotManager().saveSnapshotAsync(snapshot);
+            }
+        }
 
         String broadcastMsg = configManager.getString("messages.ban.broadcast", "%prefix% %executor% banned %player%.");
         if (plugin.getPluginMessageManager() != null) {
@@ -479,12 +496,22 @@ public class WapeBAPIImpl implements WapeBAPI {
 
     @Override
     public boolean mutePlayer(String targetName, String reason, String executor, long duration, boolean silent, boolean ipMute, String activeServer, String server) {
-        OfflinePlayer op = Bukkit.getOfflinePlayer(targetName);
-        return mutePlayer(op.getUniqueId(), reason, executor, duration, silent, ipMute, activeServer, server);
+        return mutePlayer(targetName, reason, executor, duration, silent, ipMute, activeServer, server, null);
     }
 
     @Override
     public boolean mutePlayer(UUID target, String reason, String executor, long duration, boolean silent, boolean ipMute, String activeServer, String server) {
+        return mutePlayer(target, reason, executor, duration, silent, ipMute, activeServer, server, null);
+    }
+
+    @Override
+    public boolean mutePlayer(String targetName, String reason, String executor, long duration, boolean silent, boolean ipMute, String activeServer, String server, String proof) {
+        OfflinePlayer op = Bukkit.getOfflinePlayer(targetName);
+        return mutePlayer(op.getUniqueId(), reason, executor, duration, silent, ipMute, activeServer, server, proof);
+    }
+
+    @Override
+    public boolean mutePlayer(UUID target, String reason, String executor, long duration, boolean silent, boolean ipMute, String activeServer, String server, String proof) {
         OfflinePlayer op = Bukkit.getOfflinePlayer(target);
         String targetName = op.getName() != null ? op.getName() : target.toString();
         String targetIp = op.isOnline() && ((Player)op).getAddress() != null 
@@ -498,9 +525,9 @@ public class WapeBAPIImpl implements WapeBAPI {
             type = (duration == -1) ? Punishment.PunishmentType.MUTE : Punishment.PunishmentType.TEMPMUTE;
         }
 
-        plugin.getLogger().info("[wapeB Debug] PlayerPunishEvent FIRED for " + targetName + " | Original Executor: '" + executor + "' | Type: " + type + " | ActiveServer: " + activeServer + " | Server: " + server);
+        plugin.getLogger().info("[wapeB Debug] PlayerPunishEvent FIRED for " + targetName + " | Original Executor: '" + executor + "' | Type: " + type + " | ActiveServer: " + activeServer + " | Server: " + server + " | Proof: " + proof);
 
-        PlayerPunishEvent event = new PlayerPunishEvent(target, targetName, targetIp, type, reason, executor, activeServer, server, duration, silent);
+        PlayerPunishEvent event = new PlayerPunishEvent(target, targetName, targetIp, type, reason, executor, activeServer, server, proof, duration, silent);
         Bukkit.getPluginManager().callEvent(event);
 
         plugin.getLogger().info("[wapeB Debug] PlayerPunishEvent PROCESSED for " + targetName + " | Final Executor: '" + event.getExecutor() + "' | Cancelled: " + event.isCancelled());
@@ -512,9 +539,16 @@ public class WapeBAPIImpl implements WapeBAPI {
             dataManager.savePunishment(existingMute);
         }
 
-        Punishment p = new Punishment(dataManager.getNextId(), target, targetName, targetIp, type, event.getReason(), event.getExecutor(), event.getActiveServer(), event.getServer(), System.currentTimeMillis(), event.getDuration());
+        Punishment p = new Punishment(dataManager.getNextId(), target, targetName, targetIp, type, event.getReason(), event.getExecutor(), event.getActiveServer(), event.getServer(), event.getProof(), System.currentTimeMillis(), event.getDuration());
         dataManager.savePunishment(p);
         WebhookUtil.sendPunishmentWebhook(p);
+
+        if (plugin.getChatSnapshotManager() != null) {
+            dev.azuyo.wapeB.utils.ChatSnapshot snapshot = event.getChatSnapshot() != null ? event.getChatSnapshot() : plugin.getChatSnapshotManager().captureSnapshot(p);
+            if (snapshot != null) {
+                plugin.getChatSnapshotManager().saveSnapshotAsync(snapshot);
+            }
+        }
 
         String broadcastMsg = configManager.getString("messages.mute.broadcast", "%prefix% %executor% muted %player%.");
         if (plugin.getPluginMessageManager() != null) {
@@ -566,27 +600,44 @@ public class WapeBAPIImpl implements WapeBAPI {
 
     @Override
     public boolean warnPlayer(String targetName, String reason, String executor, boolean silent, String activeServer, String server) {
-        OfflinePlayer op = Bukkit.getOfflinePlayer(targetName);
-        return warnPlayer(op.getUniqueId(), reason, executor, silent, activeServer, server);
+        return warnPlayer(targetName, reason, executor, silent, activeServer, server, null);
     }
 
     @Override
     public boolean warnPlayer(UUID target, String reason, String executor, boolean silent, String activeServer, String server) {
+        return warnPlayer(target, reason, executor, silent, activeServer, server, null);
+    }
+
+    @Override
+    public boolean warnPlayer(String targetName, String reason, String executor, boolean silent, String activeServer, String server, String proof) {
+        OfflinePlayer op = Bukkit.getOfflinePlayer(targetName);
+        return warnPlayer(op.getUniqueId(), reason, executor, silent, activeServer, server, proof);
+    }
+
+    @Override
+    public boolean warnPlayer(UUID target, String reason, String executor, boolean silent, String activeServer, String server, String proof) {
         OfflinePlayer op = Bukkit.getOfflinePlayer(target);
         String targetName = op.getName() != null ? op.getName() : target.toString();
 
-        plugin.getLogger().info("[wapeB Debug] PlayerPunishEvent FIRED for " + targetName + " | Original Executor: '" + executor + "' | Type: WARN | ActiveServer: " + activeServer + " | Server: " + server);
+        plugin.getLogger().info("[wapeB Debug] PlayerPunishEvent FIRED for " + targetName + " | Original Executor: '" + executor + "' | Type: WARN | ActiveServer: " + activeServer + " | Server: " + server + " | Proof: " + proof);
 
-        PlayerPunishEvent event = new PlayerPunishEvent(target, targetName, null, Punishment.PunishmentType.WARN, reason, executor, activeServer, server, -1, silent);
+        PlayerPunishEvent event = new PlayerPunishEvent(target, targetName, null, Punishment.PunishmentType.WARN, reason, executor, activeServer, server, proof, -1, silent);
         Bukkit.getPluginManager().callEvent(event);
 
         plugin.getLogger().info("[wapeB Debug] PlayerPunishEvent PROCESSED for " + targetName + " | Final Executor: '" + event.getExecutor() + "' | Cancelled: " + event.isCancelled());
 
         if (event.isCancelled()) return false;
 
-        Punishment p = new Punishment(dataManager.getNextId(), target, targetName, Punishment.PunishmentType.WARN, event.getReason(), event.getExecutor(), event.getActiveServer(), event.getServer(), System.currentTimeMillis(), -1);
+        Punishment p = new Punishment(dataManager.getNextId(), target, targetName, null, Punishment.PunishmentType.WARN, event.getReason(), event.getExecutor(), event.getActiveServer(), event.getServer(), event.getProof(), System.currentTimeMillis(), -1);
         dataManager.savePunishment(p);
         WebhookUtil.sendPunishmentWebhook(p);
+
+        if (plugin.getChatSnapshotManager() != null) {
+            dev.azuyo.wapeB.utils.ChatSnapshot snapshot = event.getChatSnapshot() != null ? event.getChatSnapshot() : plugin.getChatSnapshotManager().captureSnapshot(p);
+            if (snapshot != null) {
+                plugin.getChatSnapshotManager().saveSnapshotAsync(snapshot);
+            }
+        }
 
         checkWarnActions(target, targetName);
 
@@ -645,31 +696,48 @@ public class WapeBAPIImpl implements WapeBAPI {
 
     @Override
     public boolean kickPlayer(String targetName, String reason, String executor, boolean silent, String activeServer, String server) {
-        Player player = Bukkit.getPlayer(targetName);
-        if (player == null) return false;
-        return kickPlayer(player.getUniqueId(), reason, executor, silent, activeServer, server);
+        return kickPlayer(targetName, reason, executor, silent, activeServer, server, null);
     }
 
     @Override
     public boolean kickPlayer(UUID target, String reason, String executor, boolean silent, String activeServer, String server) {
+        return kickPlayer(target, reason, executor, silent, activeServer, server, null);
+    }
+
+    @Override
+    public boolean kickPlayer(String targetName, String reason, String executor, boolean silent, String activeServer, String server, String proof) {
+        Player player = Bukkit.getPlayer(targetName);
+        if (player == null) return false;
+        return kickPlayer(player.getUniqueId(), reason, executor, silent, activeServer, server, proof);
+    }
+
+    @Override
+    public boolean kickPlayer(UUID target, String reason, String executor, boolean silent, String activeServer, String server, String proof) {
         OfflinePlayer op = Bukkit.getOfflinePlayer(target);
         if (!op.isOnline()) return false;
 
         Player onlineTarget = (Player) op;
 
-        plugin.getLogger().info("[wapeB Debug] PlayerPunishEvent FIRED for " + onlineTarget.getName() + " | Original Executor: '" + executor + "' | Type: KICK | ActiveServer: " + activeServer + " | Server: " + server);
+        plugin.getLogger().info("[wapeB Debug] PlayerPunishEvent FIRED for " + onlineTarget.getName() + " | Original Executor: '" + executor + "' | Type: KICK | ActiveServer: " + activeServer + " | Server: " + server + " | Proof: " + proof);
 
-        PlayerPunishEvent event = new PlayerPunishEvent(target, onlineTarget.getName(), null, Punishment.PunishmentType.KICK, reason, executor, activeServer, server, -1, silent);
+        PlayerPunishEvent event = new PlayerPunishEvent(target, onlineTarget.getName(), null, Punishment.PunishmentType.KICK, reason, executor, activeServer, server, proof, -1, silent);
         Bukkit.getPluginManager().callEvent(event);
 
         plugin.getLogger().info("[wapeB Debug] PlayerPunishEvent PROCESSED for " + onlineTarget.getName() + " | Final Executor: '" + event.getExecutor() + "' | Cancelled: " + event.isCancelled());
 
         if (event.isCancelled()) return false;
 
-        Punishment p = new Punishment(dataManager.getNextId(), target, onlineTarget.getName(), Punishment.PunishmentType.KICK, event.getReason(), event.getExecutor(), event.getActiveServer(), event.getServer(), System.currentTimeMillis(), -1);
+        Punishment p = new Punishment(dataManager.getNextId(), target, onlineTarget.getName(), null, Punishment.PunishmentType.KICK, event.getReason(), event.getExecutor(), event.getActiveServer(), event.getServer(), event.getProof(), System.currentTimeMillis(), -1);
         p.setActive(false);
         dataManager.savePunishment(p);
         WebhookUtil.sendPunishmentWebhook(p);
+
+        if (plugin.getChatSnapshotManager() != null) {
+            dev.azuyo.wapeB.utils.ChatSnapshot snapshot = event.getChatSnapshot() != null ? event.getChatSnapshot() : plugin.getChatSnapshotManager().captureSnapshot(p);
+            if (snapshot != null) {
+                plugin.getChatSnapshotManager().saveSnapshotAsync(snapshot);
+            }
+        }
 
         String broadcastMsg = configManager.getString("messages.kick.broadcast", "%prefix% %executor% kicked %player%.");
         if (plugin.getPluginMessageManager() != null) {
@@ -861,6 +929,30 @@ public class WapeBAPIImpl implements WapeBAPI {
     }
 
     @Override
+    public String getProof(int punishmentId) {
+        Punishment p = dataManager.getPunishment(punishmentId);
+        return (p != null) ? p.getProof() : null;
+    }
+
+    @Override
+    public boolean setProof(int punishmentId, String proofUrl) {
+        Punishment p = dataManager.getPunishment(punishmentId);
+        if (p == null) return false;
+        p.setProof(proofUrl);
+        dataManager.savePunishment(p);
+        return true;
+    }
+
+    @Override
+    public boolean removeProof(int punishmentId) {
+        Punishment p = dataManager.getPunishment(punishmentId);
+        if (p == null || !p.hasProof()) return false;
+        p.setProof(null);
+        dataManager.savePunishment(p);
+        return true;
+    }
+
+    @Override
     public boolean setLockdown(boolean enabled, String reason) {
         LockdownToggleEvent event = new LockdownToggleEvent(enabled, reason);
         Bukkit.getPluginManager().callEvent(event);
@@ -1025,5 +1117,37 @@ public class WapeBAPIImpl implements WapeBAPI {
     @Override
     public List<String> getCommandAliases(String originalCommand) {
         return commandManager.getAliases(originalCommand);
+    }
+
+    // --- Chat Snapshot API Methods ---
+
+    @Override
+    public dev.azuyo.wapeB.utils.ChatSnapshot getChatSnapshot(int punishmentId) {
+        if (plugin.getChatSnapshotManager() == null) return null;
+        return plugin.getChatSnapshotManager().getChatSnapshot(punishmentId);
+    }
+
+    @Override
+    public boolean hasChatSnapshot(int punishmentId) {
+        if (plugin.getChatSnapshotManager() == null) return false;
+        return plugin.getChatSnapshotManager().hasChatSnapshot(punishmentId);
+    }
+
+    @Override
+    public boolean deleteChatSnapshot(int punishmentId) {
+        if (plugin.getChatSnapshotManager() == null) return false;
+        return plugin.getChatSnapshotManager().deleteChatSnapshot(punishmentId);
+    }
+
+    @Override
+    public List<dev.azuyo.wapeB.utils.ChatMessage> getRecentChat(UUID playerUuid, int limit) {
+        if (plugin.getChatSnapshotManager() == null) return java.util.Collections.emptyList();
+        return plugin.getChatSnapshotManager().getRecentChat(playerUuid, limit);
+    }
+
+    @Override
+    public dev.azuyo.wapeB.utils.ChatSnapshot captureChatSnapshot(UUID playerUuid, int limit) {
+        if (plugin.getChatSnapshotManager() == null) return null;
+        return plugin.getChatSnapshotManager().captureSnapshotForPlayer(playerUuid, limit);
     }
 }

@@ -21,6 +21,29 @@ messages:
   no-alts-found: "%prefix% §aNincs alt fiók találat %player% számára."
   no-active-bans: "%prefix% §aNincsenek aktív kitiltások."
   no-staff-history: "%prefix% §aNincs büntetési előzmény %executor% staff tag számára."
+  proof:
+    usage: "%prefix% §cHasználat: /proof <set|remove|reset|check> <id> [url]"
+    set-usage: "%prefix% §cHasználat: /proof set <id> <url>"
+    remove-usage: "%prefix% §cHasználat: /proof remove <id>"
+    reset-usage: "%prefix% §cHasználat: /proof reset <id> <url>"
+    check-usage: "%prefix% §cHasználat: /proof check <id>"
+    set-success: "%prefix% §aBizonyíték sikeresen csatolva a(z) §x§F§F§0§0§D§9#%punishment_id% §aszankcióhoz: §e%proof%"
+    remove-success: "%prefix% §aBizonyíték sikeresen eltávolítva a(z) §x§F§F§0§0§D§9#%punishment_id% §aszankcióból!"
+    reset-success: "%prefix% §aBizonyíték sikeresen frissítve a(z) §x§F§F§0§0§D§9#%punishment_id% §aszankciónál: §e%proof%"
+    no-proof: "%prefix% §cEhhez a szankcióhoz (#%punishment_id%) nincs csatolva bizonyíték!"
+    none: "§cNincs megadva"
+    status-active: "§aAktív"
+    status-inactive: "§cInaktív"
+    check-header: "§8§m----------------[§c§l BIZONYÍTÉK ELLENŐRZÉS #%punishment_id% §8§m]----------------"
+    check-details:
+      - "§7Játékos: §f%player%"
+      - "§7Büntette: §f%executor%"
+      - "§7Típus: §f%type%"
+      - "§7Indok: §f%reason%"
+      - "§7Állapot: %status%"
+      - "§7Dátum: §f%date%"
+      - "§7Bizonyíték: §e%proof%"
+    check-footer: "§8§m-----------------------------------------------------"
 
   punishment-notification:
     permission: "wapeb.notify.punishment"
@@ -147,6 +170,7 @@ messages:
       - "§fLejárati dátum: §x§F§F§0§0§D§9%end_date%"
       - "§fBüntetés ID: §x§F§F§0§0§D§9%punishment_id%"
       - "§fIP Cím: §x§F§F§0§0§D§9%ip_address%" # Csak IP kitiltás esetén jelenik meg
+      - "§fBizonyíték: §e%proof%"
     footer: "§8§m----------------------------------------------------"
 
   checkmute:
@@ -160,6 +184,7 @@ messages:
       - "§fLejárati dátum: §x§F§F§0§0§D§9%end_date%"
       - "§fBüntetés ID: §x§F§F§0§0§D§9%punishment_id%"
       - "§fIP Cím: §x§F§F§0§0§D§9%ip_address%" # Csak IP némítás esetén jelenik meg
+      - "§fBizonyíték: §e%proof%"
     footer: "§8§m----------------------------------------------------"
 
 lockdown:
@@ -295,3 +320,17 @@ sentinel:
     ai-muted: "%prefix% §cNémítva lettél %duration% időre AI által detektált chat szabálysértés miatt: %reason%"
     auto-mute-broadcast: "%prefix% §x§F§F§0§0§D§9%player% §fnémítva lett Sentinel által %duration% időre. Indok: %reason%"
     ai-mute-broadcast: "%prefix% §x§F§F§0§0§D§9%player% §fnémítva lett %sentinel_ai_name% által %duration% időre. Indok: %reason%"
+
+# --- Chat Pillanatkép (Snapshot) Beállítások ---
+chat-snapshot:
+  enabled: true # Chatnaplók automatikus készítése szankcióknál
+  history-lines: 30 # Hány korábbi üzenetet rögzítsen a büntetés időpontjában
+  # Megőrzési idő. Támogatott formátumok: "1h", "2h", "12h", "1d", "7d", "30d" (0 = kikapcsolva)
+  retention: "1h"
+  local-storage:
+    enabled: true # Helyi tárolás engedélyezése a plugins/wapeB/snapshots/ mappában
+  velocity-storage:
+    enabled: false # Továbbítás a wapeb-velocity felé a központi tároláshoz
+    queue-enabled: true # Ha nincs online játékos, tegye várólistára és küldje át belépéskor
+
+

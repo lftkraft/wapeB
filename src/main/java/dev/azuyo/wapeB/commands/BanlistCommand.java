@@ -5,6 +5,7 @@ import dev.azuyo.wapeB.managers.ConfigManager;
 import dev.azuyo.wapeB.managers.DataManager;
 import dev.azuyo.wapeB.utils.MessageUtil;
 import dev.azuyo.wapeB.utils.Punishment;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -32,26 +33,28 @@ public class BanlistCommand implements CommandExecutor {
             return true;
         }
 
-        List<Punishment> activeBans = dataManager.getAllActiveBans();
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            List<Punishment> activeBans = dataManager.getAllActiveBans();
 
-        if (activeBans.isEmpty()) {
-            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.no-active-bans", ""), null));
-            return true;
-        }
+            if (activeBans.isEmpty()) {
+                sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.no-active-bans", ""), null));
+                return;
+            }
 
-        // Header
-        sender.sendMessage(MessageUtil.createComponent(configManager.getString("banlist.header", ""), null));
+            // Header
+            sender.sendMessage(MessageUtil.createComponent(configManager.getString("banlist.header", ""), null));
 
-        // Lines
-        String lineFormat = configManager.getString("banlist.line", "");
-        for (Punishment ban : activeBans) {
-            Map<String, String> placeholders = new HashMap<>();
-            placeholders.put("%type%", ban.getType().toString());
-            sender.sendMessage(MessageUtil.createComponent(lineFormat, ban, placeholders));
-        }
+            // Lines
+            String lineFormat = configManager.getString("banlist.line", "");
+            for (Punishment ban : activeBans) {
+                Map<String, String> placeholders = new HashMap<>();
+                placeholders.put("%type%", ban.getType().toString());
+                sender.sendMessage(MessageUtil.createComponent(lineFormat, ban, placeholders));
+            }
 
-        // Footer
-        sender.sendMessage(MessageUtil.createComponent(configManager.getString("banlist.footer", ""), null));
+            // Footer
+            sender.sendMessage(MessageUtil.createComponent(configManager.getString("banlist.footer", ""), null));
+        });
 
         return true;
     }

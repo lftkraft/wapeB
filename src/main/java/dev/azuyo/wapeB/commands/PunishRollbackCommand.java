@@ -6,6 +6,7 @@ import dev.azuyo.wapeB.managers.DataManager;
 import dev.azuyo.wapeB.utils.MessageUtil;
 import dev.azuyo.wapeB.utils.Punishment;
 import dev.azuyo.wapeB.utils.WebhookUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -37,31 +38,35 @@ public class PunishRollbackCommand implements CommandExecutor {
             return true;
         }
 
-        try {
-            int id = Integer.parseInt(args[0]);
-            Punishment p = dataManager.getPunishment(id);
+        String argId = args[0];
 
-            if (p == null) {
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            try {
+                int id = Integer.parseInt(argId);
+                Punishment p = dataManager.getPunishment(id);
+
+                if (p == null) {
+                    sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.invalid-punishment-id", ""), null));
+                    return;
+                }
+
+                p.setActive(false);
+                dataManager.savePunishment(p);
+
+                // Webhook for rollback
+                WebhookUtil.sendRollbackWebhook(p);
+
+                Map<String, String> placeholders = new HashMap<>();
+                placeholders.put("%punishment_id%", String.valueOf(p.getId()));
+                placeholders.put("%type%", p.getType().toString());
+                placeholders.put("%player%", p.getPlayerName());
+
+                sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.rollback-success", ""), null, placeholders));
+
+            } catch (NumberFormatException e) {
                 sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.invalid-punishment-id", ""), null));
-                return true;
             }
-
-            p.setActive(false);
-            dataManager.savePunishment(p);
-
-            // Webhook for rollback
-            WebhookUtil.sendRollbackWebhook(p);
-
-            Map<String, String> placeholders = new HashMap<>();
-            placeholders.put("%punishment_id%", String.valueOf(p.getId()));
-            placeholders.put("%type%", p.getType().toString());
-            placeholders.put("%player%", p.getPlayerName());
-
-            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.rollback-success", ""), null, placeholders));
-
-        } catch (NumberFormatException e) {
-            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.invalid-punishment-id", ""), null));
-        }
+        });
 
         return true;
     }

@@ -44,6 +44,20 @@ public class MuteCommand implements CommandExecutor {
         boolean silent = arguments.remove("-s");
         boolean ipMute = arguments.remove("-ip");
 
+        String proof = null;
+        for (int i = arguments.size() - 1; i >= 0; i--) {
+            String arg = arguments.get(i);
+            if (arg.toLowerCase().startsWith("-proof:")) {
+                proof = arg.substring(7);
+                arguments.remove(i);
+                break;
+            } else if (arg.toLowerCase().startsWith("-proof=")) {
+                proof = arg.substring(7);
+                arguments.remove(i);
+                break;
+            }
+        }
+
         String server = "global";
         for (int i = arguments.size() - 1; i >= 0; i--) {
             String arg = arguments.get(i);
@@ -110,17 +124,26 @@ public class MuteCommand implements CommandExecutor {
         OfflinePlayer target = Bukkit.getOfflinePlayer(targetName);
         String executorName = (sender instanceof Player) ? sender.getName() : configManager.getString("console-name", "Console");
 
-        boolean success = plugin.getApi().mutePlayer(targetName, reason, executorName, duration, silent, ipMute, server);
-        if (success) {
-            Punishment mute = plugin.getApi().getActiveMute(targetName);
-            if (mute == null) {
-                Punishment.PunishmentType pType = ipMute 
-                        ? (duration == -1 ? Punishment.PunishmentType.IPMUTE : Punishment.PunishmentType.TEMPIPMUTE)
-                        : (duration == -1 ? Punishment.PunishmentType.MUTE : Punishment.PunishmentType.TEMPMUTE);
-                mute = new Punishment(-1, target.getUniqueId(), targetName, pType, reason, executorName, server, System.currentTimeMillis(), duration);
+        final String finalReason = reason;
+        final long finalDuration = duration;
+        final String finalServer = server;
+        final String finalProof = proof;
+        final boolean finalSilent = silent;
+        final boolean finalIpMute = ipMute;
+
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            boolean success = plugin.getApi().mutePlayer(targetName, finalReason, executorName, finalDuration, finalSilent, finalIpMute, finalServer, finalServer, finalProof);
+            if (success) {
+                Punishment mute = plugin.getApi().getActiveMute(targetName);
+                if (mute == null) {
+                    Punishment.PunishmentType pType = finalIpMute 
+                            ? (finalDuration == -1 ? Punishment.PunishmentType.IPMUTE : Punishment.PunishmentType.TEMPIPMUTE)
+                            : (finalDuration == -1 ? Punishment.PunishmentType.MUTE : Punishment.PunishmentType.TEMPMUTE);
+                    mute = new Punishment(-1, target.getUniqueId(), targetName, null, pType, finalReason, executorName, finalServer, finalServer, finalProof, System.currentTimeMillis(), finalDuration);
+                }
+                sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.mute.success", "&aSuccessfully muted %player%."), mute));
             }
-            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.mute.success", "&aSuccessfully muted %player%."), mute));
-        }
+        });
 
         return true;
     }

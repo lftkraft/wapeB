@@ -39,31 +39,34 @@ public class WarningsCommand implements CommandExecutor {
         }
 
         String targetNameInput = args[0];
-        OfflinePlayer target = Bukkit.getOfflinePlayer(targetNameInput);
-        List<Punishment> warnings = plugin.getApi().getWarnings(targetNameInput);
 
-        if (warnings.isEmpty() && !target.hasPlayedBefore() && !target.isOnline()) {
-            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.player-not-found", ""), null));
-            return true;
-        }
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            OfflinePlayer target = Bukkit.getOfflinePlayer(targetNameInput);
+            List<Punishment> warnings = plugin.getApi().getWarnings(targetNameInput);
 
-        if (warnings.isEmpty()) {
-            String targetDisplayName = target.getName() != null ? target.getName() : targetNameInput;
-            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.no-warnings", ""), null, Collections.singletonMap("%player%", targetDisplayName)));
-            return true;
-        }
+            if (warnings.isEmpty() && !target.hasPlayedBefore() && !target.isOnline()) {
+                sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.player-not-found", ""), null));
+                return;
+            }
 
-        // Header
-        sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.warnings.header", ""), warnings.get(0)));
+            if (warnings.isEmpty()) {
+                String targetDisplayName = target.getName() != null ? target.getName() : targetNameInput;
+                sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.no-warnings", ""), null, Collections.singletonMap("%player%", targetDisplayName)));
+                return;
+            }
 
-        // Lines
-        String lineFormat = configManager.getString("messages.warnings.line", "");
-        for (Punishment warning : warnings) {
-            sender.sendMessage(MessageUtil.createComponent(lineFormat, warning));
-        }
+            // Header
+            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.warnings.header", ""), warnings.get(0)));
 
-        // Footer
-        sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.warnings.footer", ""), warnings.get(0)));
+            // Lines
+            String lineFormat = configManager.getString("messages.warnings.line", "");
+            for (Punishment warning : warnings) {
+                sender.sendMessage(MessageUtil.createComponent(lineFormat, warning));
+            }
+
+            // Footer
+            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.warnings.footer", ""), warnings.get(0)));
+        });
 
         return true;
     }

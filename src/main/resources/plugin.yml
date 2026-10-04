@@ -129,6 +129,10 @@ commands:
     description: Undoes a specific punishment by ID.
     usage: /punish-rollback <id>
     aliases: [pundo, rollback]
+  punish-proof:
+    description: Manages punishment proofs/evidence.
+    usage: /proof <set|remove|reset|check> <id> [url]
+    aliases: [proof, pproof]
 
 permissions:
   wapeb.*:
@@ -161,6 +165,7 @@ permissions:
       wapeb.unlink: true
       wapeb.punish.gui: true
       wapeb.rollback: true
+      wapeb.proof: true
       wapeb.notify: true
       wapeb.notify.punishment: true
       wapeb.alts.notify: true
@@ -243,6 +248,9 @@ permissions:
     default: op
   wapeb.rollback:
     description: Allows rolling back a specific punishment.
+    default: op
+  wapeb.proof:
+    description: Allows managing and checking punishment proofs.
     default: op
   wapeb.notify:
     description: Receives punishment notifications.

@@ -140,6 +140,7 @@ public class MysqlDataManager implements DataManager {
                 "executorName VARCHAR(64) NOT NULL," +
                 "active_server VARCHAR(255) DEFAULT 'global'," +
                 "server VARCHAR(64) DEFAULT 'global'," +
+                "proof TEXT," +
                 "date BIGINT NOT NULL," +
                 "duration BIGINT NOT NULL," +
                 "end BIGINT NOT NULL," +
@@ -171,6 +172,10 @@ public class MysqlDataManager implements DataManager {
                 stmt.execute("ALTER TABLE punishments ADD COLUMN active_server VARCHAR(255) DEFAULT 'global'");
             } catch (SQLException ignored) {
             }
+            try {
+                stmt.execute("ALTER TABLE punishments ADD COLUMN proof TEXT");
+            } catch (SQLException ignored) {
+            }
         } catch (SQLException e) {
             plugin.getLogger().severe("Could not create MySQL tables!");
             e.printStackTrace();
@@ -184,9 +189,9 @@ public class MysqlDataManager implements DataManager {
         boolean isUpdate = (punishment.getId() != 0 && getPunishment(punishment.getId()) != null);
         String sql;
         if (isUpdate) {
-            sql = "UPDATE punishments SET active = ?, playerUuid = ?, playerName = ?, ipAddress = ?, type = ?, reason = ?, executorName = ?, active_server = ?, server = ?, date = ?, duration = ?, end = ? WHERE id = ?";
+            sql = "UPDATE punishments SET active = ?, playerUuid = ?, playerName = ?, ipAddress = ?, type = ?, reason = ?, executorName = ?, active_server = ?, server = ?, proof = ?, date = ?, duration = ?, end = ? WHERE id = ?";
         } else {
-            sql = "INSERT INTO punishments(playerUuid, playerName, ipAddress, type, reason, executorName, active_server, server, date, duration, end, active) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)";
+            sql = "INSERT INTO punishments(playerUuid, playerName, ipAddress, type, reason, executorName, active_server, server, proof, date, duration, end, active) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)";
         }
 
         try (Connection conn = dataSource.getConnection();
@@ -202,10 +207,11 @@ public class MysqlDataManager implements DataManager {
                 pstmt.setString(7, punishment.getExecutorName());
                 pstmt.setString(8, punishment.getActiveServer() != null ? punishment.getActiveServer() : "global");
                 pstmt.setString(9, punishment.getServer() != null ? punishment.getServer() : "global");
-                pstmt.setLong(10, punishment.getDate());
-                pstmt.setLong(11, punishment.getDuration());
-                pstmt.setLong(12, punishment.getEnd());
-                pstmt.setInt(13, punishment.getId());
+                pstmt.setString(10, punishment.getProof());
+                pstmt.setLong(11, punishment.getDate());
+                pstmt.setLong(12, punishment.getDuration());
+                pstmt.setLong(13, punishment.getEnd());
+                pstmt.setInt(14, punishment.getId());
             } else {
                 pstmt.setString(1, punishment.getPlayerUuid() != null ? punishment.getPlayerUuid().toString() : null);
                 pstmt.setString(2, punishment.getPlayerName());
@@ -215,10 +221,11 @@ public class MysqlDataManager implements DataManager {
                 pstmt.setString(6, punishment.getExecutorName());
                 pstmt.setString(7, punishment.getActiveServer() != null ? punishment.getActiveServer() : "global");
                 pstmt.setString(8, punishment.getServer() != null ? punishment.getServer() : "global");
-                pstmt.setLong(9, punishment.getDate());
-                pstmt.setLong(10, punishment.getDuration());
-                pstmt.setLong(11, punishment.getEnd());
-                pstmt.setBoolean(12, punishment.isActive());
+                pstmt.setString(9, punishment.getProof());
+                pstmt.setLong(10, punishment.getDate());
+                pstmt.setLong(11, punishment.getDuration());
+                pstmt.setLong(12, punishment.getEnd());
+                pstmt.setBoolean(13, punishment.isActive());
             }
 
             pstmt.executeUpdate();
@@ -631,11 +638,15 @@ public class MysqlDataManager implements DataManager {
             server = rs.getString("server");
             if (server == null || server.isEmpty()) server = "global";
         } catch (SQLException ignored) {}
+        String proof = null;
+        try {
+            proof = rs.getString("proof");
+        } catch (SQLException ignored) {}
         long date = rs.getLong("date");
         long duration = rs.getLong("duration");
         boolean active = rs.getBoolean("active");
 
-        Punishment p = new Punishment(id, playerUuid, playerName, ipAddress, type, reason, executorName, activeServer, server, date, duration);
+        Punishment p = new Punishment(id, playerUuid, playerName, ipAddress, type, reason, executorName, activeServer, server, proof, date, duration);
         p.setActive(active);
         return p;
     }

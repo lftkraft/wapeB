@@ -186,7 +186,9 @@ public class SentinelManager {
         placeholders.put("%reason%", autoMuteReason);
         
         Component broadcast = MessageUtil.createComponent(broadcastMsg, punishment, placeholders);
-        plugin.getServer().broadcast(broadcast);
+        org.bukkit.Bukkit.getScheduler().runTask(plugin, () -> {
+            plugin.getServer().broadcast(broadcast);
+        });
     }
 
     private void applyAIMute(Player player, String reason) {
@@ -214,9 +216,13 @@ public class SentinelManager {
         placeholders.put("%duration%", aiMuteDuration);
         
         Component broadcast = MessageUtil.createComponent(broadcastMsg, punishment, placeholders);
-        plugin.getServer().broadcast(broadcast);
-
         String playerMsg = plugin.getConfigManager().getConfig().getString("sentinel.messages.ai-muted");
-        player.sendMessage(MessageUtil.createComponent(playerMsg, punishment, placeholders));
+
+        org.bukkit.Bukkit.getScheduler().runTask(plugin, () -> {
+            plugin.getServer().broadcast(broadcast);
+            if (player.isOnline()) {
+                player.sendMessage(MessageUtil.createComponent(playerMsg, punishment, placeholders));
+            }
+        });
     }
 }

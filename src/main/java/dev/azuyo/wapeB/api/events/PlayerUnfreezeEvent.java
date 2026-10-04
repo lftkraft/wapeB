@@ -1,5 +1,6 @@
 package dev.azuyo.wapeB.api.events;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
@@ -14,6 +15,7 @@ public class PlayerUnfreezeEvent extends Event implements Cancellable {
     private boolean cancelled;
 
     public PlayerUnfreezeEvent(Player player, String executor) {
+        super(!Bukkit.isPrimaryThread());
         this.player = player;
         this.executor = executor;
         this.cancelled = false;

@@ -71,6 +71,21 @@ public class BanIpCommand implements CommandExecutor {
 
         java.util.List<String> arguments = new java.util.ArrayList<>(Arrays.asList(args).subList(1, args.length));
         boolean silent = arguments.remove("-s");
+
+        String proof = null;
+        for (int i = arguments.size() - 1; i >= 0; i--) {
+            String arg = arguments.get(i);
+            if (arg.toLowerCase().startsWith("-proof:")) {
+                proof = arg.substring(7);
+                arguments.remove(i);
+                break;
+            } else if (arg.toLowerCase().startsWith("-proof=")) {
+                proof = arg.substring(7);
+                arguments.remove(i);
+                break;
+            }
+        }
+
         String server = "global";
         for (int i = arguments.size() - 1; i >= 0; i--) {
             String arg = arguments.get(i);
@@ -135,15 +150,26 @@ public class BanIpCommand implements CommandExecutor {
 
         String executorName = (sender instanceof Player) ? sender.getName() : configManager.getString("console-name", "Console");
 
-        boolean success = plugin.getApi().banPlayer(finalTargetName, reason, executorName, duration, silent, true, server);
-        if (success) {
-            Punishment ban = plugin.getApi().getActiveBan(finalTargetName);
-            if (ban == null) {
-                Punishment.PunishmentType pType = (duration == -1 ? Punishment.PunishmentType.IPBAN : Punishment.PunishmentType.TEMPIPBAN);
-                ban = new Punishment(-1, targetPlayer != null ? targetPlayer.getUniqueId() : null, finalTargetName, targetIp, pType, reason, executorName, server, System.currentTimeMillis(), duration);
+        final String finalReason = reason;
+        final long finalDuration = duration;
+        final String finalServer = server;
+        final String finalProof = proof;
+        final boolean finalSilent = silent;
+        final String capturedTargetName = finalTargetName;
+        final String capturedTargetIp = targetIp;
+        final OfflinePlayer capturedTargetPlayer = targetPlayer;
+
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            boolean success = plugin.getApi().banPlayer(capturedTargetName, finalReason, executorName, finalDuration, finalSilent, true, finalServer, finalServer, finalProof);
+            if (success) {
+                Punishment ban = plugin.getApi().getActiveBan(capturedTargetName);
+                if (ban == null) {
+                    Punishment.PunishmentType pType = (finalDuration == -1 ? Punishment.PunishmentType.IPBAN : Punishment.PunishmentType.TEMPIPBAN);
+                    ban = new Punishment(-1, capturedTargetPlayer != null ? capturedTargetPlayer.getUniqueId() : null, capturedTargetName, capturedTargetIp, pType, finalReason, executorName, finalServer, finalServer, finalProof, System.currentTimeMillis(), finalDuration);
+                }
+                sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.banip.success", "&aSuccessfully IP-banned %player%."), ban));
             }
-            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.banip.success", "&aSuccessfully IP-banned %player%."), ban));
-        }
+        });
 
         return true;
     }

@@ -136,6 +136,7 @@ public class MessageUtil {
                     .replace("%activeserver%", activeServerName)
                     .replace("%active_server%", activeServerName)
                     .replace("%punishment_id%", String.valueOf(punishment.getId()))
+                    .replace("%proof%", formatProofPlaceholder(punishment))
                     .replace("%date%", DATE_FORMAT.format(new Date(punishment.getDate())))
                     .replace("%end_date%", (punishment.getEnd() == -1) ? "Permanent" : DATE_FORMAT.format(new Date(punishment.getEnd())));
         }
@@ -157,7 +158,7 @@ public class MessageUtil {
                     .replace("%active_server%", "global");
             // Replace remaining standard placeholders with empty string if no punishment object
             String[] placeholders = {
-                    "%player%", "%executor%", "%reason%", "%type%", "%punishment_id%",
+                    "%player%", "%executor%", "%reason%", "%type%", "%punishment_id%", "%proof%",
                     "%time%", "%duration%", "%remaining%", "%remaining_duration%", "%time_left%", "%expires_in%",
                     "%detailed_duration%", "%detailed_remaining%",
                     "%original_duration%", "%total_duration%", "%detailed_original_duration%",
@@ -171,6 +172,27 @@ public class MessageUtil {
         return result;
     }
     
+    public static String formatProofPlaceholder(Punishment punishment) {
+        if (punishment == null || !punishment.hasProof()) {
+            return WapeB.getInstance() != null && WapeB.getInstance().getConfigManager() != null
+                    ? WapeB.getInstance().getConfigManager().getString("messages.proof.none", "&cNincs megadva")
+                    : "&cNincs megadva";
+        }
+        return formatProofUrl(punishment.getProof());
+    }
+
+    public static String formatProofUrl(String proofUrl) {
+        if (proofUrl == null || proofUrl.trim().isEmpty()) {
+            return WapeB.getInstance() != null && WapeB.getInstance().getConfigManager() != null
+                    ? WapeB.getInstance().getConfigManager().getString("messages.proof.none", "&cNincs megadva")
+                    : "&cNincs megadva";
+        }
+        if (proofUrl.startsWith("http://") || proofUrl.startsWith("https://")) {
+            return "<click:open_url:'" + proofUrl + "'>" + proofUrl + "</click>";
+        }
+        return proofUrl;
+    }
+
     public static Component formatKickScreen(List<String> lines, Punishment punishment) {
         TextComponent.Builder messageBuilder = Component.text();
         for (int i = 0; i < lines.size(); i++) {

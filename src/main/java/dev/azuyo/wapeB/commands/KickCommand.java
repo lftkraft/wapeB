@@ -43,6 +43,21 @@ public class KickCommand implements CommandExecutor {
         java.util.List<String> arguments = new java.util.ArrayList<>(Arrays.asList(args).subList(1, args.length));
 
         boolean silent = arguments.remove("-s");
+
+        String proof = null;
+        for (int i = arguments.size() - 1; i >= 0; i--) {
+            String arg = arguments.get(i);
+            if (arg.toLowerCase().startsWith("-proof:")) {
+                proof = arg.substring(7);
+                arguments.remove(i);
+                break;
+            } else if (arg.toLowerCase().startsWith("-proof=")) {
+                proof = arg.substring(7);
+                arguments.remove(i);
+                break;
+            }
+        }
+
         String server = "global";
         for (int i = arguments.size() - 1; i >= 0; i--) {
             String arg = arguments.get(i);
@@ -73,11 +88,18 @@ public class KickCommand implements CommandExecutor {
 
         String executorName = (sender instanceof Player) ? sender.getName() : configManager.getString("console-name", "Console");
 
-        boolean success = plugin.getApi().kickPlayer(target.getUniqueId(), reason, executorName, silent, server);
-        if (success) {
-            Punishment p = new Punishment(0, target.getUniqueId(), target.getName(), Punishment.PunishmentType.KICK, reason, executorName, server, System.currentTimeMillis(), 0);
-            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.kick.success", "&aSuccessfully kicked %player%."), p));
-        }
+        final String finalReason = reason;
+        final String finalServer = server;
+        final String finalProof = proof;
+        final boolean finalSilent = silent;
+
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            boolean success = plugin.getApi().kickPlayer(target.getUniqueId(), finalReason, executorName, finalSilent, finalServer, finalServer, finalProof);
+            if (success) {
+                Punishment p = new Punishment(0, target.getUniqueId(), target.getName(), null, Punishment.PunishmentType.KICK, finalReason, executorName, finalServer, finalServer, finalProof, System.currentTimeMillis(), 0);
+                sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.kick.success", "&aSuccessfully kicked %player%."), p));
+            }
+        });
 
         return true;
     }

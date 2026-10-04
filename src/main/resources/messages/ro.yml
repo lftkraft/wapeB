@@ -46,6 +46,29 @@ messages:
   no-staff-history: '%prefix% <yellow>No history records found for staff member %executor%.'
   rollback-success: '%prefix% <green>Successfully revoked punishment #%punishment_id% (%type% for %player%).'
   rollback-usage: '%prefix% <white>Usage: <red>/punish-rollback <id>'
+  proof:
+    usage: '%prefix% <white>Utilizare: <red>/proof <set|remove|reset|check> <id> [url]'
+    set-usage: '%prefix% <white>Utilizare: <red>/proof set <id> <url>'
+    remove-usage: '%prefix% <white>Utilizare: <red>/proof remove <id>'
+    reset-usage: '%prefix% <white>Utilizare: <red>/proof reset <id> <url>'
+    check-usage: '%prefix% <white>Utilizare: <red>/proof check <id>'
+    set-success: '%prefix% <green>Dovada a fost atașată cu succes sancțiunii #%punishment_id%: <yellow>%proof%'
+    remove-success: '%prefix% <green>Dovada a fost eliminată cu succes din sancțiunea #%punishment_id%.'
+    reset-success: '%prefix% <green>Dovada a fost actualizată cu succes pentru sancțiunea #%punishment_id%: <yellow>%proof%'
+    no-proof: '%prefix% <yellow>Nu există nicio dovadă atașată sancțiunii #%punishment_id%.'
+    none: '<red>Niciuna'
+    status-active: '<green>Activ'
+    status-inactive: '<red>Inactiv'
+    check-header: '<dark_gray><st>------------------</st> <gradient:#FF00D9:#B300FF>Verificare Dovadă #%punishment_id%</gradient> <dark_gray><st>------------------'
+    check-details:
+      - '<white>Jucător: <color:#C34338>%player%'
+      - '<white>Executor: <color:#C34338>%executor%'
+      - '<white>Tip: <color:#C34338>%type%'
+      - '<white>Motiv: <color:#C34338>%reason%'
+      - '<white>Stare: %status%'
+      - '<white>Data: <gray>%date%'
+      - '<white>Dovadă: <yellow>%proof%'
+    check-footer: '<dark_gray><st>----------------------------------------------------'
   console-only: '%prefix% <red>This command can only be executed from the console!'
   global-unban-success: '%prefix% <green>All active bans have been revoked! (Global Unban).'
 
@@ -173,6 +196,7 @@ messages:
       - '<white>Punishment ID: #<color:#C34338>%punishment_id%'
       - '<white>IP Address: <color:#C34338>%ip_address%'
       - '<white>GeoIP: <color:#C34338>%geoip%'
+      - '<white>Dovadă: <yellow>%proof%'
     footer: <dark_gray><st>----------------------------------------------------
 
   checkmute:
@@ -187,6 +211,7 @@ messages:
       - '<white>Punishment ID: #<color:#C34338>%punishment_id%'
       - '<white>IP Address: <color:#C34338>%ip_address%'
       - '<white>GeoIP: <color:#C34338>%geoip%'
+      - '<white>Dovadă: <yellow>%proof%'
     footer: <dark_gray><st>----------------------------------------------------
 
   alts:

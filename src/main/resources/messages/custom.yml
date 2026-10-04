@@ -46,6 +46,29 @@ messages:
   no-staff-history: '%prefix% <yellow>No history records found for staff member %executor%.'
   rollback-success: '%prefix% <green>Successfully revoked punishment #%punishment_id% (%type% for %player%).'
   rollback-usage: '%prefix% <white>Usage: <red>/punish-rollback <id>'
+  proof:
+    usage: '%prefix% <white>Usage: <red>/proof <set|remove|reset|check> <id> [url]'
+    set-usage: '%prefix% <white>Usage: <red>/proof set <id> <url>'
+    remove-usage: '%prefix% <white>Usage: <red>/proof remove <id>'
+    reset-usage: '%prefix% <white>Usage: <red>/proof reset <id> <url>'
+    check-usage: '%prefix% <white>Usage: <red>/proof check <id>'
+    set-success: '%prefix% <green>Successfully attached proof to punishment #%punishment_id%: <yellow>%proof%'
+    remove-success: '%prefix% <green>Successfully removed proof from punishment #%punishment_id%.'
+    reset-success: '%prefix% <green>Successfully updated proof for punishment #%punishment_id%: <yellow>%proof%'
+    no-proof: '%prefix% <yellow>There is no proof attached to punishment #%punishment_id%.'
+    none: '<red>None'
+    status-active: '<green>Active'
+    status-inactive: '<red>Inactive'
+    check-header: '<dark_gray><st>------------------</st> <gradient:#FF00D9:#B300FF>Proof Check #%punishment_id%</gradient> <dark_gray><st>------------------'
+    check-details:
+      - '<white>Player: <color:#C34338>%player%'
+      - '<white>Executor: <color:#C34338>%executor%'
+      - '<white>Type: <color:#C34338>%type%'
+      - '<white>Reason: <color:#C34338>%reason%'
+      - '<white>Status: %status%'
+      - '<white>Date: <gray>%date%'
+      - '<white>Proof: <yellow>%proof%'
+    check-footer: '<dark_gray><st>----------------------------------------------------'
   console-only: '%prefix% <red>This command can only be executed from the console!'
   global-unban-success: '%prefix% <green>All active bans have been revoked! (Global Unban).'
 
@@ -173,6 +196,7 @@ messages:
       - '<white>Punishment ID: #<color:#C34338>%punishment_id%'
       - '<white>IP Address: <color:#C34338>%ip_address%'
       - '<white>GeoIP: <color:#C34338>%geoip%'
+      - '<white>Proof: <yellow>%proof%'
     footer: <dark_gray><st>----------------------------------------------------
 
   checkmute:
@@ -187,6 +211,7 @@ messages:
       - '<white>Punishment ID: #<color:#C34338>%punishment_id%'
       - '<white>IP Address: <color:#C34338>%ip_address%'
       - '<white>GeoIP: <color:#C34338>%geoip%'
+      - '<white>Proof: <yellow>%proof%'
     footer: <dark_gray><st>----------------------------------------------------
 
   alts:

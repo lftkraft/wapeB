@@ -106,6 +106,9 @@ public class WebAPIManager {
             server.createContext("/api/punish/execute", new PunishExecuteHandler());
             server.createContext("/api/punish/remove", new PunishRemoveHandler());
             server.createContext("/api/punish/active", new ActivePunishmentsHandler());
+            server.createContext("/api/punish/proof", new PunishProofHandler());
+            server.createContext("/api/punish/snapshot", new PunishSnapshotHandler());
+            server.createContext("/api/player/recentchat", new PlayerRecentChatHandler());
 
             server.start();
             plugin.getLogger().info("Web API server started on port " + port);
@@ -260,12 +263,28 @@ public class WebAPIManager {
             UUID uuid = op.getUniqueId();
             String storedData = plugin.getDataManager().getWebPassword(uuid);
             
-            if (storedData != null && storedData.contains(":")) {
-                String[] parts = storedData.split(":");
-                String salt = parts[0];
-                String hash = parts[1];
+            if (storedData != null && !storedData.trim().isEmpty()) {
+                boolean authenticated = false;
+                // Modern BCrypt check ($2a$, $2b$, $2y$)
+                if (storedData.startsWith("$2")) {
+                    try {
+                        authenticated = org.mindrot.jbcrypt.BCrypt.checkpw(password, storedData);
+                    } catch (Exception ignored) {
+                    }
+                } else if (storedData.contains(":")) {
+                    // Legacy SHA-256 + Salt fallback & auto-migrate to BCrypt
+                    String[] parts = storedData.split(":");
+                    String salt = parts[0];
+                    String hash = parts[1];
+                    if (hash.equals(hashPassword(password, salt))) {
+                        authenticated = true;
+                        // Auto-upgrade stored password to BCrypt
+                        String newBcryptHash = org.mindrot.jbcrypt.BCrypt.hashpw(password, org.mindrot.jbcrypt.BCrypt.gensalt(12));
+                        plugin.getDataManager().setWebPassword(uuid, newBcryptHash);
+                    }
+                }
                 
-                if (hash.equals(hashPassword(password, salt))) {
+                if (authenticated) {
                     String sessionId = UUID.randomUUID().toString();
                     activeSessions.put(sessionId, new Session(uuid));
                     sendResponse(exchange, 200, "{\"success\": true, \"session\": \"" + sessionId + "\", \"uuid\": \"" + uuid + "\"}");
@@ -284,18 +303,14 @@ public class WebAPIManager {
             String uuidStr = params.get("uuid");
             String newPassword = params.get("password");
             
-            if (uuidStr == null || newPassword == null) {
+            if (uuidStr == null || newPassword == null || newPassword.trim().isEmpty()) {
                 sendResponse(exchange, 400, "{\"error\": \"Missing uuid or password\"}");
                 return;
             }
 
             UUID uuid = UUID.fromString(uuidStr);
-            byte[] saltBytes = new byte[16];
-            new SecureRandom().nextBytes(saltBytes);
-            String salt = Base64.getEncoder().encodeToString(saltBytes);
-            
-            String hashed = hashPassword(newPassword, salt);
-            plugin.getDataManager().setWebPassword(uuid, salt + ":" + hashed);
+            String bcryptHash = org.mindrot.jbcrypt.BCrypt.hashpw(newPassword, org.mindrot.jbcrypt.BCrypt.gensalt(12));
+            plugin.getDataManager().setWebPassword(uuid, bcryptHash);
             sendResponse(exchange, 200, "{\"success\": true}");
         }
     }
@@ -418,6 +433,7 @@ public class WebAPIManager {
                 po.addProperty("activeServer", p.getActiveServer());
                 po.addProperty("active_server", p.getActiveServer());
                 po.addProperty("server", p.getServer());
+                po.addProperty("proof", p.getProof() != null ? p.getProof() : "");
                 po.addProperty("date", p.getDate());
                 po.addProperty("active", p.isActive());
                 historyArr.add(po);
@@ -437,6 +453,7 @@ public class WebAPIManager {
             String typeStr = params.get("type");
             String reason = params.get("reason");
             String durationStr = params.get("duration");
+            String proof = params.get("proof");
             String activeServer = params.get("active_server");
             if (activeServer == null) activeServer = params.get("activeserver");
             if (activeServer == null) activeServer = params.get("activeServer");
@@ -468,7 +485,7 @@ public class WebAPIManager {
             long duration = (durationStr == null || durationStr.isEmpty() || durationStr.equals("-1")) ? -1 : TimeUtil.parseTime(durationStr);
             String targetIp = target.isOnline() ? ((Player)target).getAddress().getAddress().getHostAddress() : plugin.getPlayerDataManager().getLastKnownIp(target.getUniqueId());
             
-            Punishment p = new Punishment(plugin.getDataManager().getNextId(), target.getUniqueId(), target.getName(), targetIp, type, reason, getAdminName(adminUuid), activeServer, originServer, System.currentTimeMillis(), duration);
+            Punishment p = new Punishment(plugin.getDataManager().getNextId(), target.getUniqueId(), target.getName(), targetIp, type, reason, getAdminName(adminUuid), activeServer, originServer, proof, System.currentTimeMillis(), duration);
             
             // KICK esetén alapból inaktív legyen
             if (type == Punishment.PunishmentType.KICK) {
@@ -557,12 +574,128 @@ public class WebAPIManager {
                     po.addProperty("activeServer", p.getActiveServer());
                     po.addProperty("active_server", p.getActiveServer());
                     po.addProperty("server", p.getServer());
+                    po.addProperty("proof", p.getProof() != null ? p.getProof() : "");
                     po.addProperty("date", p.getDate());
                     po.addProperty("duration", p.getDuration());
                     po.addProperty("active", p.isActive());
                     po.addProperty("uuid", p.getPlayerUuid() != null ? p.getPlayerUuid().toString() : "");
                     arr.add(po);
                 }
+            }
+            sendResponse(exchange, 200, arr.toString());
+        }
+    }
+
+    class PunishProofHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            if (!isAuthenticated(exchange)) return;
+            Map<String, String> params = queryToMap(exchange.getRequestURI().getRawQuery());
+            String idStr = params.get("id");
+            if (idStr == null || idStr.isEmpty()) {
+                sendResponse(exchange, 400, "{\"error\": \"Missing id parameter\"}");
+                return;
+            }
+
+            int id;
+            try {
+                id = Integer.parseInt(idStr);
+            } catch (NumberFormatException e) {
+                sendResponse(exchange, 400, "{\"error\": \"Invalid id parameter\"}");
+                return;
+            }
+
+            String action = params.get("action");
+            if (action == null || action.equalsIgnoreCase("get") || action.equalsIgnoreCase("check")) {
+                Punishment p = plugin.getDataManager().getPunishment(id);
+                if (p == null) {
+                    sendResponse(exchange, 404, "{\"error\": \"Punishment not found\"}");
+                    return;
+                }
+                JsonObject obj = new JsonObject();
+                obj.addProperty("id", p.getId());
+                obj.addProperty("player", p.getPlayerName());
+                obj.addProperty("type", p.getType().name());
+                obj.addProperty("proof", p.getProof() != null ? p.getProof() : "");
+                sendResponse(exchange, 200, obj.toString());
+            } else if (action.equalsIgnoreCase("set") || action.equalsIgnoreCase("reset")) {
+                String proofUrl = params.get("proof");
+                if (proofUrl == null || proofUrl.trim().isEmpty()) {
+                    sendResponse(exchange, 400, "{\"error\": \"Missing proof parameter\"}");
+                    return;
+                }
+                boolean ok = plugin.getApi().setProof(id, proofUrl.trim());
+                if (ok) {
+                    sendResponse(exchange, 200, "{\"success\": true, \"id\": " + id + ", \"proof\": \"" + proofUrl.trim() + "\"}");
+                } else {
+                    sendResponse(exchange, 404, "{\"error\": \"Punishment not found or failed to set proof\"}");
+                }
+            } else if (action.equalsIgnoreCase("remove") || action.equalsIgnoreCase("delete")) {
+                boolean ok = plugin.getApi().removeProof(id);
+                if (ok) {
+                    sendResponse(exchange, 200, "{\"success\": true, \"id\": " + id + "}");
+                } else {
+                    sendResponse(exchange, 404, "{\"error\": \"Punishment not found or failed to remove proof\"}");
+                }
+            } else {
+                sendResponse(exchange, 400, "{\"error\": \"Unknown action. Supported: get, set, reset, remove\"}");
+            }
+        }
+    }
+
+    class PunishSnapshotHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            if (!isAuthenticated(exchange)) return;
+            Map<String, String> params = queryToMap(exchange.getRequestURI().getRawQuery());
+            String idStr = params.get("id");
+            if (idStr == null || idStr.isEmpty()) {
+                sendResponse(exchange, 400, "{\"error\": \"Missing id parameter\"}");
+                return;
+            }
+
+            int id;
+            try {
+                id = Integer.parseInt(idStr);
+            } catch (NumberFormatException e) {
+                sendResponse(exchange, 400, "{\"error\": \"Invalid id parameter\"}");
+                return;
+            }
+
+            dev.azuyo.wapeB.utils.ChatSnapshot snapshot = plugin.getApi().getChatSnapshot(id);
+            if (snapshot == null) {
+                sendResponse(exchange, 404, "{\"error\": \"Chat snapshot not found for punishment #" + id + "\"}");
+                return;
+            }
+
+            sendResponse(exchange, 200, snapshot.toJson());
+        }
+    }
+
+    class PlayerRecentChatHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            if (!isAuthenticated(exchange)) return;
+            Map<String, String> params = queryToMap(exchange.getRequestURI().getRawQuery());
+            String playerName = params.get("player");
+            String limitStr = params.get("limit");
+            int limit = 30;
+            if (limitStr != null && !limitStr.isEmpty()) {
+                try {
+                    limit = Integer.parseInt(limitStr);
+                } catch (NumberFormatException ignored) {}
+            }
+
+            UUID uuid = null;
+            if (playerName != null && !playerName.isEmpty()) {
+                OfflinePlayer op = Bukkit.getOfflinePlayer(playerName);
+                if (op != null) uuid = op.getUniqueId();
+            }
+
+            List<dev.azuyo.wapeB.utils.ChatMessage> list = plugin.getApi().getRecentChat(uuid, limit);
+            JsonArray arr = new JsonArray();
+            for (dev.azuyo.wapeB.utils.ChatMessage msg : list) {
+                arr.add(msg.toJson());
             }
             sendResponse(exchange, 200, arr.toString());
         }
@@ -592,6 +725,7 @@ public class WebAPIManager {
                 obj.addProperty("activeServer", p.getActiveServer());
                 obj.addProperty("active_server", p.getActiveServer());
                 obj.addProperty("server", p.getServer());
+                obj.addProperty("proof", p.getProof() != null ? p.getProof() : "");
                 obj.addProperty("date", p.getDate());
                 obj.addProperty("duration", p.getDuration());
                 obj.addProperty("active", p.isActive());
@@ -626,6 +760,7 @@ public class WebAPIManager {
                 obj.addProperty("activeServer", activeBan.getActiveServer());
                 obj.addProperty("active_server", activeBan.getActiveServer());
                 obj.addProperty("server", activeBan.getServer());
+                obj.addProperty("proof", activeBan.getProof() != null ? activeBan.getProof() : "");
                 obj.addProperty("date", activeBan.getDate());
                 obj.addProperty("end", activeBan.getEnd());
                 sendResponse(exchange, 200, obj.toString());
@@ -658,6 +793,7 @@ public class WebAPIManager {
                 obj.addProperty("activeServer", activeMute.getActiveServer());
                 obj.addProperty("active_server", activeMute.getActiveServer());
                 obj.addProperty("server", activeMute.getServer());
+                obj.addProperty("proof", activeMute.getProof() != null ? activeMute.getProof() : "");
                 obj.addProperty("date", activeMute.getDate());
                 obj.addProperty("end", activeMute.getEnd());
                 sendResponse(exchange, 200, obj.toString());
@@ -676,7 +812,7 @@ public class WebAPIManager {
                 "ban", "banip", "kick", "kickall", "mute", "muteip", "unban", "unmute",
                 "warn", "unwarn", "warnings", "history", "checkban", "checkmute",
                 "freeze", "unfreeze", "alts", "banlist", "staffhistory", "lockdown",
-                "wapeb", "globalunban", "punish", "punish-rollback"
+                "wapeb", "globalunban", "punish", "punish-rollback", "punish-proof"
             };
 
             for (String cmdName : pluginCommands) {

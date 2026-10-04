@@ -49,36 +49,38 @@ public class UnwarnCommand implements CommandExecutor {
             return true;
         }
 
-        Punishment punishment = dataManager.getPunishment(punishmentId);
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            Punishment punishment = dataManager.getPunishment(punishmentId);
 
-        boolean matchesPlayer = punishment != null && (
-            (punishment.getPlayerUuid() != null && punishment.getPlayerUuid().equals(target.getUniqueId())) ||
-            (punishment.getPlayerName() != null && punishment.getPlayerName().equalsIgnoreCase(targetNameInput))
-        );
+            boolean matchesPlayer = punishment != null && (
+                (punishment.getPlayerUuid() != null && punishment.getPlayerUuid().equals(target.getUniqueId())) ||
+                (punishment.getPlayerName() != null && punishment.getPlayerName().equalsIgnoreCase(targetNameInput))
+            );
 
-        if (punishment == null || !matchesPlayer || punishment.getType() != Punishment.PunishmentType.WARN) {
-            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.unwarn.not-found", "%prefix% <red>Warning with ID #%punishment_id% not found for this player."), null, Collections.singletonMap("%punishment_id%", String.valueOf(punishmentId))));
-            return true;
-        }
+            if (punishment == null || !matchesPlayer || punishment.getType() != Punishment.PunishmentType.WARN) {
+                sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.unwarn.not-found", "%prefix% <red>Warning with ID #%punishment_id% not found for this player."), null, Collections.singletonMap("%punishment_id%", String.valueOf(punishmentId))));
+                return;
+            }
 
-        dataManager.removePunishment(punishmentId);
+            dataManager.removePunishment(punishmentId);
 
-        String executorName = (sender instanceof Player) ? sender.getName() : configManager.getString("console-name", "Console");
-        boolean silent = args.length > 2 && args[args.length - 1].equalsIgnoreCase("-s");
-        
-        // Creating a temporary punishment object with WARN type to avoid NPE and show correct info in messages
-        Punishment tempPunishment = new Punishment(punishmentId, target.getUniqueId(), target.getName(), Punishment.PunishmentType.WARN, punishment.getReason(), executorName, System.currentTimeMillis(), 0);
+            String executorName = (sender instanceof Player) ? sender.getName() : configManager.getString("console-name", "Console");
+            boolean silent = args.length > 2 && args[args.length - 1].equalsIgnoreCase("-s");
+            
+            // Creating a temporary punishment object with WARN type to avoid NPE and show correct info in messages
+            Punishment tempPunishment = new Punishment(punishmentId, target.getUniqueId(), target.getName(), Punishment.PunishmentType.WARN, punishment.getReason(), executorName, System.currentTimeMillis(), 0);
 
-        // Broadcast
-        String broadcastMessageConfig = configManager.getString("messages.unwarn.broadcast", "%prefix% %executor% removed a warning from %player%.");
-        if (silent) {
-            String silentPrefix = configManager.getString("messages.unwarn.silent.prefix", "<gray>(Silent) ");
-            Bukkit.broadcast(MessageUtil.createComponent(silentPrefix + broadcastMessageConfig, tempPunishment), "wapeb.notify");
-        } else {
-            Bukkit.broadcast(MessageUtil.createComponent(broadcastMessageConfig, tempPunishment));
-        }
+            // Broadcast
+            String broadcastMessageConfig = configManager.getString("messages.unwarn.broadcast", "%prefix% %executor% removed a warning from %player%.");
+            if (silent) {
+                String silentPrefix = configManager.getString("messages.unwarn.silent.prefix", "<gray>(Silent) ");
+                Bukkit.broadcast(MessageUtil.createComponent(silentPrefix + broadcastMessageConfig, tempPunishment), "wapeb.notify");
+            } else {
+                Bukkit.broadcast(MessageUtil.createComponent(broadcastMessageConfig, tempPunishment));
+            }
 
-        sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.unwarn.success", "&aSuccessfully removed warning %punishment_id% from %player%."), tempPunishment));
+            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.unwarn.success", "&aSuccessfully removed warning %punishment_id% from %player%."), tempPunishment));
+        });
 
         return true;
     }

@@ -83,6 +83,8 @@ public interface WapeBAPI {
     boolean banPlayer(String targetName, String reason, String executor, long duration, boolean silent, boolean ipBan, String activeServer);
     boolean banPlayer(UUID target, String reason, String executor, long duration, boolean silent, boolean ipBan, String activeServer, String server);
     boolean banPlayer(String targetName, String reason, String executor, long duration, boolean silent, boolean ipBan, String activeServer, String server);
+    boolean banPlayer(UUID target, String reason, String executor, long duration, boolean silent, boolean ipBan, String activeServer, String server, String proof);
+    boolean banPlayer(String targetName, String reason, String executor, long duration, boolean silent, boolean ipBan, String activeServer, String server, String proof);
 
     boolean mutePlayer(UUID target, String reason, String executor, long duration, boolean silent, boolean ipMute);
     boolean mutePlayer(String targetName, String reason, String executor, long duration, boolean silent, boolean ipMute);
@@ -90,6 +92,8 @@ public interface WapeBAPI {
     boolean mutePlayer(String targetName, String reason, String executor, long duration, boolean silent, boolean ipMute, String activeServer);
     boolean mutePlayer(UUID target, String reason, String executor, long duration, boolean silent, boolean ipMute, String activeServer, String server);
     boolean mutePlayer(String targetName, String reason, String executor, long duration, boolean silent, boolean ipMute, String activeServer, String server);
+    boolean mutePlayer(UUID target, String reason, String executor, long duration, boolean silent, boolean ipMute, String activeServer, String server, String proof);
+    boolean mutePlayer(String targetName, String reason, String executor, long duration, boolean silent, boolean ipMute, String activeServer, String server, String proof);
 
     boolean warnPlayer(UUID target, String reason, String executor, boolean silent);
     boolean warnPlayer(String targetName, String reason, String executor, boolean silent);
@@ -97,6 +101,8 @@ public interface WapeBAPI {
     boolean warnPlayer(String targetName, String reason, String executor, boolean silent, String activeServer);
     boolean warnPlayer(UUID target, String reason, String executor, boolean silent, String activeServer, String server);
     boolean warnPlayer(String targetName, String reason, String executor, boolean silent, String activeServer, String server);
+    boolean warnPlayer(UUID target, String reason, String executor, boolean silent, String activeServer, String server, String proof);
+    boolean warnPlayer(String targetName, String reason, String executor, boolean silent, String activeServer, String server, String proof);
 
     boolean kickPlayer(UUID target, String reason, String executor, boolean silent);
     boolean kickPlayer(String targetName, String reason, String executor, boolean silent);
@@ -104,6 +110,8 @@ public interface WapeBAPI {
     boolean kickPlayer(String targetName, String reason, String executor, boolean silent, String activeServer);
     boolean kickPlayer(UUID target, String reason, String executor, boolean silent, String activeServer, String server);
     boolean kickPlayer(String targetName, String reason, String executor, boolean silent, String activeServer, String server);
+    boolean kickPlayer(UUID target, String reason, String executor, boolean silent, String activeServer, String server, String proof);
+    boolean kickPlayer(String targetName, String reason, String executor, boolean silent, String activeServer, String server, String proof);
 
     boolean freezePlayer(UUID target, String reason, String executor);
     boolean freezePlayer(String targetName, String reason, String executor);
@@ -118,6 +126,10 @@ public interface WapeBAPI {
     boolean unmutePlayer(String targetName, String reason, String executor);
 
     boolean revokePunishment(int punishmentId, String executor);
+
+    String getProof(int punishmentId);
+    boolean setProof(int punishmentId, String proofUrl);
+    boolean removeProof(int punishmentId);
 
     boolean setLockdown(boolean enabled, String reason);
 
@@ -151,4 +163,12 @@ public interface WapeBAPI {
 
     boolean registerCommandAlias(String originalCommand, String customAlias);
     List<String> getCommandAliases(String originalCommand);
+
+    // --- Chat Snapshot API Methods ---
+
+    dev.azuyo.wapeB.utils.ChatSnapshot getChatSnapshot(int punishmentId);
+    boolean hasChatSnapshot(int punishmentId);
+    boolean deleteChatSnapshot(int punishmentId);
+    List<dev.azuyo.wapeB.utils.ChatMessage> getRecentChat(UUID playerUuid, int limit);
+    dev.azuyo.wapeB.utils.ChatSnapshot captureChatSnapshot(UUID playerUuid, int limit);
 }

@@ -26,6 +26,7 @@ public final class WapeB extends JavaPlugin {
     private CommandManager commandManager;
     private TemplateManager templateManager;
     private PluginMessageManager pluginMessageManager;
+    private ChatSnapshotManager chatSnapshotManager;
 
     @Override
     public void onEnable() {
@@ -37,6 +38,9 @@ public final class WapeB extends JavaPlugin {
 
         // Initialize Template Manager
         templateManager = new TemplateManager(this);
+
+        // Initialize Chat Snapshot Manager
+        chatSnapshotManager = new ChatSnapshotManager(this);
 
         // Initialize Plugin Message Manager for Velocity proxy communication
         pluginMessageManager = new PluginMessageManager(this);
@@ -128,6 +132,9 @@ public final class WapeB extends JavaPlugin {
         Objects.requireNonNull(getCommand("globalunban")).setExecutor(new GlobalUnbanCommand(this));
         Objects.requireNonNull(getCommand("punish")).setExecutor(new PunishCommand(this));
         Objects.requireNonNull(getCommand("punish-rollback")).setExecutor(new PunishRollbackCommand(this));
+        ProofCommand proofCommand = new ProofCommand(this);
+        Objects.requireNonNull(getCommand("punish-proof")).setExecutor(proofCommand);
+        Objects.requireNonNull(getCommand("punish-proof")).setTabCompleter(proofCommand);
     }
 
     private void registerListeners() {
@@ -188,5 +195,9 @@ public final class WapeB extends JavaPlugin {
 
     public PluginMessageManager getPluginMessageManager() {
         return pluginMessageManager;
+    }
+
+    public ChatSnapshotManager getChatSnapshotManager() {
+        return chatSnapshotManager;
     }
 }

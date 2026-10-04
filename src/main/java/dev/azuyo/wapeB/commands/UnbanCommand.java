@@ -57,57 +57,60 @@ public class UnbanCommand implements CommandExecutor {
         }
 
         String targetIdentifier = args[0];
-        String targetIp = null;
-        OfflinePlayer targetPlayer = null;
-        Punishment activeBan = null;
-
-        boolean isIp = IP_PATTERN.matcher(targetIdentifier).matches();
-
-        if (isIp) {
-            targetIp = targetIdentifier;
-            activeBan = dataManager.getActivePunishment(null, null, targetIp, null, ipBanTypes);
-        } else {
-            targetPlayer = Bukkit.getOfflinePlayer(targetIdentifier);
-            UUID targetUuid = targetPlayer != null ? targetPlayer.getUniqueId() : null;
-            targetIp = targetUuid != null ? playerDataManager.getLastKnownIp(targetUuid) : null;
-            List<UUID> alts = (targetIp != null && !targetIp.isEmpty()) ? playerDataManager.getPlayersByIp(targetIp) : null;
-            activeBan = dataManager.getActivePunishment(targetUuid, targetIdentifier, targetIp, alts, banTypes);
-        }
-        
-        if (activeBan == null) {
-            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.not-banned", "&cPlayer/IP is not banned."), null));
-            return true;
-        }
-
         String executorName = (sender instanceof Player) ? sender.getName() : configManager.getString("console-name", "Console");
         boolean silent = args.length > 1 && args[args.length - 1].equalsIgnoreCase("-s");
-        String reason = (args.length > 1 && !silent) ? String.join(" ", Arrays.copyOfRange(args, 1, args.length)) : "Unbanned";
+        String initialReason = (args.length > 1 && !silent) ? String.join(" ", Arrays.copyOfRange(args, 1, args.length)) : "Unbanned";
         if (silent && args.length > 2) {
-            reason = String.join(" ", Arrays.copyOfRange(args, 1, args.length - 1));
+            initialReason = String.join(" ", Arrays.copyOfRange(args, 1, args.length - 1));
         }
-        if (reason.isEmpty()) reason = "Unbanned";
+        if (initialReason.isEmpty()) initialReason = "Unbanned";
+        final String reason = initialReason;
 
-        boolean success = isIp ? plugin.getApi().revokePunishment(activeBan.getId(), executorName) : plugin.getApi().unbanPlayer(targetIdentifier, reason, executorName);
-        if (!success) {
-            success = plugin.getApi().revokePunishment(activeBan.getId(), executorName);
-        }
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            String targetIp = null;
+            OfflinePlayer targetPlayer = null;
+            Punishment activeBan = null;
 
-        if (success) {
-            Punishment unbanPunishment = new Punishment(
-                activeBan.getId(), 
-                activeBan.getPlayerUuid(), 
-                activeBan.getPlayerName() != null ? activeBan.getPlayerName() : targetIdentifier, 
-                activeBan.getIpAddress(), 
-                activeBan.getType(), 
-                reason, 
-                executorName, 
-                System.currentTimeMillis(), 
-                0
-            );
-            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.unban.success", "&aSuccessfully unbanned %player%."), unbanPunishment));
-        } else {
-            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.not-banned", "&cPlayer/IP is not banned."), null));
-        }
+            boolean isIp = IP_PATTERN.matcher(targetIdentifier).matches();
+
+            if (isIp) {
+                targetIp = targetIdentifier;
+                activeBan = dataManager.getActivePunishment(null, null, targetIp, null, ipBanTypes);
+            } else {
+                targetPlayer = Bukkit.getOfflinePlayer(targetIdentifier);
+                UUID targetUuid = targetPlayer != null ? targetPlayer.getUniqueId() : null;
+                targetIp = targetUuid != null ? playerDataManager.getLastKnownIp(targetUuid) : null;
+                List<UUID> alts = (targetIp != null && !targetIp.isEmpty()) ? playerDataManager.getPlayersByIp(targetIp) : null;
+                activeBan = dataManager.getActivePunishment(targetUuid, targetIdentifier, targetIp, alts, banTypes);
+            }
+            
+            if (activeBan == null) {
+                sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.not-banned", "&cPlayer/IP is not banned."), null));
+                return;
+            }
+
+            boolean success = isIp ? plugin.getApi().revokePunishment(activeBan.getId(), executorName) : plugin.getApi().unbanPlayer(targetIdentifier, reason, executorName);
+            if (!success) {
+                success = plugin.getApi().revokePunishment(activeBan.getId(), executorName);
+            }
+
+            if (success) {
+                Punishment unbanPunishment = new Punishment(
+                    activeBan.getId(), 
+                    activeBan.getPlayerUuid(), 
+                    activeBan.getPlayerName() != null ? activeBan.getPlayerName() : targetIdentifier, 
+                    activeBan.getIpAddress(), 
+                    activeBan.getType(), 
+                    reason, 
+                    executorName, 
+                    System.currentTimeMillis(), 
+                    0
+                );
+                sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.unban.success", "&aSuccessfully unbanned %player%."), unbanPunishment));
+            } else {
+                sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.not-banned", "&cPlayer/IP is not banned."), null));
+            }
+        });
 
         return true;
     }

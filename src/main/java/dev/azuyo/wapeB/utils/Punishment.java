@@ -22,6 +22,7 @@ public class Punishment {
     private final String executorName;
     private String activeServer; // The server scope where the punishment is active (e.g. "global", "szerver2", "szerver1,szerver2")
     private String server;       // The server where the punishment took place (origin/source server, e.g. "szerver1")
+    private String proof;        // Proof / evidence URL (e.g. screenshot, video link)
     private final long date;
     private final long duration;
     private final long end;
@@ -49,6 +50,10 @@ public class Punishment {
     }
 
     public Punishment(int id, UUID playerUuid, String playerName, String ipAddress, PunishmentType type, String reason, String executorName, String activeServer, String server, long date, long duration) {
+        this(id, playerUuid, playerName, ipAddress, type, reason, executorName, activeServer, server, null, date, duration);
+    }
+
+    public Punishment(int id, UUID playerUuid, String playerName, String ipAddress, PunishmentType type, String reason, String executorName, String activeServer, String server, String proof, long date, long duration) {
         this.id = id;
         this.playerUuid = playerUuid;
         this.playerName = playerName;
@@ -58,6 +63,7 @@ public class Punishment {
         this.executorName = executorName;
         this.activeServer = (activeServer != null && !activeServer.trim().isEmpty()) ? activeServer : "global";
         this.server = (server != null && !server.trim().isEmpty()) ? server : "global";
+        this.proof = proof;
         this.date = date;
         this.duration = duration;
         this.end = (duration == -1) ? -1 : date + duration;
@@ -89,6 +95,9 @@ public class Punishment {
     public void setActiveServer(String activeServer) { this.activeServer = (activeServer != null && !activeServer.trim().isEmpty()) ? activeServer : "global"; }
     public String getServer() { return server != null ? server : "global"; }
     public void setServer(String server) { this.server = (server != null && !server.trim().isEmpty()) ? server : "global"; }
+    public String getProof() { return proof; }
+    public void setProof(String proof) { this.proof = proof; }
+    public boolean hasProof() { return proof != null && !proof.trim().isEmpty(); }
     public long getDate() { return date; }
     public long getDuration() { return duration; }
     public long getEnd() { return end; }

@@ -4,6 +4,7 @@ import dev.azuyo.wapeB.WapeB;
 import dev.azuyo.wapeB.managers.ConfigManager;
 import dev.azuyo.wapeB.managers.DataManager;
 import dev.azuyo.wapeB.utils.MessageUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -28,8 +29,10 @@ public class GlobalUnbanCommand implements CommandExecutor {
             return true;
         }
 
-        dataManager.deactivateAllBans();
-        sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.global-unban-success", "<green>All active bans have been successfully removed (Global Unban)."), null));
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            dataManager.deactivateAllBans();
+            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.global-unban-success", "<green>All active bans have been successfully removed (Global Unban)."), null));
+        });
 
         return true;
     }

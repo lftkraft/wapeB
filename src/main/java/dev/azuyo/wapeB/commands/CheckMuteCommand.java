@@ -47,49 +47,52 @@ public class CheckMuteCommand implements CommandExecutor {
         }
 
         String targetNameInput = args[0];
-        Punishment activeMute = plugin.getApi().getActiveMute(targetNameInput);
-        OfflinePlayer target = Bukkit.getOfflinePlayer(targetNameInput);
 
-        if (activeMute == null && !target.hasPlayedBefore() && !target.isOnline()) {
-            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.player-not-found", ""), null));
-            return true;
-        }
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            Punishment activeMute = plugin.getApi().getActiveMute(targetNameInput);
+            OfflinePlayer target = Bukkit.getOfflinePlayer(targetNameInput);
 
-        if (activeMute == null || (activeMute.getDuration() != -1 && activeMute.getEnd() <= System.currentTimeMillis())) {
-            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.no-active-mute", ""), null));
-            return true;
-        }
-
-        Map<String, String> headerPlaceholders = new HashMap<>();
-        String targetName = target.getName() != null ? target.getName() : args[0];
-        headerPlaceholders.put("%target%", targetName);
-        boolean isAltMute = activeMute.getPlayerUuid() != null && !activeMute.getPlayerUuid().equals(target.getUniqueId());
-        headerPlaceholders.put("%alt_notice%", isAltMute ? " (Alt fiók: " + (activeMute.getPlayerName() != null ? activeMute.getPlayerName() : "Ismeretlen") + ")" : "");
-        headerPlaceholders.put("%punished_player%", activeMute.getPlayerName() != null ? activeMute.getPlayerName() : targetName);
-
-        // Header
-        sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.checkmute.header", ""), activeMute, headerPlaceholders));
-
-        // Details
-        List<String> details = configManager.getStringList("messages.checkmute.details");
-        for (String line : details) {
-            Map<String, String> placeholders = new HashMap<>(headerPlaceholders);
-            placeholders.put("%type%", activeMute.getType().toString());
-            
-            if (activeMute.getIpAddress() != null && !activeMute.getIpAddress().isEmpty()) {
-                placeholders.put("%ip_address%", activeMute.getIpAddress());
-                placeholders.put("%geoip%", dev.azuyo.wapeB.utils.GeoIPUtil.getGeoInfo(activeMute.getIpAddress()).getFormatted());
+            if (activeMute == null && !target.hasPlayedBefore() && !target.isOnline()) {
+                sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.player-not-found", ""), null));
+                return;
             }
 
-            if (line.contains("%ip_address%") && (activeMute.getIpAddress() == null || activeMute.getIpAddress().isEmpty())) {
-                continue;
+            if (activeMute == null || (activeMute.getDuration() != -1 && activeMute.getEnd() <= System.currentTimeMillis())) {
+                sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.no-active-mute", ""), null));
+                return;
             }
 
-            sender.sendMessage(MessageUtil.createComponent(line, activeMute, placeholders));
-        }
+            Map<String, String> headerPlaceholders = new HashMap<>();
+            String targetName = target.getName() != null ? target.getName() : targetNameInput;
+            headerPlaceholders.put("%target%", targetName);
+            boolean isAltMute = activeMute.getPlayerUuid() != null && !activeMute.getPlayerUuid().equals(target.getUniqueId());
+            headerPlaceholders.put("%alt_notice%", isAltMute ? " (Alt fiók: " + (activeMute.getPlayerName() != null ? activeMute.getPlayerName() : "Ismeretlen") + ")" : "");
+            headerPlaceholders.put("%punished_player%", activeMute.getPlayerName() != null ? activeMute.getPlayerName() : targetName);
 
-        // Footer
-        sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.checkmute.footer", ""), activeMute, headerPlaceholders));
+            // Header
+            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.checkmute.header", ""), activeMute, headerPlaceholders));
+
+            // Details
+            List<String> details = configManager.getStringList("messages.checkmute.details");
+            for (String line : details) {
+                Map<String, String> placeholders = new HashMap<>(headerPlaceholders);
+                placeholders.put("%type%", activeMute.getType().toString());
+                
+                if (activeMute.getIpAddress() != null && !activeMute.getIpAddress().isEmpty()) {
+                    placeholders.put("%ip_address%", activeMute.getIpAddress());
+                    placeholders.put("%geoip%", dev.azuyo.wapeB.utils.GeoIPUtil.getGeoInfo(activeMute.getIpAddress()).getFormatted());
+                }
+
+                if (line.contains("%ip_address%") && (activeMute.getIpAddress() == null || activeMute.getIpAddress().isEmpty())) {
+                    continue;
+                }
+
+                sender.sendMessage(MessageUtil.createComponent(line, activeMute, placeholders));
+            }
+
+            // Footer
+            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.checkmute.footer", ""), activeMute, headerPlaceholders));
+        });
 
         return true;
     }

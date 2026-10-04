@@ -1,6 +1,8 @@
 package dev.azuyo.wapeB.api.events;
 
+import dev.azuyo.wapeB.utils.ChatSnapshot;
 import dev.azuyo.wapeB.utils.Punishment;
+import org.bukkit.Bukkit;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
@@ -19,19 +21,26 @@ public class PlayerPunishEvent extends Event implements Cancellable {
     private String executor;
     private String activeServer;
     private String server;
+    private String proof;
+    private ChatSnapshot chatSnapshot;
     private long duration;
     private boolean silent;
     private boolean cancelled;
 
     public PlayerPunishEvent(UUID playerUuid, String playerName, String ipAddress, Punishment.PunishmentType type, String reason, String executor, long duration, boolean silent) {
-        this(playerUuid, playerName, ipAddress, type, reason, executor, "global", "global", duration, silent);
+        this(playerUuid, playerName, ipAddress, type, reason, executor, "global", "global", null, duration, silent);
     }
 
     public PlayerPunishEvent(UUID playerUuid, String playerName, String ipAddress, Punishment.PunishmentType type, String reason, String executor, String activeServer, long duration, boolean silent) {
-        this(playerUuid, playerName, ipAddress, type, reason, executor, activeServer, "global", duration, silent);
+        this(playerUuid, playerName, ipAddress, type, reason, executor, activeServer, "global", null, duration, silent);
     }
 
     public PlayerPunishEvent(UUID playerUuid, String playerName, String ipAddress, Punishment.PunishmentType type, String reason, String executor, String activeServer, String server, long duration, boolean silent) {
+        this(playerUuid, playerName, ipAddress, type, reason, executor, activeServer, server, null, duration, silent);
+    }
+
+    public PlayerPunishEvent(UUID playerUuid, String playerName, String ipAddress, Punishment.PunishmentType type, String reason, String executor, String activeServer, String server, String proof, long duration, boolean silent) {
+        super(!Bukkit.isPrimaryThread());
         this.playerUuid = playerUuid;
         this.playerName = playerName;
         this.ipAddress = ipAddress;
@@ -40,6 +49,7 @@ public class PlayerPunishEvent extends Event implements Cancellable {
         this.executor = executor;
         this.activeServer = (activeServer != null && !activeServer.trim().isEmpty()) ? activeServer : "global";
         this.server = (server != null && !server.trim().isEmpty()) ? server : "global";
+        this.proof = proof;
         this.duration = duration;
         this.silent = silent;
         this.cancelled = false;
@@ -91,6 +101,22 @@ public class PlayerPunishEvent extends Event implements Cancellable {
 
     public void setServer(String server) {
         this.server = (server != null && !server.trim().isEmpty()) ? server : "global";
+    }
+
+    public String getProof() {
+        return proof;
+    }
+
+    public void setProof(String proof) {
+        this.proof = proof;
+    }
+
+    public ChatSnapshot getChatSnapshot() {
+        return chatSnapshot;
+    }
+
+    public void setChatSnapshot(ChatSnapshot chatSnapshot) {
+        this.chatSnapshot = chatSnapshot;
     }
 
     public long getDuration() {
