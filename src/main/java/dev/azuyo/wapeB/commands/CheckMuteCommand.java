@@ -68,6 +68,7 @@ public class CheckMuteCommand implements CommandExecutor {
             Map<String, String> headerPlaceholders = new HashMap<>();
             String targetName = target.getName() != null ? target.getName() : targetNameInput;
             headerPlaceholders.put("%target%", targetName);
+            headerPlaceholders.put("%player%", targetName);
             boolean isAltMute = activeMute.getPlayerUuid() != null && !activeMute.getPlayerUuid().equals(target.getUniqueId());
             headerPlaceholders.put("%alt_notice%", isAltMute ? " (Alt fiók: " + (activeMute.getPlayerName() != null ? activeMute.getPlayerName() : "Ismeretlen") + ")" : "");
             headerPlaceholders.put("%punished_player%", activeMute.getPlayerName() != null ? activeMute.getPlayerName() : targetName);

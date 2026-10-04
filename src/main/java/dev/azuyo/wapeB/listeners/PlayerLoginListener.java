@@ -81,7 +81,7 @@ public class PlayerLoginListener implements Listener {
                 List<String> kickScreenLines = plugin.getConfigManager().getStringList("messages.ban.kick-screen");
                 event.disallow(PlayerLoginEvent.Result.KICK_BANNED, MessageUtil.formatKickScreen(kickScreenLines, kickPunishment));
                 
-                notifyPunishment(kickPunishment);
+                notifyPunishment(activeBan, playerName, playerUuid);
                 return; 
             }
         }
@@ -160,12 +160,11 @@ public class PlayerLoginListener implements Listener {
         });
     }
 
-    private void notifyPunishment(Punishment punishment) {
+    private void notifyPunishment(Punishment punishment, String playerName, UUID playerUuid) {
         // Check cooldown for ban alert
         long currentTime = System.currentTimeMillis();
-        UUID bannedPlayerUuid = punishment.getPlayerUuid();
-        if (lastBanAlertTime.containsKey(bannedPlayerUuid) &&
-            currentTime - lastBanAlertTime.get(bannedPlayerUuid) < BAN_ALERT_COOLDOWN_MILLIS) {
+        if (lastBanAlertTime.containsKey(playerUuid) &&
+            currentTime - lastBanAlertTime.get(playerUuid) < BAN_ALERT_COOLDOWN_MILLIS) {
             return; // Cooldown is active, do not send notification
         }
         
@@ -174,11 +173,14 @@ public class PlayerLoginListener implements Listener {
         if (permission.isEmpty() || message.isEmpty()) return;
 
         // Update the timestamp and notify staff
-        lastBanAlertTime.put(bannedPlayerUuid, currentTime);
+        lastBanAlertTime.put(playerUuid, currentTime);
+        Map<String, String> placeholders = new HashMap<>();
+        placeholders.put("%player%", playerName);
+
         Bukkit.getScheduler().runTask(plugin, () -> 
             Bukkit.getOnlinePlayers().stream()
                   .filter(staff -> staff.hasPermission(permission))
-                  .forEach(staff -> staff.sendMessage(MessageUtil.createComponent(message, punishment)))
+                  .forEach(staff -> staff.sendMessage(MessageUtil.createComponent(message, punishment, placeholders)))
         );
     }
 }

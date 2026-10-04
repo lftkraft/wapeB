@@ -67,10 +67,12 @@ public class PlayerChatListener implements Listener {
 
                 // Send mute message to player ALWAYS
                 String mutedMessage = plugin.getConfigManager().getString("messages.mute.player-is-muted", "%prefix% §cYou are currently muted! \\n§cReason: %reason% \\n§cExpires in: %duration%");
-                player.sendMessage(MessageUtil.createComponent(mutedMessage, activeMute));
+                Map<String, String> playerPlaceholders = new HashMap<>();
+                playerPlaceholders.put("%player%", player.getName());
+                player.sendMessage(MessageUtil.createComponent(mutedMessage, activeMute, playerPlaceholders));
                 
                 // Notify staff about mute attempt (with cooldown)
-                notifyStaff(activeMute);
+                notifyStaff(activeMute, player);
                 return; // Don't process the message further
             }
         }
@@ -87,7 +89,7 @@ public class PlayerChatListener implements Listener {
                 event.getRecipients().add(player);
 
                 // Notify staff about shadowmute attempt
-                notifyShadowMuteStaff(activeShadowMute, event.getMessage());
+                notifyShadowMuteStaff(activeShadowMute, player, event.getMessage());
                 return; // Do not process with Sentinel or other handlers
             }
         }
@@ -98,9 +100,9 @@ public class PlayerChatListener implements Listener {
         }
     }
 
-    private void notifyStaff(Punishment punishment) {
+    private void notifyStaff(Punishment punishment, Player player) {
         long currentTime = System.currentTimeMillis();
-        UUID playerUuid = punishment.getPlayerUuid();
+        UUID playerUuid = player.getUniqueId();
         
         // 1 minute cooldown for staff notifications
         if (lastMuteStaffAlertTime.containsKey(playerUuid) &&
@@ -116,15 +118,17 @@ public class PlayerChatListener implements Listener {
 
         lastMuteStaffAlertTime.put(playerUuid, currentTime);
 
-        // The punishment object already contains the player's name.
+        Map<String, String> placeholders = new HashMap<>();
+        placeholders.put("%player%", player.getName());
+
         Bukkit.getOnlinePlayers().stream()
               .filter(staff -> staff.hasPermission(permission))
-              .forEach(staff -> staff.sendMessage(MessageUtil.createComponent(message, punishment)));
+              .forEach(staff -> staff.sendMessage(MessageUtil.createComponent(message, punishment, placeholders)));
     }
 
-    private void notifyShadowMuteStaff(Punishment punishment, String chatMessage) {
+    private void notifyShadowMuteStaff(Punishment punishment, Player player, String chatMessage) {
         long currentTime = System.currentTimeMillis();
-        UUID playerUuid = punishment.getPlayerUuid();
+        UUID playerUuid = player.getUniqueId();
 
         if (lastShadowMuteStaffAlertTime.containsKey(playerUuid) &&
             currentTime - lastShadowMuteStaffAlertTime.get(playerUuid) < STAFF_ALERT_COOLDOWN_MILLIS) {
@@ -140,7 +144,7 @@ public class PlayerChatListener implements Listener {
 
         Map<String, String> placeholders = new HashMap<>();
         placeholders.put("%message%", chatMessage);
-        placeholders.put("%player%", punishment.getPlayerName() != null ? punishment.getPlayerName() : "Unknown");
+        placeholders.put("%player%", player.getName());
         placeholders.put("%reason%", punishment.getReason() != null ? punishment.getReason() : "");
 
         Bukkit.getOnlinePlayers().stream()

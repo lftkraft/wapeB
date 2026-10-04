@@ -116,6 +116,16 @@ public class MessageUtil {
                     ? punishment.getActiveServer()
                     : "global";
 
+            String effectivePlayerName = (customPlaceholders != null && customPlaceholders.containsKey("%player%"))
+                    ? customPlaceholders.get("%player%")
+                    : (punishment.getPlayerName() != null ? punishment.getPlayerName() : "N/A");
+            String effectiveExecutorName = (customPlaceholders != null && customPlaceholders.containsKey("%executor%"))
+                    ? customPlaceholders.get("%executor%")
+                    : (punishment.getExecutorName() != null ? punishment.getExecutorName() : "N/A");
+            String effectiveReason = (customPlaceholders != null && customPlaceholders.containsKey("%reason%"))
+                    ? customPlaceholders.get("%reason%")
+                    : (punishment.getReason() != null ? punishment.getReason() : "N/A");
+
             result = result
                     .replace("%time%", remainingStr)
                     .replace("%duration%", remainingStr)
@@ -128,9 +138,9 @@ public class MessageUtil {
                     .replace("%original_duration%", originalStr)
                     .replace("%total_duration%", originalStr)
                     .replace("%detailed_original_duration%", detailedOriginalStr)
-                    .replace("%player%", punishment.getPlayerName() != null ? punishment.getPlayerName() : "N/A")
-                    .replace("%executor%", punishment.getExecutorName() != null ? punishment.getExecutorName() : "N/A")
-                    .replace("%reason%", punishment.getReason() != null ? punishment.getReason() : "N/A")
+                    .replace("%player%", effectivePlayerName)
+                    .replace("%executor%", effectiveExecutorName)
+                    .replace("%reason%", effectiveReason)
                     .replace("%type%", typeName)
                     .replace("%server%", originServerName)
                     .replace("%activeserver%", activeServerName)

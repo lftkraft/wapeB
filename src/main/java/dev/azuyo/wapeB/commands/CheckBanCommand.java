@@ -65,6 +65,7 @@ public class CheckBanCommand implements CommandExecutor {
             Map<String, String> headerPlaceholders = new HashMap<>();
             String targetName = target.getName() != null ? target.getName() : targetNameInput;
             headerPlaceholders.put("%target%", targetName);
+            headerPlaceholders.put("%player%", targetName);
             boolean isAltBan = activeBan.getPlayerUuid() != null && !activeBan.getPlayerUuid().equals(target.getUniqueId());
             headerPlaceholders.put("%alt_notice%", isAltBan ? " (Alt fiók: " + (activeBan.getPlayerName() != null ? activeBan.getPlayerName() : "Ismeretlen") + ")" : "");
             headerPlaceholders.put("%punished_player%", activeBan.getPlayerName() != null ? activeBan.getPlayerName() : targetName);
