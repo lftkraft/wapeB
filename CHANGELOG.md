@@ -4,7 +4,18 @@ All notable changes to **wapeB** will be documented in this file.
 
 ---
 
-## [v1.0.13-alpha.2] - alpha.2-1.0.13-aiupdate (2026-10-04)
+## [v1.0.13-alpha.3] - 2026-10-04 (alpha.3-aiupdate)
+
+### 🤖 Sentinel AI & Performance Enhancements
+* **🔄 Multi-API Key Pool & Round-Robin Rotation:** Added `groq-api-keys` list support in `config.yml` with round-robin load balancing and instant zero-delay failover on `429 Too Many Requests`.
+* **⚡ Intelligent Local Heuristic Pre-Filtering:** Added `sentinel.ai.pre-filter` to skip trivial, harmless chatter (< 3 chars, coordinates, numbers, emojies, gaming terms) locally with 0 ms overhead, saving 50–70% of API quotas.
+* **🛡️ Prompt Injection & Jailbreak Protection:** Hardened system instructions to ignore user-injected commands, custom bypasses, and JSON overrides.
+* **🧠 Context-Aware Chat History Analysis:** Added `sentinel.ai.context-lines` (default: 5) to supply conversation history from `ChatSnapshotManager` for accurate evaluation of ongoing disputes.
+* **🚀 Default Model Optimization:** Defaulted to `llama-3.1-8b-instant` for ultra-low latency and 14,400 RPD free-tier limit.
+
+---
+
+## [v1.0.13-alpha.2] - 2026-10-04
 
 ### 📸 1. Automatic Chat Snapshot System
 - **In-Memory Rolling Buffer:** Automatically tracks the last 300 chat messages globally with nanosecond precision and player context.
@@ -40,13 +51,6 @@ All notable changes to **wapeB** will be documented in this file.
 ### 🌍 7. Complete Localization & UTF-8 Refresh
 - Updated all 11 built-in language configurations (`hu`, `en`, `de`, `fr`, `es`, `pt`, `ru`, `ro`, `da`, `sv`, `custom`) with the latest Proof, Snapshot, and Console notification keys.
 - Enforced clean UTF-8 encoding across Hungarian and international message files.
-
-### 🤖 8. Sentinel AI Performance & Quota Optimization
-- **Multi-API Key Pool & Rotation:** Added `groq-api-keys` list support in `config.yml` with round-robin balancing and instant zero-delay failover on `429 Too Many Requests`.
-- **Intelligent Local Pre-Filtering:** Added `sentinel.ai.pre-filter` to skip trivial chatter (< 3 chars, coordinates, numbers, emojies, harmless gaming acronyms) locally with 0 ms overhead, saving 50–70% of API quotas.
-- **Prompt Injection & Jailbreak Protection:** Hardened system instructions to ignore user-injected commands and JSON overrides.
-- **Context-Aware Chat History Analysis:** Added `sentinel.ai.context-lines` (default: 5) to supply conversation context from `ChatSnapshotManager` for accurate evaluation of ongoing disputes.
-- **Optimized Model:** Defaulted to `llama-3.1-8b-instant` for ultra-low latency and 14,400 RPD free tier limit.
 
 ---
 
