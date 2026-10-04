@@ -256,7 +256,13 @@ public class YamlDataManager implements DataManager {
 
                     boolean uuidMatch = playerUuid != null && playerUuid.equals(storedUuid);
                     boolean nameMatch = playerName != null && !playerName.isEmpty() && storedName != null && storedName.equalsIgnoreCase(playerName);
-                    boolean ipMatch = ipAddress != null && !ipAddress.isEmpty() && storedIp != null && (ipAddress.equals(storedIp) || dev.azuyo.wapeB.utils.IPUtil.isIpInCidr(ipAddress, storedIp));
+                    boolean isIpPunishment = storedType == Punishment.PunishmentType.IPBAN 
+                            || storedType == Punishment.PunishmentType.TEMPIPBAN 
+                            || storedType == Punishment.PunishmentType.IPMUTE 
+                            || storedType == Punishment.PunishmentType.TEMPIPMUTE 
+                            || storedType == Punishment.PunishmentType.IPSHADOWMUTE 
+                            || storedType == Punishment.PunishmentType.TEMPIPSHADOWMUTE;
+                    boolean ipMatch = isIpPunishment && ipAddress != null && !ipAddress.isEmpty() && storedIp != null && (ipAddress.equalsIgnoreCase(storedIp) || dev.azuyo.wapeB.utils.IPUtil.isIpInCidr(ipAddress, storedIp));
                     boolean altMatch = altUuids != null && storedUuid != null && altUuids.contains(storedUuid);
 
                     if (uuidMatch || nameMatch || ipMatch || altMatch) {

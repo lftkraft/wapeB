@@ -91,6 +91,15 @@ public class Punishment {
         return false;
     }
 
+    public boolean isIpPunishment() {
+        return type == PunishmentType.IPBAN 
+            || type == PunishmentType.TEMPIPBAN 
+            || type == PunishmentType.IPMUTE 
+            || type == PunishmentType.TEMPIPMUTE 
+            || type == PunishmentType.IPSHADOWMUTE 
+            || type == PunishmentType.TEMPIPSHADOWMUTE;
+    }
+
     // Getters and Setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }

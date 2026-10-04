@@ -339,6 +339,16 @@ public class SqliteDataManager implements DataManager {
                 if (!p.isAppliesTo(currentServer)) {
                     continue;
                 }
+
+                boolean uuidMatch = playerUuid != null && playerUuid.equals(p.getPlayerUuid());
+                boolean nameMatch = playerName != null && !playerName.isEmpty() && p.getPlayerName() != null && playerName.equalsIgnoreCase(p.getPlayerName());
+                boolean altMatch = altUuids != null && p.getPlayerUuid() != null && altUuids.contains(p.getPlayerUuid());
+                boolean ipMatch = p.isIpPunishment() && ipAddress != null && !ipAddress.isEmpty() && p.getIpAddress() != null && (ipAddress.equalsIgnoreCase(p.getIpAddress()) || dev.azuyo.wapeB.utils.IPUtil.isIpInCidr(ipAddress, p.getIpAddress()));
+
+                if (!uuidMatch && !nameMatch && !altMatch && !ipMatch) {
+                    continue;
+                }
+
                 if (p.getDuration() == -1 || p.getEnd() > System.currentTimeMillis()) {
                     return p;
                 } else {
@@ -356,6 +366,9 @@ public class SqliteDataManager implements DataManager {
                     while (cidrRs.next()) {
                         Punishment p = buildPunishmentFromResultSet(cidrRs);
                         if (!p.isAppliesTo(currentServer)) {
+                            continue;
+                        }
+                        if (!p.isIpPunishment()) {
                             continue;
                         }
                         if (dev.azuyo.wapeB.utils.IPUtil.isIpInCidr(ipAddress, p.getIpAddress())) {
