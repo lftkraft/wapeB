@@ -4,7 +4,7 @@ All notable changes to **wapeB** will be documented in this file.
 
 ---
 
-## [v1.0.14-alpha.1] - 2026-10-04
+## [v1.0.13] - 2026-10-04
 
 ### 👻 1. Shadow-Mute (Szellem-Némítás) System
 * **Ghost Muting Mode:** Shadow-muted players are unaware they are muted. Their messages appear normally on their own screen, while server-wide recipients are cleared so no other players receive them.
@@ -29,11 +29,7 @@ All notable changes to **wapeB** will be documented in this file.
   - `%ip%`: Clean IP address.
 * **Interactive Chat Events:** Includes `<click:run_command:'/alts %player%'>` and `<hover:show_text:'...'>` actions for instant one-click staff inspection.
 
----
-
-## [v1.0.13-alpha.3] - 2026-10-04
-
-### 📦 1. Extensible Importer System & Importer API
+### 📦 3. Extensible Importer System & Importer API
 * **Built-in Plugin Importers:** Added one-click automated database & file importers for:
   - **LiteBans:** Imports bans, mutes, warnings, kicks from SQLite (`litebans.sqlite`) or external MySQL/MariaDB databases.
   - **AdvancedBan:** Imports punishments and punishment history from SQLite (`AdvancedBan.db`) or MySQL.

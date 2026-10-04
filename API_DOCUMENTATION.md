@@ -1,4 +1,4 @@
-# 📚 wapeB API - Complete Developer Documentation (v1.0.14-alpha.1)
+# 📚 wapeB API - Complete Developer Documentation (v1.0.13)
 
 This documentation provides a comprehensive guide to the **wapeB** Minecraft punishment system's **Java API**, **Bukkit Events**, **Dynamic Command Overrides**, **Message Placeholders**, **Proof (Evidence) System**, **Cross-Server / Velocity Synchronization**, **Extensible Importers Framework**, **AltExempt Audit API**, **Quick-Punish Template Shortcuts**, **Shadow-Mute (Ghost Mute) System**, and **HTTP REST Web API**.
 
@@ -12,12 +12,12 @@ This documentation provides a comprehensive guide to the **wapeB** Minecraft pun
    - [B) Staff History & Action Recording Methods](#b-staff-history--action-recording-methods)
    - [C) Execution Methods & Multi-Server Scoping](#c-execution-methods--multi-server-scoping)
    - [D) Proof (Evidence) API Methods](#d-proof-evidence-api-methods)
-   - [E) Chat Snapshot API Methods](#e-chat-snapshot-api-methods-v1013-alpha2)
+   - [E) Chat Snapshot API Methods](#e-chat-snapshot-api-methods)
    - [F) CIDR Subnet & GeoIP API Methods](#f-cidr-subnet--geoip-api-methods)
-   - [G) Punishment Templates & Quick-Punish API Methods](#g-punishment-templates--quick-punish-api-methods-v1013-alpha3)
-   - [H) AltExempt Extended API Methods](#h-altexempt-extended-api-methods-v1013-alpha3)
-   - [I) Extensible Importer API Methods](#i-extensible-importer-api-methods-v1013-alpha3)
-   - [J) Shadow-Mute API Methods](#j-shadow-mute-api-methods-v1014-alpha1)
+   - [G) Punishment Templates & Quick-Punish API Methods](#g-punishment-templates--quick-punish-api-methods)
+   - [H) AltExempt Extended API Methods](#h-altexempt-extended-api-methods)
+   - [I) Extensible Importer API Methods](#i-extensible-importer-api-methods)
+   - [J) Shadow-Mute API Methods](#j-shadow-mute-api-methods)
    - [K) Warn-Action Escalation API Methods](#k-warn-action-escalation-api-methods)
    - [L) Command Alias Methods](#l-command-alias-methods)
    - [M) Message Placeholders & Duration Formatting](#m-message-placeholders--duration-formatting)
@@ -42,7 +42,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'com.github.lftkraft:wapeB:v1.0.14-alpha.1'
+    compileOnly 'com.github.lftkraft:wapeB:v1.0.13'
 }
 ```
 
@@ -54,7 +54,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("com.github.lftkraft:wapeB:v1.0.13-alpha.3")
+    compileOnly("com.github.lftkraft:wapeB:v1.0.13")
 }
 ```
 
@@ -470,7 +470,7 @@ api.importPunishments(batch).thenAccept(res -> {
 
 ---
 
-### J) Shadow-Mute API Methods (v1.0.14-alpha.1+)
+### J) Shadow-Mute API Methods (v1.0.13+)
 
 Shadow-Mute (Ghost Mute) allows staff to restrict toxic players silently. The muted player can type and see their own messages locally, but other players do not receive them. Staff members with `wapeb.shadowmute.notify` receive real-time alerts.
 
@@ -546,7 +546,7 @@ wapeB provides rich placeholder replacement across all in-game messages, kick sc
 - `%activeserver%` / `%active_server%`: Target server scope where the punishment applies (e.g. `global` or `survival,skyblock`).
 - `%date%`: Formatted issuance date (`yyyy-MM-dd HH:mm:ss`).
 - `%end_date%`: Formatted expiration date (`yyyy-MM-dd HH:mm:ss`) or `Permanent`.
-- `%alts%` / `%banned_alts_count%` / `%muted_alts_count%` / `%total_alts_count%` / `%alts_hover%`: Alt-account metrics and formatted hover lists for staff on join alerts. *(v1.0.14-alpha.1+)*
+- `%alts%` / `%banned_alts_count%` / `%muted_alts_count%` / `%total_alts_count%` / `%alts_hover%`: Alt-account metrics and formatted hover lists for staff on join alerts. *(v1.0.13+)*
 
 #### ⏱️ Ceiling Duration Rounding:
 Remaining seconds are rounded **upward** `((millis + 999) / 1000)` so that newly issued punishments immediately show the exact full duration (e.g. a 14-day ban instantly displays as `14d` rather than `13d 23h 59m 59s`).

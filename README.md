@@ -1,5 +1,5 @@
 # 🔨 wapeB - Ultimate Minecraft Punishment System, AI Sentinel & Developer API
-newest: v1.0.14-alpha.1
+newest: v1.0.13
 
 [![GitHub](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/lftkraft/wapeB)
 [![Discord](https://img.shields.io/badge/Discord-Community-5865F2?logo=discord&logoColor=white)](https://dc.coolnw.eu)
@@ -79,7 +79,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'com.github.lftkraft:wapeB:v1.0.14-alpha.1'
+    compileOnly 'com.github.lftkraft:wapeB:v1.0.13'
 }
 ```
 
@@ -89,7 +89,7 @@ dependencies {
     <dependency>
         <groupId>com.github.lftkraft</groupId>
         <artifactId>wapeB</artifactId>
-        <version>v1.0.14-alpha.1</version>
+        <version>v1.0.13</version>
         <scope>provided</scope>
     </dependency>
 </dependencies>
