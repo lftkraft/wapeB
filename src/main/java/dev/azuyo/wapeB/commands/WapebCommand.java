@@ -67,25 +67,36 @@ public class WapebCommand implements CommandExecutor, TabCompleter {
                 return true;
             } else if (args[0].equalsIgnoreCase("import")) {
                 if (!sender.hasPermission("wapeb.import") && !sender.hasPermission("wapeb.admin")) {
-                    sender.sendMessage(Component.text("You don't have permission to use this command.", NamedTextColor.RED));
+                    String noPerm = plugin.getConfigManager().getString("messages.no-permission", "&cYou don't have permission.");
+                    sender.sendMessage(MessageUtil.createComponent(noPerm, null));
                     return true;
                 }
 
                 if (args.length < 2 || args[1].equalsIgnoreCase("list") || args[1].equalsIgnoreCase("help")) {
-                    sender.sendMessage(Component.text("--- [ wapeB Importers ] ---", NamedTextColor.GOLD));
+                    String header = plugin.getConfigManager().getString("messages.import.list-header", "<gold>--- [ <yellow>wapeB Importers</yellow> ] ---</gold>");
+                    sender.sendMessage(MessageUtil.createComponent(header, null));
                     for (PunishmentImporter imp : plugin.getImportManager().getRegisteredImporters()) {
-                        sender.sendMessage(Component.text("• ", NamedTextColor.YELLOW)
-                                .append(Component.text(imp.getName(), NamedTextColor.GREEN))
-                                .append(Component.text(" - " + imp.getDescription(), NamedTextColor.GRAY)));
+                        String line = plugin.getConfigManager().getString("messages.import.list-line", "<yellow>• <green>%source%</green> <gray>- %description%</gray>")
+                                .replace("%source%", imp.getName())
+                                .replace("%description%", imp.getDescription());
+                        sender.sendMessage(MessageUtil.createComponent(line, null));
                     }
-                    sender.sendMessage(Component.text("Usage: /wapeb import <source> [file/options]", NamedTextColor.AQUA));
+                    String usage = plugin.getConfigManager().getString("messages.import.usage", "%prefix% <white>Használat: <red>/wapeb import <forrás> [fájl/adatbázis]");
+                    sender.sendMessage(MessageUtil.createComponent(usage, null));
                     return true;
                 }
 
                 String sourceName = args[1].toLowerCase();
                 PunishmentImporter importer = plugin.getImportManager().getImporter(sourceName);
                 if (importer == null) {
-                    sender.sendMessage(Component.text("Unknown importer source: '" + sourceName + "'. Type '/wapeb import list' to see available sources.", NamedTextColor.RED));
+                    List<String> srcNames = new ArrayList<>();
+                    for (PunishmentImporter imp : plugin.getImportManager().getRegisteredImporters()) {
+                        srcNames.add(imp.getName());
+                    }
+                    String unknown = plugin.getConfigManager().getString("messages.import.unknown-source", "%prefix% <red>Ismeretlen importáló forrás: <yellow>%source%<red>. Elérhető források: <white>%sources%")
+                            .replace("%source%", sourceName)
+                            .replace("%sources%", String.join(", ", srcNames));
+                    sender.sendMessage(MessageUtil.createComponent(unknown, null));
                     return true;
                 }
 
@@ -94,19 +105,33 @@ public class WapebCommand implements CommandExecutor, TabCompleter {
                     options.put("file", args[2]);
                 }
 
-                sender.sendMessage(Component.text("Starting import from " + importer.getName() + "... Please wait.", NamedTextColor.YELLOW));
+                String started = plugin.getConfigManager().getString("messages.import.started", "%prefix% <yellow>Importálás elindítva innen: <gold>%source%<yellow>... Kérlek várj!")
+                        .replace("%source%", importer.getName());
+                sender.sendMessage(MessageUtil.createComponent(started, null));
 
                 importer.executeImport(options).thenAccept(result -> {
                     if (result.isSuccess()) {
-                        sender.sendMessage(Component.text("✔ Import from " + result.getSourceName() + " finished in " + result.getDurationMillis() + "ms!", NamedTextColor.GREEN));
-                        sender.sendMessage(Component.text("  Imported: " + result.getImportedCount() + " | Skipped: " + result.getSkippedCount() + " | Failed: " + result.getFailedCount(), NamedTextColor.GRAY));
+                        String success = plugin.getConfigManager().getString("messages.import.success", "%prefix% <green>✔ Sikeres importálás innen: <gold>%source% <gray>(<white>%duration%ms<gray>)")
+                                .replace("%source%", result.getSourceName())
+                                .replace("%duration%", String.valueOf(result.getDurationMillis()));
+                        sender.sendMessage(MessageUtil.createComponent(success, null));
+
+                        String summary = plugin.getConfigManager().getString("messages.import.summary", "%prefix% <gray>Importálva: <green>%imported% <gray>| Kihagyva: <yellow>%skipped% <gray>| Sikertelen: <red>%failed%")
+                                .replace("%imported%", String.valueOf(result.getImportedCount()))
+                                .replace("%skipped%", String.valueOf(result.getSkippedCount()))
+                                .replace("%failed%", String.valueOf(result.getFailedCount()));
+                        sender.sendMessage(MessageUtil.createComponent(summary, null));
+
                         for (String d : result.getDetails()) {
-                            sender.sendMessage(Component.text("  " + d, NamedTextColor.DARK_GRAY));
+                            sender.sendMessage(MessageUtil.createComponent("<dark_gray>  " + d, null));
                         }
                     } else {
-                        sender.sendMessage(Component.text("✖ Import from " + result.getSourceName() + " failed!", NamedTextColor.RED));
+                        String failed = plugin.getConfigManager().getString("messages.import.failed", "%prefix% <red>✖ Sikertelen importálás innen: <gold>%source%!")
+                                .replace("%source%", result.getSourceName());
+                        sender.sendMessage(MessageUtil.createComponent(failed, null));
+
                         for (String err : result.getErrors()) {
-                            sender.sendMessage(Component.text("  Error: " + err, NamedTextColor.RED));
+                            sender.sendMessage(MessageUtil.createComponent("<red>  Hiba: " + err, null));
                         }
                     }
                 });
@@ -115,8 +140,8 @@ public class WapebCommand implements CommandExecutor, TabCompleter {
             }
         }
 
-        sender.sendMessage(Component.text("wapeB Punishments v" + plugin.getDescription().getVersion() + " by Azuyo", NamedTextColor.GOLD));
-        sender.sendMessage(Component.text("Usage: /wapeb <reload|unlink|import>", NamedTextColor.GRAY));
+        sender.sendMessage(MessageUtil.createComponent("<gold>wapeB Punishments v" + plugin.getDescription().getVersion() + " by Azuyo</gold>", null));
+        sender.sendMessage(MessageUtil.createComponent("<gray>Használat: /wapeb <reload|unlink|import></gray>", null));
         return true;
     }
 

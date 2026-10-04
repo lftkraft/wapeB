@@ -255,6 +255,16 @@ messages:
     line: '<dark_gray>- <gray>[%punishment_id%] <red>%type% <white>%player% <white>Indok: <gradient:#EC00E3:#D900EC>%reason% <gray>(%date%)'
     footer: <dark_gray><st>----------------------------------------------------
 
+  import:
+    usage: '%prefix% <white>Használat: <red>/wapeb import <forrás> [fájl/adatbázis]'
+    unknown-source: '%prefix% <red>Ismeretlen importáló forrás: <yellow>%source%<red>. Elérhető források: <white>%sources%'
+    started: '%prefix% <yellow>Importálás elindítva innen: <gold>%source%<yellow>... Kérlek várj!'
+    success: '%prefix% <green>✔ Sikeres importálás innen: <gold>%source% <gray>(<white>%duration%ms<gray>)'
+    summary: '%prefix% <gray>Importálva: <green>%imported% <gray>| Kihagyva: <yellow>%skipped% <gray>| Sikertelen: <red>%failed%'
+    failed: '%prefix% <red>✖ Sikertelen importálás innen: <gold>%source%!'
+    list-header: '<gold>--- [ <yellow>wapeB Importers</yellow> ] ---</gold>'
+    list-line: '<yellow>• <green>%source%</green> <gray>- %description%</gray>'
+
 lockdown:
   bypass-permission: wapeb.lockdown.bypass
   kick-reason:

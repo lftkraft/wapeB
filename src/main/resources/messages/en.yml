@@ -256,6 +256,16 @@ messages:
     line: '<dark_gray>- <gray>[#%punishment_id%] <red>%type% <white>%player% <white>Reason: <gradient:#EC00E3:#D900EC>%reason% <gray>(%date%)'
     footer: <dark_gray><st>----------------------------------------------------
 
+  import:
+    usage: '%prefix% <white>Usage: <red>/wapeb import <source> [file/database]'
+    unknown-source: '%prefix% <red>Unknown importer source: <yellow>%source%<red>. Available sources: <white>%sources%'
+    started: '%prefix% <yellow>Starting import from <gold>%source%<yellow>... Please wait!'
+    success: '%prefix% <green>✔ Successfully imported from <gold>%source% <gray>(<white>%duration%ms<gray>)'
+    summary: '%prefix% <gray>Imported: <green>%imported% <gray>| Skipped: <yellow>%skipped% <gray>| Failed: <red>%failed%'
+    failed: '%prefix% <red>✖ Failed to import from <gold>%source%!'
+    list-header: '<gold>--- [ <yellow>wapeB Importers</yellow> ] ---</gold>'
+    list-line: '<yellow>• <green>%source%</green> <gray>- %description%</gray>'
+
 lockdown:
   bypass-permission: wapeb.lockdown.bypass
   kick-reason:
