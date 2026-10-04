@@ -14,8 +14,7 @@ All notable changes to **wapeB** will be documented in this file.
   - `/tempshadowmute <player> <time> [reason/#code] [-s] [-ip] [-server] [-proof:url]` (Alias: `/tsmute`)
   - `/shadowmuteip <player/ip> [time] [reason/#code] [-s] [-server] [-proof:url]` (Alias: `/smuteip`)
   - `/tempshadowmuteip <player/ip> <time> [reason/#code] [-s] [-server] [-proof:url]`
-  - `/unshadowmute <player/ip> [reason] [-s]` (Alias: `/unsmute`)
-  - `/unmute` and `/checkmute` automatically resolve and interact with active shadow-mutes when regular mutes are absent.
+  - `/unmute <player/ip>` and `/checkmute <player/ip>` automatically resolve and lift/inspect active shadow-mutes when regular mutes are absent.
 * **Staff Violation Alert:** Staff members with permission `wapeb.shadowmute.notify` receive real-time notifications with anti-spam cooldown when shadow-muted players attempt to speak.
 * **Java API & REST Endpoints:**
   - Added `WapeBAPI#isShadowMuted(...)`, `WapeBAPI#getActiveShadowMute(...)`, `WapeBAPI#shadowMutePlayer(...)`, and `WapeBAPI#unshadowMutePlayer(...)`.

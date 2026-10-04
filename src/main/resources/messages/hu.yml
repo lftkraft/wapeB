@@ -143,13 +143,6 @@ messages:
     silent:
       prefix: '<gray>(Csendes) '
 
-  unshadowmute:
-    usage: '%prefix% <white>Használat: <red>/unshadowmute <játékos> [indok] [-s]'
-    success: '%prefix% <white>Sikeresen feloldottad <color:#C34338>%player%<white> szellem-némítását.'
-    broadcast: '%prefix% <color:#C34338>%player% <white>szellem-némítása feloldva.'
-    silent:
-      prefix: '<gray>(Csendes) '
-
   banip:
     usage: '%prefix% <white>Használat: <red>/banip <játékos/IP> [idő] [indok] [-s] [-proof:url]'
     default-reason: IP tiltás.

@@ -136,11 +136,6 @@ public final class WapeB extends JavaPlugin {
             Objects.requireNonNull(getCommand("tempshadowmuteip")).setExecutor(shadowMuteIpCommand);
             Objects.requireNonNull(getCommand("tempshadowmuteip")).setTabCompleter(shadowMuteIpCommand);
         }
-        UnshadowMuteCommand unshadowMuteCommand = new UnshadowMuteCommand(this);
-        if (getCommand("unshadowmute") != null) {
-            Objects.requireNonNull(getCommand("unshadowmute")).setExecutor(unshadowMuteCommand);
-            Objects.requireNonNull(getCommand("unshadowmute")).setTabCompleter(unshadowMuteCommand);
-        }
         Objects.requireNonNull(getCommand("unban")).setExecutor(new UnbanCommand(this));
         Objects.requireNonNull(getCommand("unmute")).setExecutor(new UnmuteCommand(this));
         Objects.requireNonNull(getCommand("warn")).setExecutor(new WarnCommand(this));

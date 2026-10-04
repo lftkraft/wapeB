@@ -117,13 +117,6 @@ messages:
     broadcast: "%prefix% §x§F§F§0§0§D§9%executor% §ffeloldotta §x§F§F§0§0§D§9%player%§f némítását."
     silent:
       prefix: "§7(Néma) "
-
-  unshadowmute:
-    usage: "%prefix% §fUnshadowmute használata: §c/unshadowmute (játékos) [indok] [-s]"
-    success: "%prefix% §fSikeresen feloldottad §a%player%§f szellem-némítását."
-    broadcast: "%prefix% §x§F§F§0§0§D§9%executor% §ffeloldotta §x§F§F§0§0§D§9%player%§f szellem-némítását."
-    silent:
-      prefix: "§7(Néma) "
       
   banip:
     usage: "%prefix% §fIP-Ban használata: §c/banip (játékos/ip) [idő] [indok] [-s]"

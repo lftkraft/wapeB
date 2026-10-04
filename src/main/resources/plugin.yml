@@ -61,10 +61,6 @@ commands:
     description: Temporarily shadow mutes a player's IP address.
     usage: /tempshadowmuteip <player/ip> <time> [reason] [-s]
     aliases: [tsmuteip, tsmi]
-  unshadowmute:
-    description: Un-shadow mutes a player or IP address.
-    usage: /unshadowmute <player/ip> [reason] [-s]
-    aliases: [unsmute, unszellemnemitas]
   kick:
     description: Kicks a player from the server.
     usage: /kick <player> [reason] [-s]
@@ -212,9 +208,6 @@ permissions:
     default: op
   wapeb.shadowmuteip:
     description: Allows IP shadow muting players.
-    default: op
-  wapeb.unshadowmute:
-    description: Allows un-shadow muting players or IPs.
     default: op
   wapeb.shadowmute.notify:
     description: Receives notifications when shadow-muted players attempt to chat.

@@ -46,7 +46,6 @@ newest: v1.0.14-alpha.1
 | `/muteip` | `/muteip <player/ip> [time] [reason/#code] [-s] [-server] [-proof:url]` | IP-Mute a player | `wapeb.muteip` |
 | `/shadowmute` | `/shadowmute <player> [time] [reason/#code] [-s] [-ip] [-server] [-proof:url]` | Shadow-mute player (ghost mute) | `wapeb.shadowmute` |
 | `/shadowmuteip` | `/shadowmuteip <player/ip> [time] [reason/#code] [-s] [-server] [-proof:url]` | IP Shadow-mute player | `wapeb.shadowmuteip` |
-| `/unshadowmute` | `/unshadowmute <player/ip> [reason] [-s]` | Un-shadowmute player or IP | `wapeb.unshadowmute` |
 | `/warn` | `/warn <player> [reason/#code] [-s] [-server] [-proof:url]` | Warn a player | `wapeb.warn` |
 | `/kick` | `/kick <player> [reason/#code] [-s] [-server] [-proof:url]` | Kick a player from the server | `wapeb.kick` |
 | `/kickall` | `/kickall [reason]` | Kick all non-staff players | `wapeb.kickall` |

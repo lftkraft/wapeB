@@ -144,13 +144,6 @@ messages:
     silent:
       prefix: '<gray>(Silent) '
 
-  unshadowmute:
-    usage: '%prefix% <white>Usage: <red>/unshadowmute <player> [reason] [-s]'
-    success: '%prefix% <green>Successfully un-shadowmuted <color:#C34338>%player%<green>.'
-    broadcast: '%prefix% <color:#C34338>%player% <white>was un-shadowmuted.'
-    silent:
-      prefix: '<gray>(Silent) '
-
   banip:
     usage: '%prefix% <white>Usage: <red>/banip <player/IP> [time] [reason] [-s]'
     default-reason: IP Ban.
