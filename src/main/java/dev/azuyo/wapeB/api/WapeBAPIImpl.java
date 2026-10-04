@@ -285,6 +285,23 @@ public class WapeBAPIImpl implements WapeBAPI {
     }
 
     @Override
+    public List<dev.azuyo.wapeB.utils.AltExemptInfo> getAllAltExempts() {
+        return playerDataManager.getAllAltExempts();
+    }
+
+    @Override
+    public dev.azuyo.wapeB.utils.AltExemptInfo getAltExemptDetails(UUID playerUuid) {
+        return playerDataManager.getAltExemptDetails(playerUuid);
+    }
+
+    @Override
+    public dev.azuyo.wapeB.utils.AltExemptInfo getAltExemptDetails(String playerName) {
+        OfflinePlayer op = Bukkit.getOfflinePlayer(playerName);
+        return getAltExemptDetails(op.getUniqueId());
+    }
+
+
+    @Override
     public boolean isBanned(UUID playerUuid) {
         return getActiveBan(playerUuid) != null;
     }
@@ -1060,9 +1077,51 @@ public class WapeBAPIImpl implements WapeBAPI {
     }
 
     @Override
+    public dev.azuyo.wapeB.managers.TemplateManager.PunishmentTemplate findTemplate(String keyOrShortcut) {
+        return plugin.getTemplateManager().findTemplate(keyOrShortcut);
+    }
+
+    @Override
+    public boolean saveTemplate(String category, String key, String reason, String duration, boolean silent, String shortcut) {
+        return plugin.getTemplateManager().saveTemplate(category, key, reason, duration, silent, shortcut);
+    }
+
+    @Override
+    public boolean deleteTemplate(String category, String key) {
+        return plugin.getTemplateManager().deleteTemplate(category, key);
+    }
+
+    @Override
     public boolean punishWithTemplate(String targetName, String category, String templateKey, String executor, boolean silent) {
         OfflinePlayer op = Bukkit.getOfflinePlayer(targetName);
         return punishWithTemplate(op.getUniqueId(), category, templateKey, executor, silent);
+    }
+
+    // --- Importer API Methods ---
+
+    @Override
+    public void registerImporter(dev.azuyo.wapeB.importers.PunishmentImporter importer) {
+        plugin.getImportManager().registerImporter(importer);
+    }
+
+    @Override
+    public dev.azuyo.wapeB.importers.PunishmentImporter getImporter(String name) {
+        return plugin.getImportManager().getImporter(name);
+    }
+
+    @Override
+    public List<dev.azuyo.wapeB.importers.PunishmentImporter> getRegisteredImporters() {
+        return plugin.getImportManager().getRegisteredImporters();
+    }
+
+    @Override
+    public java.util.concurrent.CompletableFuture<dev.azuyo.wapeB.importers.ImportResult> executeImport(String importerName, Map<String, Object> options) {
+        return plugin.getImportManager().executeImport(importerName, options);
+    }
+
+    @Override
+    public java.util.concurrent.CompletableFuture<dev.azuyo.wapeB.importers.ImportResult> importPunishments(List<Punishment> punishments) {
+        return plugin.getImportManager().importBatch(punishments);
     }
 
     // --- Warn Action API Methods ---

@@ -122,11 +122,44 @@ public class PlayerDataManager {
         if (exempt) {
             playerDataConfig.set(playerUuid.toString() + ".exemptBy", addedBy != null ? addedBy : "Console");
             playerDataConfig.set(playerUuid.toString() + ".exemptDate", System.currentTimeMillis());
+            OfflinePlayer op = Bukkit.getOfflinePlayer(playerUuid);
+            if (op.getName() != null) {
+                playerDataConfig.set(playerUuid.toString() + ".lastName", op.getName());
+            }
         } else {
             playerDataConfig.set(playerUuid.toString() + ".exemptBy", null);
             playerDataConfig.set(playerUuid.toString() + ".exemptDate", null);
         }
         save();
+    }
+
+    public dev.azuyo.wapeB.utils.AltExemptInfo getAltExemptDetails(UUID playerUuid) {
+        if (playerUuid == null) return null;
+        boolean isExempt = isAltExempt(playerUuid);
+        if (!isExempt) return null;
+        String name = playerDataConfig.getString(playerUuid.toString() + ".lastName", Bukkit.getOfflinePlayer(playerUuid).getName());
+        String by = playerDataConfig.getString(playerUuid.toString() + ".exemptBy", "Console");
+        long date = playerDataConfig.getLong(playerUuid.toString() + ".exemptDate", 0);
+        return new dev.azuyo.wapeB.utils.AltExemptInfo(playerUuid, name, true, by, date);
+    }
+
+    public List<dev.azuyo.wapeB.utils.AltExemptInfo> getAllAltExempts() {
+        List<dev.azuyo.wapeB.utils.AltExemptInfo> list = new ArrayList<>();
+        ConfigurationSection section = playerDataConfig.getConfigurationSection("");
+        if (section == null) return list;
+
+        for (String uuidStr : section.getKeys(false)) {
+            try {
+                UUID uuid = UUID.fromString(uuidStr);
+                if (playerDataConfig.getBoolean(uuidStr + ".exempt", false)) {
+                    String name = playerDataConfig.getString(uuidStr + ".lastName", Bukkit.getOfflinePlayer(uuid).getName());
+                    String by = playerDataConfig.getString(uuidStr + ".exemptBy", "Console");
+                    long date = playerDataConfig.getLong(uuidStr + ".exemptDate", 0);
+                    list.add(new dev.azuyo.wapeB.utils.AltExemptInfo(uuid, name, true, by, date));
+                }
+            } catch (IllegalArgumentException ignored) {}
+        }
+        return list;
     }
 
     public List<UUID> getPlayersByIp(String ipAddress) {

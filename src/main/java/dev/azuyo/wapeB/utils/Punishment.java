@@ -54,6 +54,10 @@ public class Punishment {
     }
 
     public Punishment(int id, UUID playerUuid, String playerName, String ipAddress, PunishmentType type, String reason, String executorName, String activeServer, String server, String proof, long date, long duration) {
+        this(id, playerUuid, playerName, ipAddress, type, reason, executorName, activeServer, server, proof, date, duration, true);
+    }
+
+    public Punishment(int id, UUID playerUuid, String playerName, String ipAddress, PunishmentType type, String reason, String executorName, String activeServer, String server, String proof, long date, long duration, boolean active) {
         this.id = id;
         this.playerUuid = playerUuid;
         this.playerName = playerName;
@@ -67,7 +71,11 @@ public class Punishment {
         this.date = date;
         this.duration = duration;
         this.end = (duration == -1) ? -1 : date + duration;
-        this.active = true;
+        this.active = active;
+    }
+
+    public Punishment(int id, UUID playerUuid, String playerName, String ipAddress, PunishmentType type, String reason, String executorName, long date, long duration, boolean active, String activeServer, String server, String proof) {
+        this(id, playerUuid, playerName, ipAddress, type, reason, executorName, activeServer, server, proof, date, duration, active);
     }
 
     public boolean isAppliesTo(String currentServerName) {

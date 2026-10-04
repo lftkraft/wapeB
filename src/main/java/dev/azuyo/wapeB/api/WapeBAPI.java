@@ -142,14 +142,32 @@ public interface WapeBAPI {
 
     dev.azuyo.wapeB.utils.GeoIPUtil.GeoInfo getGeoInfo(String ipAddress);
 
+    // --- AltExempt Extended API Methods ---
+
+    List<dev.azuyo.wapeB.utils.AltExemptInfo> getAllAltExempts();
+    dev.azuyo.wapeB.utils.AltExemptInfo getAltExemptDetails(UUID playerUuid);
+    dev.azuyo.wapeB.utils.AltExemptInfo getAltExemptDetails(String playerName);
+
     // --- Template API Methods ---
 
     dev.azuyo.wapeB.managers.TemplateManager.PunishmentTemplate getTemplate(String category, String templateKey);
+    dev.azuyo.wapeB.managers.TemplateManager.PunishmentTemplate findTemplate(String keyOrShortcut);
     java.util.Map<String, java.util.Map<String, dev.azuyo.wapeB.managers.TemplateManager.PunishmentTemplate>> getAllTemplates();
     List<dev.azuyo.wapeB.managers.TemplateManager.PunishmentTemplate> getTemplatesForCategory(String category);
 
+    boolean saveTemplate(String category, String key, String reason, String duration, boolean silent, String shortcut);
+    boolean deleteTemplate(String category, String key);
+
     boolean punishWithTemplate(UUID target, String category, String templateKey, String executor, boolean silent);
     boolean punishWithTemplate(String targetName, String category, String templateKey, String executor, boolean silent);
+
+    // --- Importer API Methods ---
+
+    void registerImporter(dev.azuyo.wapeB.importers.PunishmentImporter importer);
+    dev.azuyo.wapeB.importers.PunishmentImporter getImporter(String name);
+    List<dev.azuyo.wapeB.importers.PunishmentImporter> getRegisteredImporters();
+    java.util.concurrent.CompletableFuture<dev.azuyo.wapeB.importers.ImportResult> executeImport(String importerName, java.util.Map<String, Object> options);
+    java.util.concurrent.CompletableFuture<dev.azuyo.wapeB.importers.ImportResult> importPunishments(List<Punishment> punishments);
 
     // --- Warn Action API Methods ---
 
@@ -172,3 +190,4 @@ public interface WapeBAPI {
     List<dev.azuyo.wapeB.utils.ChatMessage> getRecentChat(UUID playerUuid, int limit);
     dev.azuyo.wapeB.utils.ChatSnapshot captureChatSnapshot(UUID playerUuid, int limit);
 }
+

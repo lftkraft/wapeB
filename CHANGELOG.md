@@ -4,9 +4,37 @@ All notable changes to **wapeB** will be documented in this file.
 
 ---
 
-## [v1.0.13-alpha.3] - 2026-10-04 (alpha.3-aiupdate)
+## [v1.0.13-alpha.3] - 2026-10-04
 
-### 🤖 Sentinel AI & Performance Enhancements
+### 📦 1. Extensible Importer System & Importer API
+* **Built-in Plugin Importers:** Added one-click automated database & file importers for:
+  - **LiteBans:** Imports bans, mutes, warnings, kicks from SQLite (`litebans.sqlite`) or external MySQL/MariaDB databases.
+  - **AdvancedBan:** Imports punishments and punishment history from SQLite (`AdvancedBan.db`) or MySQL.
+  - **Vanilla Minecraft JSON:** Imports standard `banned-players.json` and `banned-ips.json` with duration and expiry calculation.
+* **Extensible Java API:** Developers can register custom importers via `WapeBAPI#registerImporter(PunishmentImporter)` or perform direct batch imports with `WapeBAPI#importPunishments(List<Punishment>)`.
+* **REST API Endpoints:** 
+  - `GET /api/import/sources` - List all registered punishment importers.
+  - `POST /api/import/execute` - Execute an import asynchronously via REST webhook/API.
+* **In-Game Command:** Added `/wapeb import <source> [file/database]` with live progress report and tab completion.
+
+### 👥 2. AltExempt Extended API & REST Endpoints
+* **Full Java API Integration:** Added `WapeBAPI#getAllAltExempts()`, `WapeBAPI#getAltExemptDetails(UUID/player)`, and `WapeBAPI#setAltExempt(...)` returning complete audit records (`AltExemptInfo`).
+* **REST API Endpoints:**
+  - `GET /api/altexempt/list` - Query all currently alt-exempted accounts with metadata.
+  - `GET /api/altexempt/check?player=...` - Instant check if a target is alt-exempt.
+  - `POST /api/altexempt/set` - Programmatically add or remove alt exemptions from external web dashboards.
+
+### ⚡ 3. Quick-Punish Templates & Shortcut System
+* **Shortcut Codes:** Support for numeric and custom shortcuts (e.g., `#1`, `#2`, `$cheating`) directly in punishment commands (`/ban <player> #1`, `/mute <player> #spam`, `/warn <player> #toxicity`).
+* **Silent Flag Inheritance:** Templates can specify `silent: true` in `templates.yml` to automatically execute silently without manually appending `-s`.
+* **Dynamic Template API:** Create, modify, delete, and lookup templates at runtime via `WapeBAPI#saveTemplate(...)`, `WapeBAPI#deleteTemplate(...)`, and `WapeBAPI#findTemplate(...)`.
+* **REST API Endpoints:**
+  - `GET /api/templates/list` - Retrieve all templates or filter by category.
+  - `GET /api/templates/get` - Fetch template details by key or shortcut.
+  - `POST /api/templates/save` - Create or update templates remotely.
+  - `POST /api/templates/delete` - Remove templates via REST.
+
+### 🤖 4. Sentinel AI & Performance Enhancements
 * **🔄 Multi-API Key Pool & Round-Robin Rotation:** Added `groq-api-keys` list support in `config.yml` with round-robin load balancing and instant zero-delay failover on `429 Too Many Requests`.
 * **⚡ Intelligent Local Heuristic Pre-Filtering:** Added `sentinel.ai.pre-filter` to skip trivial, harmless chatter (< 3 chars, coordinates, numbers, emojies, gaming terms) locally with 0 ms overhead, saving 50–70% of API quotas.
 * **🛡️ Prompt Injection & Jailbreak Protection:** Hardened system instructions to ignore user-injected commands, custom bypasses, and JSON overrides.

@@ -110,6 +110,21 @@ public class WebAPIManager {
             server.createContext("/api/punish/snapshot", new PunishSnapshotHandler());
             server.createContext("/api/player/recentchat", new PlayerRecentChatHandler());
 
+            // Importer REST endpoints
+            server.createContext("/api/import/sources", new ImportSourcesHandler());
+            server.createContext("/api/import/execute", new ImportExecuteHandler());
+
+            // AltExempt REST endpoints
+            server.createContext("/api/altexempt/list", new AltExemptListHandler());
+            server.createContext("/api/altexempt/check", new AltExemptCheckHandler());
+            server.createContext("/api/altexempt/set", new AltExemptSetHandler());
+
+            // Templates REST endpoints
+            server.createContext("/api/templates/list", new TemplatesListHandler());
+            server.createContext("/api/templates/get", new TemplatesGetHandler());
+            server.createContext("/api/templates/save", new TemplatesSaveHandler());
+            server.createContext("/api/templates/delete", new TemplatesDeleteHandler());
+
             server.start();
             plugin.getLogger().info("Web API server started on port " + port);
         } catch (IOException e) {
@@ -840,6 +855,328 @@ public class WebAPIManager {
             if (user != null) return user.getPrimaryGroup();
         } catch (Exception ignored) {}
         return "default";
+    }
+
+    private JsonObject parseJsonBody(HttpExchange exchange) {
+        try {
+            java.io.InputStream is = exchange.getRequestBody();
+            java.io.InputStreamReader reader = new java.io.InputStreamReader(is, StandardCharsets.UTF_8);
+            JsonObject obj = gson.fromJson(reader, JsonObject.class);
+            return obj != null ? obj : new JsonObject();
+        } catch (Exception e) {
+            return new JsonObject();
+        }
+    }
+
+    class ImportSourcesHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            if (!isAuthenticated(exchange)) return;
+            JsonArray arr = new JsonArray();
+            for (dev.azuyo.wapeB.importers.PunishmentImporter imp : plugin.getImportManager().getRegisteredImporters()) {
+                JsonObject obj = new JsonObject();
+                obj.addProperty("name", imp.getName());
+                obj.addProperty("description", imp.getDescription());
+                arr.add(obj);
+            }
+            JsonObject res = new JsonObject();
+            res.add("sources", arr);
+            sendResponse(exchange, 200, res.toString());
+        }
+    }
+
+    class ImportExecuteHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            if (!isAuthenticated(exchange)) return;
+            if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+                sendResponse(exchange, 405, "{\"error\": \"Method not allowed. Use POST.\"}");
+                return;
+            }
+            JsonObject body = parseJsonBody(exchange);
+            Map<String, String> queryParams = queryToMap(exchange.getRequestURI().getRawQuery());
+
+            String source = body.has("source") ? body.get("source").getAsString() : queryParams.get("source");
+            if (source == null || source.isEmpty()) {
+                sendResponse(exchange, 400, "{\"error\": \"Missing source parameter\"}");
+                return;
+            }
+
+            Map<String, Object> options = new HashMap<>();
+            if (body.has("options") && body.get("options").isJsonObject()) {
+                JsonObject optObj = body.getAsJsonObject("options");
+                for (String key : optObj.keySet()) {
+                    if (optObj.get(key).isJsonPrimitive()) {
+                        options.put(key, optObj.get(key).getAsString());
+                    }
+                }
+            } else {
+                for (Map.Entry<String, String> entry : queryParams.entrySet()) {
+                    if (!entry.getKey().equalsIgnoreCase("source")) {
+                        options.put(entry.getKey(), entry.getValue());
+                    }
+                }
+            }
+
+            try {
+                dev.azuyo.wapeB.importers.ImportResult result = plugin.getImportManager().executeImport(source, options).join();
+                JsonObject res = new JsonObject();
+                res.addProperty("source", result.getSource());
+                res.addProperty("success", result.isSuccess());
+                res.addProperty("imported", result.getImportedCount());
+                res.addProperty("failed", result.getFailedCount());
+                res.addProperty("durationMs", result.getDurationMillis());
+
+                JsonArray errArr = new JsonArray();
+                for (String err : result.getErrors()) errArr.add(err);
+                res.add("errors", errArr);
+
+                JsonArray detArr = new JsonArray();
+                for (String det : result.getDetails()) detArr.add(det);
+                res.add("details", detArr);
+
+                sendResponse(exchange, 200, res.toString());
+            } catch (Exception e) {
+                sendResponse(exchange, 500, "{\"error\": \"Import execution failed: " + e.getMessage() + "\"}");
+            }
+        }
+    }
+
+    class AltExemptListHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            if (!isAuthenticated(exchange)) return;
+            List<dev.azuyo.wapeB.utils.AltExemptInfo> list = plugin.getPlayerDataManager().getAllAltExempts();
+            JsonArray arr = new JsonArray();
+            for (dev.azuyo.wapeB.utils.AltExemptInfo info : list) {
+                JsonObject obj = new JsonObject();
+                obj.addProperty("uuid", info.getUuid().toString());
+                obj.addProperty("name", info.getName());
+                obj.addProperty("exempt", info.isExempt());
+                obj.addProperty("exemptBy", info.getExemptBy());
+                obj.addProperty("exemptDate", info.getExemptDate());
+                arr.add(obj);
+            }
+            JsonObject res = new JsonObject();
+            res.add("exempts", arr);
+            sendResponse(exchange, 200, res.toString());
+        }
+    }
+
+    class AltExemptCheckHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            if (!isAuthenticated(exchange)) return;
+            Map<String, String> params = queryToMap(exchange.getRequestURI().getRawQuery());
+            String player = params.get("player");
+            String uuidStr = params.get("uuid");
+
+            UUID uuid = null;
+            if (uuidStr != null && !uuidStr.isEmpty()) {
+                try { uuid = UUID.fromString(uuidStr); } catch (Exception ignored) {}
+            } else if (player != null && !player.isEmpty()) {
+                OfflinePlayer op = Bukkit.getOfflinePlayer(player);
+                if (op != null) uuid = op.getUniqueId();
+            }
+
+            if (uuid == null) {
+                sendResponse(exchange, 400, "{\"error\": \"Missing player or uuid parameter\"}");
+                return;
+            }
+
+            boolean isExempt = plugin.getPlayerDataManager().isAltExempt(uuid);
+            dev.azuyo.wapeB.utils.AltExemptInfo details = plugin.getPlayerDataManager().getAltExemptDetails(uuid);
+
+            JsonObject res = new JsonObject();
+            res.addProperty("uuid", uuid.toString());
+            res.addProperty("player", details != null ? details.getName() : Bukkit.getOfflinePlayer(uuid).getName());
+            res.addProperty("exempt", isExempt);
+            if (details != null) {
+                res.addProperty("exemptBy", details.getExemptBy());
+                res.addProperty("exemptDate", details.getExemptDate());
+            }
+            sendResponse(exchange, 200, res.toString());
+        }
+    }
+
+    class AltExemptSetHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            if (!isAuthenticated(exchange)) return;
+            if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+                sendResponse(exchange, 405, "{\"error\": \"Method not allowed. Use POST.\"}");
+                return;
+            }
+            JsonObject body = parseJsonBody(exchange);
+            Map<String, String> queryParams = queryToMap(exchange.getRequestURI().getRawQuery());
+
+            String player = body.has("player") ? body.get("player").getAsString() : queryParams.get("player");
+            String uuidStr = body.has("uuid") ? body.get("uuid").getAsString() : queryParams.get("uuid");
+            boolean exempt = body.has("exempt") ? body.get("exempt").getAsBoolean() : !"false".equalsIgnoreCase(queryParams.get("exempt"));
+            String executor = body.has("executor") ? body.get("executor").getAsString() : queryParams.get("executor");
+            if (executor == null || executor.isEmpty()) executor = "Web-API";
+
+            UUID uuid = null;
+            if (uuidStr != null && !uuidStr.isEmpty()) {
+                try { uuid = UUID.fromString(uuidStr); } catch (Exception ignored) {}
+            } else if (player != null && !player.isEmpty()) {
+                OfflinePlayer op = Bukkit.getOfflinePlayer(player);
+                if (op != null) uuid = op.getUniqueId();
+            }
+
+            if (uuid == null) {
+                sendResponse(exchange, 400, "{\"error\": \"Missing valid player or uuid\"}");
+                return;
+            }
+
+            plugin.getPlayerDataManager().setAltExempt(uuid, exempt, executor);
+            JsonObject res = new JsonObject();
+            res.addProperty("success", true);
+            res.addProperty("uuid", uuid.toString());
+            res.addProperty("exempt", exempt);
+            res.addProperty("exemptBy", executor);
+            sendResponse(exchange, 200, res.toString());
+        }
+    }
+
+    class TemplatesListHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            if (!isAuthenticated(exchange)) return;
+            Map<String, String> params = queryToMap(exchange.getRequestURI().getRawQuery());
+            String category = params.get("category");
+
+            JsonObject res = new JsonObject();
+            if (category != null && !category.isEmpty()) {
+                JsonArray catArr = new JsonArray();
+                for (dev.azuyo.wapeB.managers.TemplateManager.PunishmentTemplate t : plugin.getTemplateManager().getTemplatesForCategory(category)) {
+                    JsonObject to = new JsonObject();
+                    to.addProperty("key", t.getKey());
+                    to.addProperty("category", t.getCategory());
+                    to.addProperty("reason", t.getReason());
+                    to.addProperty("duration", t.getDuration());
+                    to.addProperty("silent", t.isSilent());
+                    to.addProperty("shortcut", t.getShortcut() != null ? t.getShortcut() : "");
+                    catArr.add(to);
+                }
+                res.add("templates", catArr);
+            } else {
+                JsonObject allObj = new JsonObject();
+                for (Map.Entry<String, Map<String, dev.azuyo.wapeB.managers.TemplateManager.PunishmentTemplate>> entry : plugin.getTemplateManager().getAllTemplates().entrySet()) {
+                    JsonObject catObj = new JsonObject();
+                    for (Map.Entry<String, dev.azuyo.wapeB.managers.TemplateManager.PunishmentTemplate> tEntry : entry.getValue().entrySet()) {
+                        dev.azuyo.wapeB.managers.TemplateManager.PunishmentTemplate t = tEntry.getValue();
+                        JsonObject to = new JsonObject();
+                        to.addProperty("key", t.getKey());
+                        to.addProperty("category", t.getCategory());
+                        to.addProperty("reason", t.getReason());
+                        to.addProperty("duration", t.getDuration());
+                        to.addProperty("silent", t.isSilent());
+                        to.addProperty("shortcut", t.getShortcut() != null ? t.getShortcut() : "");
+                        catObj.add(tEntry.getKey(), to);
+                    }
+                    allObj.add(entry.getKey(), catObj);
+                }
+                res.add("templates", allObj);
+            }
+            sendResponse(exchange, 200, res.toString());
+        }
+    }
+
+    class TemplatesGetHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            if (!isAuthenticated(exchange)) return;
+            Map<String, String> params = queryToMap(exchange.getRequestURI().getRawQuery());
+            String category = params.get("category");
+            String key = params.get("key");
+            String shortcut = params.get("shortcut");
+
+            dev.azuyo.wapeB.managers.TemplateManager.PunishmentTemplate t = null;
+            if (shortcut != null && !shortcut.isEmpty()) {
+                t = plugin.getTemplateManager().findTemplate(shortcut);
+            } else if (key != null && !key.isEmpty()) {
+                t = plugin.getTemplateManager().getTemplate(category, key);
+            }
+
+            if (t == null) {
+                sendResponse(exchange, 404, "{\"error\": \"Template not found\"}");
+                return;
+            }
+
+            JsonObject to = new JsonObject();
+            to.addProperty("key", t.getKey());
+            to.addProperty("category", t.getCategory());
+            to.addProperty("reason", t.getReason());
+            to.addProperty("duration", t.getDuration());
+            to.addProperty("silent", t.isSilent());
+            to.addProperty("shortcut", t.getShortcut() != null ? t.getShortcut() : "");
+            sendResponse(exchange, 200, to.toString());
+        }
+    }
+
+    class TemplatesSaveHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            if (!isAuthenticated(exchange)) return;
+            if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+                sendResponse(exchange, 405, "{\"error\": \"Method not allowed. Use POST.\"}");
+                return;
+            }
+            JsonObject body = parseJsonBody(exchange);
+            Map<String, String> queryParams = queryToMap(exchange.getRequestURI().getRawQuery());
+
+            String category = body.has("category") ? body.get("category").getAsString() : queryParams.get("category");
+            String key = body.has("key") ? body.get("key").getAsString() : queryParams.get("key");
+            String reason = body.has("reason") ? body.get("reason").getAsString() : queryParams.get("reason");
+            String duration = body.has("duration") ? body.get("duration").getAsString() : queryParams.get("duration");
+            boolean silent = body.has("silent") ? body.get("silent").getAsBoolean() : "true".equalsIgnoreCase(queryParams.get("silent"));
+            String shortcut = body.has("shortcut") ? body.get("shortcut").getAsString() : queryParams.get("shortcut");
+
+            if (category == null || category.isEmpty() || key == null || key.isEmpty()) {
+                sendResponse(exchange, 400, "{\"error\": \"Missing category or key\"}");
+                return;
+            }
+
+            boolean saved = plugin.getTemplateManager().saveTemplate(category, key, reason, duration, silent, shortcut);
+            JsonObject res = new JsonObject();
+            res.addProperty("success", saved);
+            if (saved) {
+                res.addProperty("category", category);
+                res.addProperty("key", key);
+                res.addProperty("reason", reason);
+                res.addProperty("duration", duration);
+                res.addProperty("silent", silent);
+                res.addProperty("shortcut", shortcut != null ? shortcut : "");
+            }
+            sendResponse(exchange, saved ? 200 : 500, res.toString());
+        }
+    }
+
+    class TemplatesDeleteHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            if (!isAuthenticated(exchange)) return;
+            if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+                sendResponse(exchange, 405, "{\"error\": \"Method not allowed. Use POST.\"}");
+                return;
+            }
+            JsonObject body = parseJsonBody(exchange);
+            Map<String, String> queryParams = queryToMap(exchange.getRequestURI().getRawQuery());
+
+            String category = body.has("category") ? body.get("category").getAsString() : queryParams.get("category");
+            String key = body.has("key") ? body.get("key").getAsString() : queryParams.get("key");
+
+            if (category == null || category.isEmpty() || key == null || key.isEmpty()) {
+                sendResponse(exchange, 400, "{\"error\": \"Missing category or key\"}");
+                return;
+            }
+
+            boolean deleted = plugin.getTemplateManager().deleteTemplate(category, key);
+            JsonObject res = new JsonObject();
+            res.addProperty("success", deleted);
+            sendResponse(exchange, deleted ? 200 : 404, res.toString());
+        }
     }
 
     private Map<String, String> queryToMap(String query) {

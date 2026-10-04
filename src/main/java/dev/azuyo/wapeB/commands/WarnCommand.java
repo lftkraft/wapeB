@@ -78,10 +78,11 @@ public class WarnCommand implements CommandExecutor {
 
         String reasonStr = String.join(" ", arguments);
 
-        if (reasonStr.startsWith("$")) {
-            dev.azuyo.wapeB.managers.TemplateManager.PunishmentTemplate template = plugin.getTemplateManager().getTemplate("warn", reasonStr);
-            if (template != null) {
-                reasonStr = template.getReason();
+        dev.azuyo.wapeB.managers.TemplateManager.PunishmentTemplate template = plugin.getTemplateManager().getTemplate("warn", reasonStr);
+        if (template != null) {
+            reasonStr = template.getReason();
+            if (template.isSilent()) {
+                silent = true;
             }
         }
 

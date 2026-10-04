@@ -85,15 +85,16 @@ public class BanCommand implements CommandExecutor {
 
         if (!arguments.isEmpty()) {
             String firstArg = arguments.get(0);
-            if (firstArg.startsWith("$")) {
-                dev.azuyo.wapeB.managers.TemplateManager.PunishmentTemplate template = plugin.getTemplateManager().getTemplate("ban", firstArg);
-                if (template != null) {
-                    reason = template.getReason();
-                    if (template.getDuration() != null && !template.getDuration().equalsIgnoreCase("perm")) {
-                        duration = TimeUtil.parseTime(template.getDuration());
-                    }
-                    arguments.remove(0);
+            dev.azuyo.wapeB.managers.TemplateManager.PunishmentTemplate template = plugin.getTemplateManager().getTemplate("ban", firstArg);
+            if (template != null) {
+                reason = template.getReason();
+                if (template.getDuration() != null && !template.getDuration().equalsIgnoreCase("perm")) {
+                    duration = TimeUtil.parseTime(template.getDuration());
                 }
+                if (template.isSilent()) {
+                    silent = true;
+                }
+                arguments.remove(0);
             } else {
                 long parsedTime = TimeUtil.parseTime(firstArg);
                 if (parsedTime != -1) {
@@ -104,16 +105,20 @@ public class BanCommand implements CommandExecutor {
         }
 
         if (reason == null || reason.isEmpty()) {
-            if (!arguments.isEmpty() && arguments.get(0).startsWith("$")) {
-                dev.azuyo.wapeB.managers.TemplateManager.PunishmentTemplate template = plugin.getTemplateManager().getTemplate("ban", arguments.get(0));
+            if (!arguments.isEmpty()) {
+                String potentialTemplate = arguments.get(0);
+                dev.azuyo.wapeB.managers.TemplateManager.PunishmentTemplate template = plugin.getTemplateManager().getTemplate("ban", potentialTemplate);
                 if (template != null) {
                     reason = template.getReason();
                     if (duration == -1 && template.getDuration() != null && !template.getDuration().equalsIgnoreCase("perm")) {
                         duration = TimeUtil.parseTime(template.getDuration());
                     }
+                    if (template.isSilent()) {
+                        silent = true;
+                    }
+                } else {
+                    reason = String.join(" ", arguments);
                 }
-            } else {
-                reason = String.join(" ", arguments);
             }
         }
 

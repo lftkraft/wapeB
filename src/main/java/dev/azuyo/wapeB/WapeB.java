@@ -3,6 +3,7 @@ package dev.azuyo.wapeB;
 import dev.azuyo.wapeB.api.WapeBAPI;
 import dev.azuyo.wapeB.api.WapeBAPIImpl;
 import dev.azuyo.wapeB.commands.*;
+import dev.azuyo.wapeB.importers.ImportManager;
 import dev.azuyo.wapeB.listeners.*;
 import dev.azuyo.wapeB.managers.*;
 import dev.azuyo.wapeB.utils.TimeUtil;
@@ -27,6 +28,7 @@ public final class WapeB extends JavaPlugin {
     private TemplateManager templateManager;
     private PluginMessageManager pluginMessageManager;
     private ChatSnapshotManager chatSnapshotManager;
+    private ImportManager importManager;
 
     @Override
     public void onEnable() {
@@ -74,6 +76,9 @@ public final class WapeB extends JavaPlugin {
 
         // Initialize Player Data Manager
         playerDataManager = new PlayerDataManager(this);
+
+        // Initialize Import Manager
+        importManager = new ImportManager(this);
 
         // Initialize Freeze Manager
         freezeManager = new FreezeManager(this);
@@ -199,5 +204,9 @@ public final class WapeB extends JavaPlugin {
 
     public ChatSnapshotManager getChatSnapshotManager() {
         return chatSnapshotManager;
+    }
+
+    public ImportManager getImportManager() {
+        return importManager;
     }
 }

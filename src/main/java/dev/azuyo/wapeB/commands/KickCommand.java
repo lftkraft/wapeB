@@ -82,6 +82,14 @@ public class KickCommand implements CommandExecutor {
 
         String reason = String.join(" ", arguments);
 
+        dev.azuyo.wapeB.managers.TemplateManager.PunishmentTemplate template = plugin.getTemplateManager().getTemplate("kick", reason);
+        if (template != null) {
+            reason = template.getReason();
+            if (template.isSilent()) {
+                silent = true;
+            }
+        }
+
         if (reason.isEmpty()) {
             reason = configManager.getString("messages.kick.default-reason", "You have been kicked.");
         }
