@@ -96,7 +96,12 @@ public class UnmuteCommand implements CommandExecutor {
                 return;
             }
 
-            boolean success = isIp ? plugin.getApi().revokePunishment(activeMute.getId(), executorName) : plugin.getApi().unmutePlayer(targetIdentifier, reason, executorName);
+            boolean success = false;
+            if (activeMute.getPlayerUuid() != null) {
+                success = plugin.getApi().unmutePlayer(activeMute.getPlayerUuid(), reason, executorName);
+            } else if (activeMute.getPlayerName() != null) {
+                success = plugin.getApi().unmutePlayer(activeMute.getPlayerName(), reason, executorName);
+            }
             if (!success) {
                 success = plugin.getApi().revokePunishment(activeMute.getId(), executorName);
             }

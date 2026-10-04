@@ -1146,11 +1146,11 @@ public class WapeBAPIImpl implements WapeBAPI {
         activeMute.setActive(false);
         dataManager.savePunishment(activeMute);
 
-        String broadcastMsg = configManager.getString("messages.unshadowmute.broadcast", "%prefix% %executor% un-shadowmuted %player%.");
+        String broadcastMsg = configManager.getString("messages.unmute.broadcast", "%prefix% %executor% unmuted %player%.");
         Punishment temp = new Punishment(activeMute.getId(), activeMute.getPlayerUuid(), activeMute.getPlayerName(), activeMute.getIpAddress(), activeMute.getType(), reason, executor, activeMute.getServer(), activeMute.getDate(), activeMute.getDuration());
 
         if (plugin.getPluginMessageManager() != null && !broadcastMsg.isEmpty()) {
-            plugin.getPluginMessageManager().sendPunishmentBroadcast("UNSHADOWMUTE", temp, false, broadcastMsg);
+            plugin.getPluginMessageManager().sendPunishmentBroadcast("UNMUTE", temp, false, broadcastMsg);
         }
 
         Bukkit.getScheduler().runTask(plugin, () -> {
@@ -1160,8 +1160,7 @@ public class WapeBAPIImpl implements WapeBAPI {
             boolean showRemoteBroadcast = configManager.getBoolean("broadcast.show-remote-punishments", true);
             if (appliesToThisServer || showRemoteBroadcast) {
                 if (!broadcastMsg.isEmpty()) {
-                    String staffPerm = configManager.getString("messages.punishment-notification.permission", "wapeb.notify.punishment");
-                    Bukkit.broadcast(MessageUtil.createComponent(broadcastMsg, temp), staffPerm);
+                    Bukkit.broadcast(MessageUtil.createComponent(broadcastMsg, temp));
                 }
             }
         });
