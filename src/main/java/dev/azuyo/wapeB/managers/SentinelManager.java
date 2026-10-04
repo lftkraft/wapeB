@@ -2,6 +2,7 @@ package dev.azuyo.wapeB.managers;
 
 import dev.azuyo.wapeB.WapeB;
 import dev.azuyo.wapeB.ai.GroqApiClient;
+import dev.azuyo.wapeB.utils.ChatMessage;
 import dev.azuyo.wapeB.utils.MessageUtil;
 import dev.azuyo.wapeB.utils.Punishment;
 import dev.azuyo.wapeB.utils.TimeUtil;
@@ -30,7 +31,17 @@ public class SentinelManager {
     private final String aiName;
     private final String aiMuteDuration;
     private final String aiMuteReasonPrefix;
+    private final int aiContextLines;
+    private final boolean preFilterEnabled;
+    private final int preFilterMinLength;
     private final GroqApiClient groqApiClient;
+
+    private static final Set<String> TRIVIAL_WORDS = new HashSet<>(Arrays.asList(
+        "gg", "wp", "ez", "gl", "hf", "lol", "lmao", "rofl", "xd", "dx", "thx", "ty", "np", "brb", "afk",
+        "bb", "csa", "csao", "cső", "cso", "szia", "sziasztok", "hali", "halika", "hello", "heló", "helo",
+        "ok", "oks", "oke", "oksa", "oki", "rendben", "ja", "jah", "aha", "aham", "nem", "igen", "jo", "jó",
+        "rossz", "szép", "szep", "koszi", "köszi", "koszonom", "köszönöm", "pls", "plz", "kerlek", "kérlek"
+    ));
 
     private final Map<UUID, Integer> violationCount = new HashMap<>();
     private final Map<UUID, List<Long>> messageHistory = new ConcurrentHashMap<>();
@@ -58,6 +69,9 @@ public class SentinelManager {
         this.aiName = plugin.getConfigManager().getConfig().getString("sentinel.ai.name", "Sentinel AI");
         this.aiMuteDuration = plugin.getConfigManager().getConfig().getString("sentinel.ai.ai-mute-duration", "20m");
         this.aiMuteReasonPrefix = plugin.getConfigManager().getConfig().getString("sentinel.ai.ai-mute-reason-prefix", "Chat helytelen használata - ");
+        this.aiContextLines = plugin.getConfigManager().getConfig().getInt("sentinel.ai.context-lines", 5);
+        this.preFilterEnabled = plugin.getConfigManager().getConfig().getBoolean("sentinel.ai.pre-filter.enabled", true);
+        this.preFilterMinLength = plugin.getConfigManager().getConfig().getInt("sentinel.ai.pre-filter.min-length", 3);
         
         this.groqApiClient = new GroqApiClient(plugin);
     }
@@ -90,13 +104,47 @@ public class SentinelManager {
             return true;
         }
 
-        if (aiEnabled) {
-            groqApiClient.analyzeChatMessage(message).thenAccept(response -> {
+        if (aiEnabled && !isTrivialMessage(message)) {
+            List<ChatMessage> history = null;
+            if (aiContextLines > 0 && plugin.getChatSnapshotManager() != null && plugin.getChatSnapshotManager().isEnabled()) {
+                history = plugin.getChatSnapshotManager().getRecentChat(null, aiContextLines);
+            }
+
+            groqApiClient.analyzeChatMessage(player.getName(), message, history).thenAccept(response -> {
                 if (response.isShouldMute()) {
                     plugin.getLogger().info("AI detected a violation for " + player.getName() + ". Reason: " + response.getReason());
                     applyAIMute(player, response.getReason());
                 }
             });
+        }
+
+        return false;
+    }
+
+    private boolean isTrivialMessage(String message) {
+        if (!preFilterEnabled || message == null) return false;
+        String trimmed = message.trim();
+        if (trimmed.isEmpty()) return true;
+
+        // 1. Min length check (e.g. <= 2 chars like "k", "xd", "?")
+        if (trimmed.length() < preFilterMinLength) {
+            return true;
+        }
+
+        // 2. Pure numbers, math or coordinates (e.g. "100 64 -200", "12.5", "500k")
+        if (trimmed.matches("^[0-9\\s\\-\\.,/:#kKmM]+$")) {
+            return true;
+        }
+
+        // 3. Pure punctuation or emojis / smiles (e.g. "???", "!!!", ":)", ":D", "^^", "<3")
+        if (trimmed.matches("^[\\p{Punct}\\s\\^]+$")) {
+            return true;
+        }
+
+        // 4. Exact match single trivial word (e.g. "szia", "gg", "oks")
+        String cleanWord = trimmed.toLowerCase().replaceAll("[^a-záéíóöőúüű]", "");
+        if (TRIVIAL_WORDS.contains(cleanWord)) {
+            return true;
         }
 
         return false;

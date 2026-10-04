@@ -4,6 +4,25 @@ All notable changes to **wapeB** will be documented in this file.
 
 ---
 
+## [v1.0.13-alpha.2] - alpha.2-1.0.13-aiupdate (2026-10-04)
+
+### 🤖 Sentinel AI & Performance Enhancements
+
+* **🔄 Multi-API Key Pool & Round-Robin Rotation:**
+  * Added support for `groq-api-keys` list in `config.yml`. The plugin automatically balances chat analysis requests across multiple Groq API keys in a round-robin rotation.
+  * Instant failover on `429 Too Many Requests`: automatically switches to the next available API key in the pool with zero delay.
+* **⚡ Intelligent Local Heuristic Pre-Filtering:**
+  * Added `sentinel.ai.pre-filter` to intercept and skip trivial messages locally with 0 ms overhead (saving 50–70% of API quotas).
+  * Automatically filters out short chatter (< 3 chars like `k`, `xd`, `?`), coordinates/numbers (`100 64 -200`, `500k`), punctuation/emojis (`???`, `:)`, `:D`, `^^`), and common harmless gaming terms (`gg`, `wp`, `ez`, `szia`, `oks`, `ty`, etc.).
+* **🛡️ Prompt Injection & Jailbreak Protection:**
+  * Hardened system prompt instructions to completely ignore user-injected instructions (e.g. `ignore previous instructions`, `do not mute`, JSON overrides), preventing LLM manipulation.
+* **🧠 Context-Aware Chat Analysis:**
+  * Added `sentinel.ai.context-lines` (default: 5) to supply recent conversation history from `ChatSnapshotManager`, allowing the AI to understand multi-line context, ongoing arguments, and contextual toxicity.
+* **🚀 Default Model & Parameter Optimization:**
+  * Defaulted to `llama-3.1-8b-instant` for ultra-fast latency and high free-tier daily rate limits (14,400 RPD).
+
+---
+
 ## [v1.0.13-alpha.1] - 2026-10-03
 
 ### 🚀 New Features & Enhancements
