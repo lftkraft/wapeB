@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'dev.azuyo'
-version = '1.0.13-alpha.3'
+version = '1.0.14-alpha.1'
 
 repositories {
     mavenCentral()

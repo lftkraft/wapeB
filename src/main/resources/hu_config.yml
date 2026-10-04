@@ -13,11 +13,13 @@ messages:
   no-ip-history: "%prefix% §cNincs rögzített IP címe %player% offline játékosnak."
   not-banned: "%prefix% §cEz a játékos nincs kitiltva."
   not-muted: "%prefix% §cEz a játékos nincs némítva."
+  not-shadow-muted: "%prefix% §cEz a játékos nincs szellem-némítva."
   invalid-punishment-id: "%prefix% §cÉrvénytelen büntetés ID."
   no-warnings: "%prefix% §aEnnek a játékosnak nincs figyelmeztetése."
   no-history: "%prefix% §aEnnek a játékosnak nincs büntetési előzménye."
   no-active-ban: "%prefix% §aEnnek a játékosnak nincs aktív kitiltása."
   no-active-mute: "%prefix% §aEnnek a játékosnak nincs aktív némítása."
+  no-active-shadow-mute: "%prefix% §aEnnek a játékosnak nincs aktív szellem-némítása."
   no-alts-found: "%prefix% §aNincs alt fiók találat %player% számára."
   no-active-bans: "%prefix% §aNincsenek aktív kitiltások."
   no-staff-history: "%prefix% §aNincs büntetési előzmény %executor% staff tag számára."
@@ -47,8 +49,10 @@ messages:
 
   punishment-notification:
     permission: "wapeb.notify.punishment"
+    shadowmute-permission: "wapeb.shadowmute.notify"
     ban-attempt: "%prefix% §c%player% §fpróbált csatlakozni, de ki van tiltva §c%duration%§f ideig."
     mute-attempt: "%prefix% §e%player% §fpróbált írni, de némítva van §e%duration%§f ideig."
+    shadowmute-attempt: "%prefix% §7[§cShadowMute§7] §e%player% §fpróbált írni: §7%message%"
 
   ban:
     usage: "%prefix% §fBan használata: §c/ban (játékos) [idő] [indok] [-s]"
@@ -92,6 +96,14 @@ messages:
       prefix: "§7(Néma) "
     player-is-muted: "%prefix% §cJelenleg némítva vagy! \n§cIndok: %reason% \n§cLejárat: %duration%"
 
+  shadowmute:
+    usage: "%prefix% §fShadowMute használata: §c/shadowmute (játékos) [idő] [indok] [-s] [-ip]"
+    default-reason: "Szellem-némítva lettél."
+    success: "%prefix% §fSikeresen szellem-némítottad §a%player%§f játékost."
+    broadcast: "%prefix% §x§F§F§0§0§D§9%executor% §fszellem-némította §x§F§F§0§0§D§9%player%§f játékost."
+    silent:
+      prefix: "§7(Néma) "
+
   unban:
     usage: "%prefix% §fUnban használata: §c/unban (játékos) [indok] [-s]"
     success: "%prefix% §fSikeresen feloldottad §a%player%§f kitiltását."
@@ -103,6 +115,13 @@ messages:
     usage: "%prefix% §fUnmute használata: §c/unmute (játékos) [indok] [-s]"
     success: "%prefix% §fSikeresen feloldottad §a%player%§f némítását."
     broadcast: "%prefix% §x§F§F§0§0§D§9%executor% §ffeloldotta §x§F§F§0§0§D§9%player%§f némítását."
+    silent:
+      prefix: "§7(Néma) "
+
+  unshadowmute:
+    usage: "%prefix% §fUnshadowmute használata: §c/unshadowmute (játékos) [indok] [-s]"
+    success: "%prefix% §fSikeresen feloldottad §a%player%§f szellem-némítását."
+    broadcast: "%prefix% §x§F§F§0§0§D§9%executor% §ffeloldotta §x§F§F§0§0§D§9%player%§f szellem-némítását."
     silent:
       prefix: "§7(Néma) "
       
@@ -117,6 +136,13 @@ messages:
     usage: "%prefix% §fIP-Mute használata: §c/muteip (játékos/ip) [idő] [indok] [-s]"
     success: "%prefix% §fSikeresen IP-némítottad §a%player%§f játékost."
     broadcast: "%prefix% §x§F§F§0§0§D§9%executor% §fIP-némította §x§F§F§0§0§D§9%player%§f játékost. §r\n§fVégrehajtó: §x§F§F§0§0§D§9%executor%\n§fJátékos/IP: §x§F§F§0§0§D§9%player%\n§fIndok: §x§F§F§0§0§D§9%reason%\n§fLejárat: §x§F§F§0§0§D§9%duration%\n§fLejárati dátum: §x§F§F§0§0§D§9%end_date%"
+    silent:
+      prefix: "§7(Néma) "
+
+  shadowmuteip:
+    usage: "%prefix% §fIP-ShadowMute használata: §c/shadowmuteip (játékos/ip) [idő] [indok] [-s]"
+    success: "%prefix% §fSikeresen IP-szellem-némítottad §a%player%§f játékost."
+    broadcast: "%prefix% §x§F§F§0§0§D§9%executor% §fIP-szellem-némította §x§F§F§0§0§D§9%player%§f játékost."
     silent:
       prefix: "§7(Néma) "
 

@@ -45,6 +45,26 @@ commands:
     description: Temporarily mutes a player's IP address.
     usage: /tempmuteip <player/ip> <time> [reason] [-s]
     aliases: [tmi]
+  shadowmute:
+    description: Shadow mutes a player (messages visible only to themselves).
+    usage: /shadowmute <player> [time] [reason] [-s]
+    aliases: [smute, szellemnemitas]
+  tempshadowmute:
+    description: Temporarily shadow mutes a player.
+    usage: /tempshadowmute <player> <time> [reason] [-s]
+    aliases: [tsmute, tsm]
+  shadowmuteip:
+    description: Shadow mutes a player's IP address.
+    usage: /shadowmuteip <player/ip> [time] [reason] [-s]
+    aliases: [smuteip, smi, ipshadowmute]
+  tempshadowmuteip:
+    description: Temporarily shadow mutes a player's IP address.
+    usage: /tempshadowmuteip <player/ip> <time> [reason] [-s]
+    aliases: [tsmuteip, tsmi]
+  unshadowmute:
+    description: Un-shadow mutes a player or IP address.
+    usage: /unshadowmute <player/ip> [reason] [-s]
+    aliases: [unsmute, unszellemnemitas]
   kick:
     description: Kicks a player from the server.
     usage: /kick <player> [reason] [-s]
@@ -143,6 +163,9 @@ permissions:
       wapeb.banip: true
       wapeb.mute: true
       wapeb.muteip: true
+      wapeb.shadowmute: true
+      wapeb.shadowmuteip: true
+      wapeb.unshadowmute: true
       wapeb.kick: true
       wapeb.kickall: true
       wapeb.kickall.bypass: true
@@ -168,6 +191,7 @@ permissions:
       wapeb.proof: true
       wapeb.notify: true
       wapeb.notify.punishment: true
+      wapeb.shadowmute.notify: true
       wapeb.alts.notify: true
       wapeb.sentinel.bypass: true
 
@@ -182,6 +206,18 @@ permissions:
     default: op
   wapeb.muteip:
     description: Allows IP muting players.
+    default: op
+  wapeb.shadowmute:
+    description: Allows shadow muting players.
+    default: op
+  wapeb.shadowmuteip:
+    description: Allows IP shadow muting players.
+    default: op
+  wapeb.unshadowmute:
+    description: Allows un-shadow muting players or IPs.
+    default: op
+  wapeb.shadowmute.notify:
+    description: Receives notifications when shadow-muted players attempt to chat.
     default: op
   wapeb.kick:
     description: Allows kicking players.

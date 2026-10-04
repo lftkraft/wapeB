@@ -11,6 +11,10 @@ punishment-types:
   TEMPMUTE: Temp-Mute
   IPMUTE: IP-Mute
   TEMPIPMUTE: Temp-IP-Mute
+  SHADOWMUTE: Szellem-Némítás
+  TEMPSHADOWMUTE: Temp-Szellem-Némítás
+  IPSHADOWMUTE: IP-Szellem-Némítás
+  TEMPIPSHADOWMUTE: Temp-IP-Szellem-Némítás
   WARN: Figyelmeztetés
   KICK: Kidobás
   FREEZE_LOGOUT_BAN: Lelépés-Ban
@@ -36,11 +40,13 @@ messages:
   no-ip-history: '%prefix% <white>Nincs elmentett IP-cím %player% játékoshoz.'
   not-banned: '%prefix% <white>A játékos nincs kitiltva.'
   not-muted: '%prefix% <white>A játékos nincs némítva.'
+  not-shadow-muted: '%prefix% <white>A játékos nincs szellem-némítva.'
   invalid-punishment-id: '%prefix% <white>Nem létező szankció azonosító.'
   no-warnings: '%prefix% <white>A játékosnak nincsenek aktív figyelmeztetései.'
   no-history: '%prefix% <white>A játékosnak nincsenek szankciós előzményei.'
   no-active-ban: '%prefix% <white>A játékosnak nincs aktív kitiltása.'
   no-active-mute: '%prefix% <white>A játékosnak nincs aktív némítása.'
+  no-active-shadowmute: '%prefix% <white>A játékosnak nincs aktív szellem-némítása.'
   no-alts-found: '%prefix% <white>Nem találhatók másodlagos fiókok %player% számára.'
   no-active-bans: '%prefix% <white>Jelenleg nincsenek aktív kitiltások.'
   no-staff-history: '%prefix% <color:#C34338>%executor% <white>staff taghoz nincsenek elmentett előzmények.'
@@ -74,8 +80,10 @@ messages:
 
   punishment-notification:
     permission: wapeb.notify.punishment
+    shadowmute-permission: wapeb.shadowmute.notify
     ban-attempt: '%prefix% <color:#C34338>%player% <white>megpróbált csatlakozni, de ki van tiltva (<color:#C34338>%duration%<white>).'
     mute-attempt: '%prefix% <color:#C34338>%player% <white>megpróbált írni a chatre, de némítva van (<color:#C34338>%duration%<white>).'
+    shadowmute-attempt: '%prefix% <gradient:#8a2be2:#4b0082>[ShadowMute]</gradient> <color:#C34338>%player% <white>(Szellem-némítva) beszélt: <white>%message%'
 
   ban:
     usage: '%prefix% <white>Használat: <red>/ban <játékos> [idő] [indok] [-s] [-proof:url]'
@@ -113,6 +121,14 @@ messages:
       prefix: '<gray>(Csendes) '
     player-is-muted: "%prefix% <white>Némítva vagy! Ennyi idő múlva jár le: <color:#C34338>%duration%"
 
+  shadowmute:
+    usage: '%prefix% <white>Használat: <red>/shadowmute <játékos> [idő] [indok] [-s] [-ip] [-proof:url]'
+    default-reason: Szellem-némítva a chaten.
+    success: '%prefix% <white>Sikeresen szellem-némítottad <color:#C34338>%player%<white> játékost.'
+    broadcast: '%prefix% <color:#C34338>%executor% <white>szellem-némította <color:#C34338>%player% <white>játékost.'
+    silent:
+      prefix: '<gray>(Csendes) '
+
   unban:
     usage: '%prefix% <white>Használat: <red>/unban <játékos> [indok] [-s]'
     success: '%prefix% <white>Sikeresen feloldottad <color:#C34338>%player%<white> kitiltását.'
@@ -124,6 +140,13 @@ messages:
     usage: '%prefix% <white>Használat: <red>/unmute <játékos> [indok] [-s]'
     success: '%prefix% <white>Sikeresen feloldottad <color:#C34338>%player%<white> némítását.'
     broadcast: '%prefix% <color:#C34338>%player% <white>némítása feloldva.'
+    silent:
+      prefix: '<gray>(Csendes) '
+
+  unshadowmute:
+    usage: '%prefix% <white>Használat: <red>/unshadowmute <játékos> [indok] [-s]'
+    success: '%prefix% <white>Sikeresen feloldottad <color:#C34338>%player%<white> szellem-némítását.'
+    broadcast: '%prefix% <color:#C34338>%player% <white>szellem-némítása feloldva.'
     silent:
       prefix: '<gray>(Csendes) '
 
@@ -140,6 +163,14 @@ messages:
     default-reason: IP némítás.
     success: '%prefix% <white>Sikeresen IP-némítottad <color:#C34338>%player%<white> játékost.'
     broadcast: '%prefix% <color:#C34338>%executor% <white>IP-némítást szabott ki <color:#C34338>%player% <white>játékosra.'
+    silent:
+      prefix: '<gray>(Csendes) '
+
+  shadowmuteip:
+    usage: '%prefix% <white>Használat: <red>/shadowmuteip <játékos/IP> [idő] [indok] [-s] [-proof:url]'
+    default-reason: IP szellem-némítás.
+    success: '%prefix% <white>Sikeresen IP-szellem-némítottad <color:#C34338>%player%<white> játékost.'
+    broadcast: '%prefix% <color:#C34338>%executor% <white>IP-szellem-némítást szabott ki <color:#C34338>%player% <white>játékosra.'
     silent:
       prefix: '<gray>(Csendes) '
 
@@ -232,7 +263,7 @@ messages:
     tags:
       exempt: '<gradient:#00FFCC:#0099FF>[🛡 MENTESÍTVE]</gradient>'
       cidr: '<dark_purple>[CIDR /24]</dark_purple>'
-    login-notification: '%prefix% <red>%player% <white>fiókra alt fiókok csatlakoztak! IP: <color:#C34338>%ip_address%'
+    login-notification: '<gradient:#ff9900:#ff5500>[wapeB]</gradient> <yellow>Figyelem:</yellow> <white>%player%</white> <gray>belépett! <click:run_command:''/alts %player%''><hover:show_text:''<gray>Kattints az altok listázásához:\n%alts_hover%''><gold>[Altok: %total_alts_count% | Kitiltott: %banned_alts_count% | Némított: %muted_alts_count%]</gold></hover></click></gray>'
 
   altexempt:
     usage: '%prefix% <white>Használat: <red>/altexempt <játékos> [add/remove]'

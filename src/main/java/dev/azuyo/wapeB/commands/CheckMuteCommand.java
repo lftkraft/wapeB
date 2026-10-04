@@ -50,6 +50,9 @@ public class CheckMuteCommand implements CommandExecutor {
 
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             Punishment activeMute = plugin.getApi().getActiveMute(targetNameInput);
+            if (activeMute == null) {
+                activeMute = plugin.getApi().getActiveShadowMute(targetNameInput);
+            }
             OfflinePlayer target = Bukkit.getOfflinePlayer(targetNameInput);
 
             if (activeMute == null && !target.hasPlayedBefore() && !target.isOnline()) {

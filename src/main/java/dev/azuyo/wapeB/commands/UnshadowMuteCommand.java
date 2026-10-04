@@ -11,34 +11,35 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-public class UnmuteCommand implements CommandExecutor {
+public class UnshadowMuteCommand implements CommandExecutor, TabCompleter {
 
     private final WapeB plugin;
     private final DataManager dataManager;
     private final ConfigManager configManager;
     private final PlayerDataManager playerDataManager;
     private static final Pattern IP_PATTERN = Pattern.compile("^(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})$");
-    private final List<Punishment.PunishmentType> muteTypes = Arrays.asList(
-            Punishment.PunishmentType.MUTE,
-            Punishment.PunishmentType.TEMPMUTE,
-            Punishment.PunishmentType.IPMUTE,
-            Punishment.PunishmentType.TEMPIPMUTE,
-            Punishment.PunishmentType.SENTINEL_AUTO_MUTE,
-            Punishment.PunishmentType.SENTINEL_AI_MUTE
+    private final List<Punishment.PunishmentType> shadowMuteTypes = Arrays.asList(
+            Punishment.PunishmentType.SHADOWMUTE,
+            Punishment.PunishmentType.TEMPSHADOWMUTE,
+            Punishment.PunishmentType.IPSHADOWMUTE,
+            Punishment.PunishmentType.TEMPIPSHADOWMUTE
     );
-    private final List<Punishment.PunishmentType> ipMuteTypes = Arrays.asList(
-            Punishment.PunishmentType.IPMUTE,
-            Punishment.PunishmentType.TEMPIPMUTE
+    private final List<Punishment.PunishmentType> ipShadowMuteTypes = Arrays.asList(
+            Punishment.PunishmentType.IPSHADOWMUTE,
+            Punishment.PunishmentType.TEMPIPSHADOWMUTE
     );
 
-    public UnmuteCommand(WapeB plugin) {
+    public UnshadowMuteCommand(WapeB plugin) {
         this.plugin = plugin;
         this.dataManager = plugin.getDataManager();
         this.configManager = plugin.getConfigManager();
@@ -47,24 +48,24 @@ public class UnmuteCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!sender.hasPermission("wapeb.unmute")) {
+        if (!sender.hasPermission("wapeb.unshadowmute")) {
             sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.no-permission", "&cYou don't have permission."), null));
             return true;
         }
 
         if (args.length < 1) {
-            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.unmute.usage", "&cUsage: /unmute <player/ip> [reason] [-s]"), null));
+            sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.unshadowmute.usage", "&cUsage: /unshadowmute <player/ip> [reason] [-s]"), null));
             return true;
         }
 
         String targetIdentifier = args[0];
         String executorName = (sender instanceof Player) ? sender.getName() : configManager.getString("console-name", "Console");
         boolean silent = args.length > 1 && args[args.length - 1].equalsIgnoreCase("-s");
-        String initialReason = (args.length > 1 && !silent) ? String.join(" ", Arrays.copyOfRange(args, 1, args.length)) : "Unmuted";
+        String initialReason = (args.length > 1 && !silent) ? String.join(" ", Arrays.copyOfRange(args, 1, args.length)) : "Un-shadowmuted";
         if (silent && args.length > 2) {
             initialReason = String.join(" ", Arrays.copyOfRange(args, 1, args.length - 1));
         }
-        if (initialReason.isEmpty()) initialReason = "Unmuted";
+        if (initialReason.isEmpty()) initialReason = "Un-shadowmuted";
         final String reason = initialReason;
 
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
@@ -76,27 +77,21 @@ public class UnmuteCommand implements CommandExecutor {
 
             if (isIp) {
                 targetIp = targetIdentifier;
-                activeMute = dataManager.getActivePunishment(null, null, targetIp, null, ipMuteTypes);
+                activeMute = dataManager.getActivePunishment(null, null, targetIp, null, ipShadowMuteTypes);
             } else {
                 targetPlayer = Bukkit.getOfflinePlayer(targetIdentifier);
                 UUID targetUuid = targetPlayer != null ? targetPlayer.getUniqueId() : null;
                 targetIp = targetUuid != null ? playerDataManager.getLastKnownIp(targetUuid) : null;
                 List<UUID> alts = (targetIp != null && !targetIp.isEmpty()) ? playerDataManager.getPlayersByIp(targetIp) : null;
-                activeMute = dataManager.getActivePunishment(targetUuid, targetIdentifier, targetIp, alts, muteTypes);
+                activeMute = dataManager.getActivePunishment(targetUuid, targetIdentifier, targetIp, alts, shadowMuteTypes);
             }
             
             if (activeMute == null) {
-                activeMute = isIp
-                        ? dataManager.getActivePunishment(null, null, targetIp, null, Arrays.asList(Punishment.PunishmentType.IPSHADOWMUTE, Punishment.PunishmentType.TEMPIPSHADOWMUTE))
-                        : dataManager.getActivePunishment(targetPlayer != null ? targetPlayer.getUniqueId() : null, targetIdentifier, targetIp, (targetIp != null && !targetIp.isEmpty()) ? playerDataManager.getPlayersByIp(targetIp) : null, Arrays.asList(Punishment.PunishmentType.SHADOWMUTE, Punishment.PunishmentType.TEMPSHADOWMUTE, Punishment.PunishmentType.IPSHADOWMUTE, Punishment.PunishmentType.TEMPIPSHADOWMUTE));
-            }
-
-            if (activeMute == null) {
-                sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.not-muted", "&cPlayer/IP is not muted."), null));
+                sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.not-shadow-muted", "&cPlayer/IP is not shadow-muted."), null));
                 return;
             }
 
-            boolean success = isIp ? plugin.getApi().revokePunishment(activeMute.getId(), executorName) : plugin.getApi().unmutePlayer(targetIdentifier, reason, executorName);
+            boolean success = isIp ? plugin.getApi().revokePunishment(activeMute.getId(), executorName) : plugin.getApi().unshadowMutePlayer(targetIdentifier, reason, executorName);
             if (!success) {
                 success = plugin.getApi().revokePunishment(activeMute.getId(), executorName);
             }
@@ -113,12 +108,27 @@ public class UnmuteCommand implements CommandExecutor {
                     System.currentTimeMillis(), 
                     0
                 );
-                sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.unmute.success", "&aSuccessfully unmuted %player%."), unmutePunishment));
+                sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.unshadowmute.success", "&aSuccessfully un-shadowmuted %player%."), unmutePunishment));
             } else {
-                sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.not-muted", "&cPlayer/IP is not muted."), null));
+                sender.sendMessage(MessageUtil.createComponent(configManager.getString("messages.not-shadow-muted", "&cPlayer/IP is not shadow-muted."), null));
             }
         });
 
         return true;
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        if (!sender.hasPermission("wapeb.unshadowmute")) return Collections.emptyList();
+        if (args.length == 1) {
+            List<String> players = new ArrayList<>();
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                if (p.getName().toLowerCase().startsWith(args[0].toLowerCase())) {
+                    players.add(p.getName());
+                }
+            }
+            return players;
+        }
+        return Collections.emptyList();
     }
 }

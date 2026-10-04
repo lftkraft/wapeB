@@ -118,6 +118,29 @@ public final class WapeB extends JavaPlugin {
         Objects.requireNonNull(getCommand("kickall")).setExecutor(new KickallCommand(this));
         Objects.requireNonNull(getCommand("mute")).setExecutor(new MuteCommand(this));
         Objects.requireNonNull(getCommand("muteip")).setExecutor(new MuteIpCommand(this));
+        ShadowMuteCommand shadowMuteCommand = new ShadowMuteCommand(this);
+        if (getCommand("shadowmute") != null) {
+            Objects.requireNonNull(getCommand("shadowmute")).setExecutor(shadowMuteCommand);
+            Objects.requireNonNull(getCommand("shadowmute")).setTabCompleter(shadowMuteCommand);
+        }
+        if (getCommand("tempshadowmute") != null) {
+            Objects.requireNonNull(getCommand("tempshadowmute")).setExecutor(shadowMuteCommand);
+            Objects.requireNonNull(getCommand("tempshadowmute")).setTabCompleter(shadowMuteCommand);
+        }
+        ShadowMuteIpCommand shadowMuteIpCommand = new ShadowMuteIpCommand(this);
+        if (getCommand("shadowmuteip") != null) {
+            Objects.requireNonNull(getCommand("shadowmuteip")).setExecutor(shadowMuteIpCommand);
+            Objects.requireNonNull(getCommand("shadowmuteip")).setTabCompleter(shadowMuteIpCommand);
+        }
+        if (getCommand("tempshadowmuteip") != null) {
+            Objects.requireNonNull(getCommand("tempshadowmuteip")).setExecutor(shadowMuteIpCommand);
+            Objects.requireNonNull(getCommand("tempshadowmuteip")).setTabCompleter(shadowMuteIpCommand);
+        }
+        UnshadowMuteCommand unshadowMuteCommand = new UnshadowMuteCommand(this);
+        if (getCommand("unshadowmute") != null) {
+            Objects.requireNonNull(getCommand("unshadowmute")).setExecutor(unshadowMuteCommand);
+            Objects.requireNonNull(getCommand("unshadowmute")).setTabCompleter(unshadowMuteCommand);
+        }
         Objects.requireNonNull(getCommand("unban")).setExecutor(new UnbanCommand(this));
         Objects.requireNonNull(getCommand("unmute")).setExecutor(new UnmuteCommand(this));
         Objects.requireNonNull(getCommand("warn")).setExecutor(new WarnCommand(this));

@@ -7,6 +7,7 @@ public class Punishment {
     public enum PunishmentType {
         BAN, TEMPBAN, IPBAN, TEMPIPBAN,
         MUTE, TEMPMUTE, IPMUTE, TEMPIPMUTE,
+        SHADOWMUTE, TEMPSHADOWMUTE, IPSHADOWMUTE, TEMPIPSHADOWMUTE,
         WARN, KICK,
         FREEZE_LOGOUT_BAN,
         SENTINEL_AUTO_MUTE, // New punishment type for automatic mutes

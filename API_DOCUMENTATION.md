@@ -1,6 +1,6 @@
-# 📚 wapeB API - Complete Developer Documentation (v1.0.13-alpha.3)
+# 📚 wapeB API - Complete Developer Documentation (v1.0.14-alpha.1)
 
-This documentation provides a comprehensive guide to the **wapeB** Minecraft punishment system's **Java API**, **Bukkit Events**, **Dynamic Command Overrides**, **Message Placeholders**, **Proof (Evidence) System**, **Cross-Server / Velocity Synchronization**, **Extensible Importers Framework**, **AltExempt Audit API**, **Quick-Punish Template Shortcuts**, and **HTTP REST Web API**.
+This documentation provides a comprehensive guide to the **wapeB** Minecraft punishment system's **Java API**, **Bukkit Events**, **Dynamic Command Overrides**, **Message Placeholders**, **Proof (Evidence) System**, **Cross-Server / Velocity Synchronization**, **Extensible Importers Framework**, **AltExempt Audit API**, **Quick-Punish Template Shortcuts**, **Shadow-Mute (Ghost Mute) System**, and **HTTP REST Web API**.
 
 ---
 
@@ -17,19 +17,15 @@ This documentation provides a comprehensive guide to the **wapeB** Minecraft pun
    - [G) Punishment Templates & Quick-Punish API Methods](#g-punishment-templates--quick-punish-api-methods-v1013-alpha3)
    - [H) AltExempt Extended API Methods](#h-altexempt-extended-api-methods-v1013-alpha3)
    - [I) Extensible Importer API Methods](#i-extensible-importer-api-methods-v1013-alpha3)
-   - [J) Warn-Action Escalation API Methods](#j-warn-action-escalation-api-methods)
-   - [K) Command Alias Methods](#k-command-alias-methods)
-   - [L) Message Placeholders & Duration Formatting](#l-message-placeholders--duration-formatting)
-   - [M) Smart Player & Active Punishment Lookup](#m-smart-player--active-punishment-lookup)
+   - [J) Shadow-Mute API Methods](#j-shadow-mute-api-methods-v1014-alpha1)
+   - [K) Warn-Action Escalation API Methods](#k-warn-action-escalation-api-methods)
+   - [L) Command Alias Methods](#l-command-alias-methods)
+   - [M) Message Placeholders & Duration Formatting](#m-message-placeholders--duration-formatting)
+   - [N) Smart Player & Active Punishment Lookup](#n-smart-player--active-punishment-lookup)
 4. [Bukkit Custom Events](#4-bukkit-custom-events)
 5. [Cross-Server & Velocity Architecture](#5-cross-server--velocity-architecture)
 6. [In-Game Commands & Proof Flags](#6-in-game-commands--proof-flags)
 7. [Integration Examples & Code Snippets](#7-integration-examples--code-snippets)
-   - [Example 1: Custom Mute Command (GMute)](#example-1-custom-mute-command-gmute)
-   - [Example 2: Discord Bot (SyncCord / DiscordSRV) Executor Override](#example-2-discord-bot-synccord--discordsrv-override)
-   - [Example 3: Punishing with Proof from Code](#example-3-punishing-with-proof-from-code)
-   - [Example 4: Chat Listener & Mute Notice](#example-4-chat-listener--mute-notice)
-   - [Example 5: Custom Punishment Importer Registration](#example-5-custom-punishment-importer-registration-v1013-alpha3)
 8. [HTTP REST Web API Reference](#8-http-rest-web-api-reference)
 
 ---
@@ -46,7 +42,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'com.github.lftkraft:wapeB:v1.0.13-alpha.3'
+    compileOnly 'com.github.lftkraft:wapeB:v1.0.14-alpha.1'
 }
 ```
 
@@ -474,7 +470,34 @@ api.importPunishments(batch).thenAccept(res -> {
 
 ---
 
-### J) Warn-Action Escalation API Methods
+### J) Shadow-Mute API Methods (v1.0.14-alpha.1+)
+
+Shadow-Mute (Ghost Mute) allows staff to restrict toxic players silently. The muted player can type and see their own messages locally, but other players do not receive them. Staff members with `wapeb.shadowmute.notify` receive real-time alerts.
+
+```java
+// 1. Check if a player is currently shadow-muted
+boolean isShadowMuted = api.isShadowMuted("PlayerName");
+boolean isShadowMutedUuid = api.isShadowMuted(playerUuid);
+
+// 2. Fetch active Shadow-Mute punishment object
+Punishment shadowMute = api.getActiveShadowMute("PlayerName");
+Punishment shadowMuteUuid = api.getActiveShadowMute(playerUuid);
+
+// 3. Issue a Shadow-Mute (supports time limit, IP scoping, target server, origin server, proof)
+// Permanent Shadow-Mute
+api.shadowMutePlayer("PlayerName", "Secret chat filter", "AdminName", 0L, false, false);
+
+// Temporary IP Shadow-Mute with Proof attachment
+api.shadowMutePlayer("PlayerName", "Persistent toxicity", "AdminName", 86400000L, false, true, "global", "lobby", "https://i.imgur.com/proof.png");
+
+// 4. Lift a Shadow-Mute
+api.unshadowMutePlayer("PlayerName", "Pardoned", "AdminName", false);
+api.unshadowMutePlayer(playerUuid, "Pardoned", "AdminName", false);
+```
+
+---
+
+### K) Warn-Action Escalation API Methods
 
 Query warning thresholds and trigger automated escalation actions:
 
@@ -491,7 +514,7 @@ api.triggerWarnActionCheck(playerUuid);
 
 ---
 
-### K) Command Alias Methods
+### L) Command Alias Methods
 
 Register dynamic command aliases at runtime:
 ```java
@@ -504,7 +527,7 @@ List<String> aliases = api.getCommandAliases("ban");
 
 ---
 
-### L) Message Placeholders & Duration Formatting
+### M) Message Placeholders & Duration Formatting
 
 wapeB provides rich placeholder replacement across all in-game messages, kick screens, broadcast messages, and Discord webhooks.
 
@@ -517,19 +540,20 @@ wapeB provides rich placeholder replacement across all in-game messages, kick sc
 - `%player%`: Target player username.
 - `%executor%`: Staff member / executor name.
 - `%reason%`: Punishment reason.
-- `%type%`: Display name of the punishment type (e.g. `Ban`, `Temp-Mute`).
+- `%type%`: Display name of the punishment type (e.g. `Ban`, `Temp-Mute`, `ShadowMute`).
 - `%punishment_id%`: Numeric ID of the punishment record.
 - `%server%`: Origin server where the punishment was executed.
 - `%activeserver%` / `%active_server%`: Target server scope where the punishment applies (e.g. `global` or `survival,skyblock`).
 - `%date%`: Formatted issuance date (`yyyy-MM-dd HH:mm:ss`).
 - `%end_date%`: Formatted expiration date (`yyyy-MM-dd HH:mm:ss`) or `Permanent`.
+- `%alts%` / `%banned_alts_count%` / `%muted_alts_count%` / `%total_alts_count%` / `%alts_hover%`: Alt-account metrics and formatted hover lists for staff on join alerts. *(v1.0.14-alpha.1+)*
 
 #### ⏱️ Ceiling Duration Rounding:
 Remaining seconds are rounded **upward** `((millis + 999) / 1000)` so that newly issued punishments immediately show the exact full duration (e.g. a 14-day ban instantly displays as `14d` rather than `13d 23h 59m 59s`).
 
 ---
 
-### M) Smart Player & Active Punishment Lookup
+### N) Smart Player & Active Punishment Lookup
 
 wapeB commands (`/unban`, `/unmute`, `/checkban`, `/checkmute`, `/history`, `/warnings`, `/unwarn`, `/ban`, `/mute`, `/banip`, `/muteip`, `/warn`, `/proof`, `/wapeb import`) and Java API methods resolve players and active punishments using multi-criteria queries:
 - **Case-Insensitive Username Resolution**: Matches player names regardless of capitalization.

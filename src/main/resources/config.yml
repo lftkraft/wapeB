@@ -30,6 +30,9 @@ command-overrides:
     - kitiltas
   mute:
     - nemit
+  shadowmute:
+    - szellemnemitas
+    - smute
   freeze:
     - lefagyaszt
   warn:
@@ -49,6 +52,10 @@ warn-actions:
 # --- Alt Account Settings ---
 alts:
   cidr-matching: true # If true, also matches alt accounts on the same /24 subnet (192.168.1.*)
+  alert-on-join:
+    enabled: true
+    only-if-punished: false # If true, only alerts if the joining player has banned or muted alts
+    permission: wapeb.alts.notify
 
 # --- Discord Webhook Settings ---
 discord-webhook:

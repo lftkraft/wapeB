@@ -23,11 +23,18 @@ public interface WapeBAPI {
     Punishment getActiveMute(String playerName);
     Punishment getActiveMuteByIp(String ipAddress);
 
+    Punishment getActiveShadowMute(UUID playerUuid);
+    Punishment getActiveShadowMute(String playerName);
+    Punishment getActiveShadowMuteByIp(String ipAddress);
+
     Punishment getActiveBanForPlayerOrAlt(UUID playerUuid);
     Punishment getActiveBanForPlayerOrAlt(String playerName);
 
     Punishment getActiveMuteForPlayerOrAlt(UUID playerUuid);
     Punishment getActiveMuteForPlayerOrAlt(String playerName);
+
+    Punishment getActiveShadowMuteForPlayerOrAlt(UUID playerUuid);
+    Punishment getActiveShadowMuteForPlayerOrAlt(String playerName);
 
     List<Punishment> getWarnings(UUID playerUuid);
     List<Punishment> getWarnings(String playerName);
@@ -63,11 +70,18 @@ public interface WapeBAPI {
     boolean isMuted(String playerName);
     boolean isMutedByIp(String ipAddress);
 
+    boolean isShadowMuted(UUID playerUuid);
+    boolean isShadowMuted(String playerName);
+    boolean isShadowMutedByIp(String ipAddress);
+
     boolean isBannedForPlayerOrAlt(UUID playerUuid);
     boolean isBannedForPlayerOrAlt(String playerName);
 
     boolean isMutedForPlayerOrAlt(UUID playerUuid);
     boolean isMutedForPlayerOrAlt(String playerName);
+
+    boolean isShadowMutedForPlayerOrAlt(UUID playerUuid);
+    boolean isShadowMutedForPlayerOrAlt(String playerName);
 
     boolean isFrozen(UUID playerUuid);
     boolean isFrozen(String playerName);
@@ -94,6 +108,15 @@ public interface WapeBAPI {
     boolean mutePlayer(String targetName, String reason, String executor, long duration, boolean silent, boolean ipMute, String activeServer, String server);
     boolean mutePlayer(UUID target, String reason, String executor, long duration, boolean silent, boolean ipMute, String activeServer, String server, String proof);
     boolean mutePlayer(String targetName, String reason, String executor, long duration, boolean silent, boolean ipMute, String activeServer, String server, String proof);
+
+    boolean shadowMutePlayer(UUID target, String reason, String executor, long duration, boolean silent, boolean ipMute);
+    boolean shadowMutePlayer(String targetName, String reason, String executor, long duration, boolean silent, boolean ipMute);
+    boolean shadowMutePlayer(UUID target, String reason, String executor, long duration, boolean silent, boolean ipMute, String activeServer);
+    boolean shadowMutePlayer(String targetName, String reason, String executor, long duration, boolean silent, boolean ipMute, String activeServer);
+    boolean shadowMutePlayer(UUID target, String reason, String executor, long duration, boolean silent, boolean ipMute, String activeServer, String server);
+    boolean shadowMutePlayer(String targetName, String reason, String executor, long duration, boolean silent, boolean ipMute, String activeServer, String server);
+    boolean shadowMutePlayer(UUID target, String reason, String executor, long duration, boolean silent, boolean ipMute, String activeServer, String server, String proof);
+    boolean shadowMutePlayer(String targetName, String reason, String executor, long duration, boolean silent, boolean ipMute, String activeServer, String server, String proof);
 
     boolean warnPlayer(UUID target, String reason, String executor, boolean silent);
     boolean warnPlayer(String targetName, String reason, String executor, boolean silent);
@@ -124,6 +147,9 @@ public interface WapeBAPI {
 
     boolean unmutePlayer(UUID target, String reason, String executor);
     boolean unmutePlayer(String targetName, String reason, String executor);
+
+    boolean unshadowMutePlayer(UUID target, String reason, String executor);
+    boolean unshadowMutePlayer(String targetName, String reason, String executor);
 
     boolean revokePunishment(int punishmentId, String executor);
 

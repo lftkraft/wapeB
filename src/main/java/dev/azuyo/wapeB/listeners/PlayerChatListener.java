@@ -32,11 +32,17 @@ public class PlayerChatListener implements Listener {
             Punishment.PunishmentType.SENTINEL_AI_MUTE
     );
 
-    // No cooldown for the player's own mute message as requested.
-    
+    private final List<Punishment.PunishmentType> shadowMuteTypes = Arrays.asList(
+            Punishment.PunishmentType.SHADOWMUTE,
+            Punishment.PunishmentType.TEMPSHADOWMUTE,
+            Punishment.PunishmentType.IPSHADOWMUTE,
+            Punishment.PunishmentType.TEMPIPSHADOWMUTE
+    );
+
     // Cooldown for staff mute notifications (1 minute)
     private final Map<UUID, Long> lastMuteStaffAlertTime = new HashMap<>();
-    private static final long STAFF_ALERT_COOLDOWN_MILLIS = 60 * 1000; // 1 minute
+    private final Map<UUID, Long> lastShadowMuteStaffAlertTime = new HashMap<>();
+    private static final long STAFF_ALERT_COOLDOWN_MILLIS = 10 * 1000; // 10 seconds for shadow-mute alerts
 
     public PlayerChatListener(WapeB plugin) {
         this.plugin = plugin;
@@ -69,6 +75,23 @@ public class PlayerChatListener implements Listener {
             }
         }
 
+        // --- Shadow-Mute Check ---
+        Punishment activeShadowMute = dataManager.getActivePunishment(player.getUniqueId(), playerIp, shadowMuteTypes);
+        if (activeShadowMute != null) {
+            if (activeShadowMute.getDuration() != -1 && activeShadowMute.getEnd() <= System.currentTimeMillis()) {
+                activeShadowMute.setActive(false);
+                dataManager.savePunishment(activeShadowMute);
+            } else {
+                // Keep the chat message visible ONLY to the shadow-muted player
+                event.getRecipients().clear();
+                event.getRecipients().add(player);
+
+                // Notify staff about shadowmute attempt
+                notifyShadowMuteStaff(activeShadowMute, event.getMessage());
+                return; // Do not process with Sentinel or other handlers
+            }
+        }
+
         // --- Sentinel Check ---
         if (sentinelManager.checkMessage(player, event.getMessage())) {
             event.setCancelled(true);
@@ -81,7 +104,7 @@ public class PlayerChatListener implements Listener {
         
         // 1 minute cooldown for staff notifications
         if (lastMuteStaffAlertTime.containsKey(playerUuid) &&
-            currentTime - lastMuteStaffAlertTime.get(playerUuid) < STAFF_ALERT_COOLDOWN_MILLIS) {
+            currentTime - lastMuteStaffAlertTime.get(playerUuid) < 60 * 1000) {
             return;
         }
 
@@ -97,5 +120,31 @@ public class PlayerChatListener implements Listener {
         Bukkit.getOnlinePlayers().stream()
               .filter(staff -> staff.hasPermission(permission))
               .forEach(staff -> staff.sendMessage(MessageUtil.createComponent(message, punishment)));
+    }
+
+    private void notifyShadowMuteStaff(Punishment punishment, String chatMessage) {
+        long currentTime = System.currentTimeMillis();
+        UUID playerUuid = punishment.getPlayerUuid();
+
+        if (lastShadowMuteStaffAlertTime.containsKey(playerUuid) &&
+            currentTime - lastShadowMuteStaffAlertTime.get(playerUuid) < STAFF_ALERT_COOLDOWN_MILLIS) {
+            return;
+        }
+
+        String permission = plugin.getConfigManager().getString("messages.punishment-notification.shadowmute-permission", "wapeb.shadowmute.notify");
+        String message = plugin.getConfigManager().getString("messages.punishment-notification.shadowmute-attempt",
+                "%prefix% <#ff5555>%player%</#ff5555> <gray>(ShadowMute) beszélt:</gray> <white>%message%</white>");
+        if (message.isEmpty()) return;
+
+        lastShadowMuteStaffAlertTime.put(playerUuid, currentTime);
+
+        Map<String, String> placeholders = new HashMap<>();
+        placeholders.put("%message%", chatMessage);
+        placeholders.put("%player%", punishment.getPlayerName() != null ? punishment.getPlayerName() : "Unknown");
+        placeholders.put("%reason%", punishment.getReason() != null ? punishment.getReason() : "");
+
+        Bukkit.getOnlinePlayers().stream()
+              .filter(staff -> staff.hasPermission(permission) || staff.hasPermission("wapeb.notify.punishment") || staff.hasPermission("wapeb.notify"))
+              .forEach(staff -> staff.sendMessage(MessageUtil.createComponent(message, punishment, placeholders)));
     }
 }

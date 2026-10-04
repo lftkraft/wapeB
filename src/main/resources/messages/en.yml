@@ -11,6 +11,10 @@ punishment-types:
   TEMPMUTE: Temp-Mute
   IPMUTE: IP-Mute
   TEMPIPMUTE: Temp-IP-Mute
+  SHADOWMUTE: Shadow-Mute
+  TEMPSHADOWMUTE: Temp-Shadow-Mute
+  IPSHADOWMUTE: IP-Shadow-Mute
+  TEMPIPSHADOWMUTE: Temp-IP-Shadow-Mute
   WARN: Warning
   KICK: Kick
   FREEZE_LOGOUT_BAN: Logout-Ban
@@ -36,11 +40,13 @@ messages:
   no-ip-history: '%prefix% <red>No recorded IP address found for player %player%.'
   not-banned: '%prefix% <red>Player is not banned.'
   not-muted: '%prefix% <red>Player is not muted.'
+  not-shadow-muted: '%prefix% <red>Player is not shadow-muted.'
   invalid-punishment-id: '%prefix% <red>Invalid punishment ID.'
   no-warnings: '%prefix% <yellow>This player has no active warnings.'
   no-history: '%prefix% <yellow>This player has no punishment history.'
   no-active-ban: '%prefix% <yellow>This player has no active ban.'
   no-active-mute: '%prefix% <yellow>This player has no active mute.'
+  no-active-shadowmute: '%prefix% <yellow>This player has no active shadow-mute.'
   no-alts-found: '%prefix% <yellow>No alternative accounts found for %player%.'
   no-active-bans: '%prefix% <yellow>There are no active bans on the server.'
   no-staff-history: '%prefix% <yellow>No history records found for staff member %executor%.'
@@ -74,8 +80,10 @@ messages:
 
   punishment-notification:
     permission: wapeb.notify.punishment
+    shadowmute-permission: wapeb.shadowmute.notify
     ban-attempt: '%prefix% <color:#C34338>%player% <white>attempted to connect while banned (<color:#C34338>%duration%<white>).'
     mute-attempt: '%prefix% <color:#C34338>%player% <white>attempted to chat while muted (<color:#C34338>%duration%<white>).'
+    shadowmute-attempt: '%prefix% <gradient:#8a2be2:#4b0082>[ShadowMute]</gradient> <color:#C34338>%player% <white>(ShadowMuted) tried to chat: <white>%message%'
 
   ban:
     usage: '%prefix% <white>Usage: <red>/ban <player> [time] [reason] [-s]'
@@ -114,6 +122,14 @@ messages:
       prefix: '<gray>(Silent) '
     player-is-muted: "%prefix% <red>You are currently muted! Expires in: <color:#C34338>%duration%"
 
+  shadowmute:
+    usage: '%prefix% <white>Usage: <red>/shadowmute <player> [time] [reason] [-s] [-ip]'
+    default-reason: Chat rules violation.
+    success: '%prefix% <green>Successfully shadow-muted <color:#C34338>%player%<green>.'
+    broadcast: '%prefix% <color:#C34338>%executor% <white>shadow-muted <color:#C34338>%player%<white>.'
+    silent:
+      prefix: '<gray>(Silent) '
+
   unban:
     usage: '%prefix% <white>Usage: <red>/unban <player> [reason] [-s]'
     success: '%prefix% <green>Successfully unbanned <color:#C34338>%player%<green>.'
@@ -125,6 +141,13 @@ messages:
     usage: '%prefix% <white>Usage: <red>/unmute <player> [reason] [-s]'
     success: '%prefix% <green>Successfully unmuted <color:#C34338>%player%<green>.'
     broadcast: '%prefix% <color:#C34338>%player% <white>was unmuted.'
+    silent:
+      prefix: '<gray>(Silent) '
+
+  unshadowmute:
+    usage: '%prefix% <white>Usage: <red>/unshadowmute <player> [reason] [-s]'
+    success: '%prefix% <green>Successfully un-shadowmuted <color:#C34338>%player%<green>.'
+    broadcast: '%prefix% <color:#C34338>%player% <white>was un-shadowmuted.'
     silent:
       prefix: '<gray>(Silent) '
 
@@ -141,6 +164,14 @@ messages:
     default-reason: IP Mute.
     success: '%prefix% <green>Successfully IP-muted <color:#C34338>%player%<green>.'
     broadcast: '%prefix% <color:#C34338>%executor% <white>IP-muted <color:#C34338>%player%<white>.'
+    silent:
+      prefix: '<gray>(Silent) '
+
+  shadowmuteip:
+    usage: '%prefix% <white>Usage: <red>/shadowmuteip <player/IP> [time] [reason] [-s]'
+    default-reason: IP Shadow Mute.
+    success: '%prefix% <green>Successfully IP-shadow-muted <color:#C34338>%player%<green>.'
+    broadcast: '%prefix% <color:#C34338>%executor% <white>IP-shadow-muted <color:#C34338>%player%<white>.'
     silent:
       prefix: '<gray>(Silent) '
 
@@ -231,9 +262,9 @@ messages:
       muted: <yellow><bold>[MUTED]</bold></yellow>
       none: <white>[CLEAN]</white>
     tags:
-      exempt: '<gradient:#00FFCC:#0099FF>[đź›ˇď¸Ź EXEMPT]</gradient>'
+      exempt: '<gradient:#00FFCC:#0099FF>[🛡 EXEMPT]</gradient>'
       cidr: '<dark_purple>[CIDR /24]</dark_purple>'
-    login-notification: '%prefix% <red>%player% <white>has logged in with alts! IP: <color:#C34338>%ip_address%'
+    login-notification: '<gradient:#ff9900:#ff5500>[wapeB]</gradient> <yellow>Warning:</yellow> <white>%player%</white> <gray>joined! <click:run_command:''/alts %player%''><hover:show_text:''<gray>Click to view alts:\n%alts_hover%''><gold>[Alts: %total_alts_count% | Banned: %banned_alts_count% | Muted: %muted_alts_count%]</gold></hover></click></gray>'
 
   altexempt:
     usage: '%prefix% <white>Usage: <red>/altexempt <player> [add/remove]'

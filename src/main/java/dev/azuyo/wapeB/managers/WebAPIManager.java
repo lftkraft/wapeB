@@ -102,6 +102,7 @@ public class WebAPIManager {
             server.createContext("/api/player/punishments", new PlayerPunishmentsHandler());
             server.createContext("/api/player/checkban", new CheckBanHandler());
             server.createContext("/api/player/checkmute", new CheckMuteHandler());
+            server.createContext("/api/player/checkshadowmute", new CheckShadowMuteHandler());
             server.createContext("/api/commands/list", new CommandsListHandler());
             server.createContext("/api/punish/execute", new PunishExecuteHandler());
             server.createContext("/api/punish/remove", new PunishRemoveHandler());
@@ -511,7 +512,8 @@ public class WebAPIManager {
             WebhookUtil.sendPunishmentWebhook(p);
             
             String typeKey = type.name().toLowerCase();
-            if (typeKey.contains("ban")) typeKey = "ban";
+            if (typeKey.contains("shadowmute")) typeKey = "shadowmute";
+            else if (typeKey.contains("ban")) typeKey = "ban";
             else if (typeKey.contains("mute")) typeKey = "mute";
             else if (typeKey.contains("warn")) typeKey = "warn";
             
@@ -816,6 +818,40 @@ public class WebAPIManager {
         }
     }
 
+    class CheckShadowMuteHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            if (!isAuthenticated(exchange)) return;
+            Map<String, String> params = queryToMap(exchange.getRequestURI().getRawQuery());
+            String playerName = params.get("player");
+            if (playerName == null || playerName.isEmpty()) {
+                sendResponse(exchange, 400, "{\"error\": \"Missing player parameter\"}");
+                return;
+            }
+
+            Punishment activeMute = plugin.getApi().getActiveShadowMute(playerName);
+            if (activeMute == null) {
+                sendResponse(exchange, 200, "{\"shadowMuted\": false, \"muted\": false}");
+            } else {
+                JsonObject obj = new JsonObject();
+                obj.addProperty("shadowMuted", true);
+                obj.addProperty("muted", true);
+                obj.addProperty("id", activeMute.getId());
+                obj.addProperty("player", activeMute.getPlayerName());
+                obj.addProperty("type", activeMute.getType().name());
+                obj.addProperty("reason", activeMute.getReason());
+                obj.addProperty("executor", activeMute.getExecutorName());
+                obj.addProperty("activeServer", activeMute.getActiveServer());
+                obj.addProperty("active_server", activeMute.getActiveServer());
+                obj.addProperty("server", activeMute.getServer());
+                obj.addProperty("proof", activeMute.getProof() != null ? activeMute.getProof() : "");
+                obj.addProperty("date", activeMute.getDate());
+                obj.addProperty("end", activeMute.getEnd());
+                sendResponse(exchange, 200, obj.toString());
+            }
+        }
+    }
+
     class CommandsListHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
@@ -824,8 +860,9 @@ public class WebAPIManager {
             JsonArray commandsArr = new JsonArray();
 
             String[] pluginCommands = new String[]{
-                "ban", "banip", "kick", "kickall", "mute", "muteip", "unban", "unmute",
-                "warn", "unwarn", "warnings", "history", "checkban", "checkmute",
+                "ban", "banip", "kick", "kickall", "mute", "muteip",
+                "shadowmute", "shadowmuteip", "tempshadowmute", "tempshadowmuteip", "unshadowmute",
+                "unban", "unmute", "warn", "unwarn", "warnings", "history", "checkban", "checkmute",
                 "freeze", "unfreeze", "alts", "banlist", "staffhistory", "lockdown",
                 "wapeb", "globalunban", "punish", "punish-rollback", "punish-proof"
             };

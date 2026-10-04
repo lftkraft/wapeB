@@ -1,5 +1,5 @@
 # 🔨 wapeB - Ultimate Minecraft Punishment System, AI Sentinel & Developer API
-newest: v1.0.13-alpha.3
+newest: v1.0.14-alpha.1
 
 [![GitHub](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/lftkraft/wapeB)
 [![Discord](https://img.shields.io/badge/Discord-Community-5865F2?logo=discord&logoColor=white)](https://dc.coolnw.eu)
@@ -14,13 +14,14 @@ newest: v1.0.13-alpha.3
 
 ## ✨ Key Features
 
-- 🔨 **Complete Punishment Suite**: Ban, TempBan, IP-Ban, Temp-IP-Ban, Mute, TempMute, IP-Mute, Temp-IP-Mute, Warn, Kick, KickAll, Freeze, and Lockdown.
+- 🔨 **Complete Punishment Suite**: Ban, TempBan, IP-Ban, Temp-IP-Ban, Mute, TempMute, IP-Mute, Temp-IP-Mute, **ShadowMute** (Ghost Mute), Temp-ShadowMute, IP-ShadowMute, Warn, Kick, KickAll, Freeze, and Lockdown.
+- 👻 **Shadow-Mute (Szellem-Némítás) Suite**: Silently mute toxic players without alerting them. The shadow-muted player sees their messages appear normally in chat, while messages are filtered for others and staff receive live violation notifications.
+- 👥 **Alt-Account Audit & Join Alerts**: Instant MiniMessage alerts on player join when alt accounts are detected (with customizable click actions, hover details, and filter options).
 - 📦 **Extensible Importers & Auto-Detection**: One-click automated database/file migration for **LiteBans** (SQLite/MySQL), **AdvancedBan** (SQLite/MySQL), and **Vanilla JSON** (`banned-players.json`, `banned-ips.json`).
 - ⚡ **Velocity Proxy Support & Companion Plugin**: Instant cross-server plugin messaging (`wapeb:channel`) and proxy-level disconnects with `wapeb-velocity`.
 - 🔗 **Evidence & Proof System (`/proof`)**: Attach clickable screenshot/video proof URLs directly to punishments via commands (`-proof:<url>`), GUI, Webhook, Java API, or REST.
 - 📸 **Automated Chat Snapshots**: In-memory rolling buffer automatically captures and freezes relevant chat history upon punishment into human-readable JSON files with retention cleanup.
 - ⚡ **Quick-Punish Templates & Shortcuts**: Fast numeric and custom command shortcuts (e.g. `/ban Player #1`, `/mute Player #spam`, `/warn Player #toxicity`) with automatic silent flag inheritance.
-- 👥 **Alt-Account & AltExempt Audit System**: Detect alternative accounts linked by IP or `/24` subnets with full audit logging (`exemptBy`, `exemptDate`) and whitelist management (`/alts`, `/altexempt`).
 - 🌐 **Multi-Server Scoping (`activeserver` vs `server`)**: Target specific servers (`survival`, `server1,server2`) or apply network-wide (`global`), while preserving the origin server audit trail.
 - 🤖 **Sentinel AI Auto-Moderation**: Multi-API key pool with round-robin failover, local heuristic pre-filtering, and Groq AI chat violation analysis with zero server lag.
 - 🎨 **Included Cyberpunk Web Panel**: A modern Neon/Glassmorphism web interface with in-game 2FA login, Chart.js statistics, and live punishment management.
@@ -43,16 +44,19 @@ newest: v1.0.13-alpha.3
 | `/banip` | `/banip <player/ip> [time] [reason/#code] [-s] [-server] [-proof:url]` | IP/CIDR Subnet Ban | `wapeb.banip` |
 | `/mute` | `/mute <player/ip> [time] [reason/#code] [-s] [-server] [-proof:url]` | Mute or Temp-Mute a player | `wapeb.mute` |
 | `/muteip` | `/muteip <player/ip> [time] [reason/#code] [-s] [-server] [-proof:url]` | IP-Mute a player | `wapeb.muteip` |
+| `/shadowmute` | `/shadowmute <player> [time] [reason/#code] [-s] [-ip] [-server] [-proof:url]` | Shadow-mute player (ghost mute) | `wapeb.shadowmute` |
+| `/shadowmuteip` | `/shadowmuteip <player/ip> [time] [reason/#code] [-s] [-server] [-proof:url]` | IP Shadow-mute player | `wapeb.shadowmuteip` |
+| `/unshadowmute` | `/unshadowmute <player/ip> [reason] [-s]` | Un-shadowmute player or IP | `wapeb.unshadowmute` |
 | `/warn` | `/warn <player> [reason/#code] [-s] [-server] [-proof:url]` | Warn a player | `wapeb.warn` |
 | `/kick` | `/kick <player> [reason/#code] [-s] [-server] [-proof:url]` | Kick a player from the server | `wapeb.kick` |
 | `/kickall` | `/kickall [reason]` | Kick all non-staff players | `wapeb.kickall` |
 | `/proof` | `/proof <set\|remove\|reset\|check> <id> [url]` | Inspect, set, or remove punishment evidence URL | `wapeb.proof` |
 | `/unban` | `/unban <player/ip> [reason] [-s]` | Unban a player or IP address | `wapeb.unban` |
-| `/unmute` | `/unmute <player/ip> [reason] [-s]` | Unmute a player or IP address | `wapeb.unmute` |
+| `/unmute` | `/unmute <player/ip> [reason] [-s]` | Unmute or un-shadowmute a player | `wapeb.unmute` |
 | `/unwarn` | `/unwarn <player> [id/all]` | Remove warnings from a player | `wapeb.unwarn` |
 | `/freeze` | `/freeze <player> [reason]` | Freeze/unfreeze player for screenshare | `wapeb.freeze` |
 | `/checkban` | `/checkban <player/ip>` | Inspect active ban status | `wapeb.checkban` |
-| `/checkmute` | `/checkmute <player/ip>` | Inspect active mute status | `wapeb.checkmute` |
+| `/checkmute` | `/checkmute <player/ip>` | Inspect active mute & shadowmute status | `wapeb.checkmute` |
 | `/history` | `/history <player>` | View full punishment history of a player | `wapeb.history` |
 | `/staffhistory` | `/staffhistory <staff>` | View staff member punishment actions | `wapeb.staffhistory` |
 | `/alts` | `/alts <player>` | View alternative accounts linked by IP/CIDR | `wapeb.alts` |
@@ -76,7 +80,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'com.github.lftkraft:wapeB:v1.0.13-alpha.3'
+    compileOnly 'com.github.lftkraft:wapeB:v1.0.14-alpha.1'
 }
 ```
 
@@ -86,7 +90,7 @@ dependencies {
     <dependency>
         <groupId>com.github.lftkraft</groupId>
         <artifactId>wapeB</artifactId>
-        <version>v1.0.13-alpha.3</version>
+        <version>v1.0.14-alpha.1</version>
         <scope>provided</scope>
     </dependency>
 </dependencies>

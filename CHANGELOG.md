@@ -4,6 +4,34 @@ All notable changes to **wapeB** will be documented in this file.
 
 ---
 
+## [v1.0.14-alpha.1] - 2026-10-04
+
+### 👻 1. Shadow-Mute (Szellem-Némítás) System
+* **Ghost Muting Mode:** Shadow-muted players are unaware they are muted. Their messages appear normally on their own screen, while server-wide recipients are cleared so no other players receive them.
+* **New Punishment Types:** Added `SHADOWMUTE`, `TEMPSHADOWMUTE`, `IPSHADOWMUTE`, and `TEMPIPSHADOWMUTE`.
+* **New Commands & Aliases:**
+  - `/shadowmute <player> [time] [reason/#code] [-s] [-ip] [-server] [-proof:url]` (Aliases: `/smute`, `/szellemnemitas`)
+  - `/tempshadowmute <player> <time> [reason/#code] [-s] [-ip] [-server] [-proof:url]` (Alias: `/tsmute`)
+  - `/shadowmuteip <player/ip> [time] [reason/#code] [-s] [-server] [-proof:url]` (Alias: `/smuteip`)
+  - `/tempshadowmuteip <player/ip> <time> [reason/#code] [-s] [-server] [-proof:url]`
+  - `/unshadowmute <player/ip> [reason] [-s]` (Alias: `/unsmute`)
+  - `/unmute` and `/checkmute` automatically resolve and interact with active shadow-mutes when regular mutes are absent.
+* **Staff Violation Alert:** Staff members with permission `wapeb.shadowmute.notify` receive real-time notifications with anti-spam cooldown when shadow-muted players attempt to speak.
+* **Java API & REST Endpoints:**
+  - Added `WapeBAPI#isShadowMuted(...)`, `WapeBAPI#getActiveShadowMute(...)`, `WapeBAPI#shadowMutePlayer(...)`, and `WapeBAPI#unshadowMutePlayer(...)`.
+  - Added REST endpoint `GET /api/player/checkshadowmute?player=...` and extended `POST /api/punish/execute` to handle `shadowmute` typeKey seamlessly.
+
+### 👥 2. Rich Alt Alert on Join
+* **Zero Hardcoding & Full MiniMessage Support:** Configurable in `config.yml` (`alts.alert-on-join.enabled`, `only-if-punished`, `permission`) with MiniMessage formatting in `messages/hu.yml`, `messages/en.yml`, and `hu_config.yml`.
+* **Rich MiniMessage Placeholders:**
+  - `%player%`: Target joining player.
+  - `%alts%` / `%alts_hover%`: Rich hover text displaying all accounts, colored statuses (`[ONLINE]`, `[OFFLINE]`, `[KITILTVA]`, `[NÉMÍTVA]`), and last known IPs.
+  - `%total_alts_count%`, `%banned_alts_count%`, `%muted_alts_count%`: Detailed account counters.
+  - `%ip%`: Clean IP address.
+* **Interactive Chat Events:** Includes `<click:run_command:'/alts %player%'>` and `<hover:show_text:'...'>` actions for instant one-click staff inspection.
+
+---
+
 ## [v1.0.13-alpha.3] - 2026-10-04
 
 ### 📦 1. Extensible Importer System & Importer API
