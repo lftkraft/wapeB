@@ -45,19 +45,45 @@ public class AdvancedBanImporter implements PunishmentImporter {
                     jdbcUrl = (String) options.get("jdbcUrl");
                     user = (String) options.get("user");
                     pass = (String) options.get("password");
+                } else if (options != null && options.containsKey("file") && (((String)options.get("file")).startsWith("jdbc:") || ((String)options.get("file")).startsWith("mysql://"))) {
+                    String raw = (String) options.get("file");
+                    jdbcUrl = raw.startsWith("mysql://") ? "jdbc:" + raw : raw;
                 } else {
-                    File sqliteFile = new File("plugins/AdvancedBan/saved.db");
-                    if (options != null && options.containsKey("file")) {
-                        sqliteFile = new File((String) options.get("file"));
+                    File customFile = (options != null && options.containsKey("file")) ? new File((String) options.get("file")) : null;
+                    File configFile = new File("plugins/AdvancedBan/config.yml");
+                    File sqliteFile = customFile != null ? customFile : new File("plugins/AdvancedBan/saved.db");
+                    if (!sqliteFile.exists() && customFile == null) {
+                        sqliteFile = new File("plugins/AdvancedBan/AdvancedBan.db");
                     }
 
-                    if (!sqliteFile.exists()) {
-                        result.addError("AdvancedBan database file not found at: " + sqliteFile.getAbsolutePath());
-                        result.setDurationMillis(System.currentTimeMillis() - startTime);
-                        future.complete(result);
-                        return;
+                    // Check config.yml first if present to detect MySQL configuration
+                    if (configFile.exists() && (customFile == null || customFile.getName().endsWith(".yml"))) {
+                        try {
+                            org.bukkit.configuration.file.FileConfiguration cfg = org.bukkit.configuration.file.YamlConfiguration.loadConfiguration(configFile);
+                            if (cfg.getBoolean("MySQL.Use", false) || cfg.getBoolean("MySQL.Enable", false)) {
+                                String ip = cfg.getString("MySQL.IP", "localhost");
+                                int port = cfg.getInt("MySQL.Port", 3306);
+                                String db = cfg.getString("MySQL.DB-Name", "AdvancedBan");
+                                user = cfg.getString("MySQL.User", "root");
+                                pass = cfg.getString("MySQL.Password", "");
+                                jdbcUrl = "jdbc:mysql://" + ip + ":" + port + "/" + db + "?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
+                                result.addDetail("Detected AdvancedBan MySQL configuration from config.yml (" + ip + ":" + port + "/" + db + ").");
+                            }
+                        } catch (Exception e) {
+                            plugin.getLogger().warning("Could not parse AdvancedBan config.yml: " + e.getMessage());
+                        }
                     }
-                    jdbcUrl = "jdbc:sqlite:" + sqliteFile.getAbsolutePath();
+
+                    if (jdbcUrl == null) {
+                        if (!sqliteFile.exists()) {
+                            result.addError("AdvancedBan database file not found at: " + sqliteFile.getAbsolutePath() + " and no MySQL settings in config.yml.");
+                            result.setDurationMillis(System.currentTimeMillis() - startTime);
+                            future.complete(result);
+                            return;
+                        }
+                        jdbcUrl = "jdbc:sqlite:" + sqliteFile.getAbsolutePath();
+                        result.addDetail("Using AdvancedBan SQLite file: " + sqliteFile.getName());
+                    }
                 }
 
                 conn = DriverManager.getConnection(jdbcUrl, user, pass);

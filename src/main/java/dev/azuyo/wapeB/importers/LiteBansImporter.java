@@ -45,20 +45,42 @@ public class LiteBansImporter implements PunishmentImporter {
                     jdbcUrl = (String) options.get("jdbcUrl");
                     user = (String) options.get("user");
                     pass = (String) options.get("password");
+                } else if (options != null && options.containsKey("file") && (((String)options.get("file")).startsWith("jdbc:") || ((String)options.get("file")).startsWith("mysql://"))) {
+                    String raw = (String) options.get("file");
+                    jdbcUrl = raw.startsWith("mysql://") ? "jdbc:" + raw : raw;
                 } else {
-                    // Default to local LiteBans SQLite file
-                    File sqliteFile = new File("plugins/LiteBans/litebans.sqlite");
-                    if (options != null && options.containsKey("file")) {
-                        sqliteFile = new File((String) options.get("file"));
+                    File customFile = (options != null && options.containsKey("file")) ? new File((String) options.get("file")) : null;
+                    File configFile = new File("plugins/LiteBans/config.yml");
+                    File sqliteFile = customFile != null ? customFile : new File("plugins/LiteBans/litebans.sqlite");
+
+                    // Check config.yml first if present to detect MySQL configuration
+                    if (configFile.exists() && (customFile == null || customFile.getName().endsWith(".yml"))) {
+                        try {
+                            org.bukkit.configuration.file.FileConfiguration cfg = org.bukkit.configuration.file.YamlConfiguration.loadConfiguration(configFile);
+                            String driver = cfg.getString("driver", "SQLite");
+                            if ("MySQL".equalsIgnoreCase(driver) || "MariaDB".equalsIgnoreCase(driver)) {
+                                String addr = cfg.getString("address", "localhost:3306");
+                                String db = cfg.getString("database", "litebans");
+                                user = cfg.getString("username", "root");
+                                pass = cfg.getString("password", "");
+                                jdbcUrl = "jdbc:mysql://" + addr + "/" + db + "?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
+                                result.addDetail("Detected LiteBans MySQL configuration from config.yml (" + addr + "/" + db + ").");
+                            }
+                        } catch (Exception e) {
+                            plugin.getLogger().warning("Could not parse LiteBans config.yml: " + e.getMessage());
+                        }
                     }
 
-                    if (!sqliteFile.exists()) {
-                        result.addError("LiteBans database file not found at: " + sqliteFile.getAbsolutePath());
-                        result.setDurationMillis(System.currentTimeMillis() - startTime);
-                        future.complete(result);
-                        return;
+                    if (jdbcUrl == null) {
+                        if (!sqliteFile.exists()) {
+                            result.addError("LiteBans database file not found at: " + sqliteFile.getAbsolutePath() + " and no MySQL settings in config.yml.");
+                            result.setDurationMillis(System.currentTimeMillis() - startTime);
+                            future.complete(result);
+                            return;
+                        }
+                        jdbcUrl = "jdbc:sqlite:" + sqliteFile.getAbsolutePath();
+                        result.addDetail("Using LiteBans SQLite file: " + sqliteFile.getName());
                     }
-                    jdbcUrl = "jdbc:sqlite:" + sqliteFile.getAbsolutePath();
                 }
 
                 conn = DriverManager.getConnection(jdbcUrl, user, pass);
