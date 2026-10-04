@@ -102,7 +102,7 @@ freeze:
 web-api:
   enabled: true
   port: 30842
-  api-key: trpzw345uwe49txfgbOhdG_DFGDVCXAer432
+  api-key: change_it
 
 # --- Sentinel Settings ---
 sentinel:
