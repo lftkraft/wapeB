@@ -1,6 +1,6 @@
-# 📚 wapeB API - Complete Developer Documentation (v1.0.13-alpha.2)
+# 📚 wapeB API - Complete Developer Documentation (v1.0.13-alpha.3)
 
-This documentation provides a comprehensive guide to the **wapeB** Minecraft punishment system's **Java API**, **Bukkit Events**, **Dynamic Command Overrides**, **Message Placeholders**, **Proof (Evidence) System**, **Cross-Server / Velocity Synchronization**, and **HTTP REST Web API**.
+This documentation provides a comprehensive guide to the **wapeB** Minecraft punishment system's **Java API**, **Bukkit Events**, **Dynamic Command Overrides**, **Message Placeholders**, **Proof (Evidence) System**, **Cross-Server / Velocity Synchronization**, **Extensible Importers Framework**, **AltExempt Audit API**, **Quick-Punish Template Shortcuts**, and **HTTP REST Web API**.
 
 ---
 
@@ -14,11 +14,13 @@ This documentation provides a comprehensive guide to the **wapeB** Minecraft pun
    - [D) Proof (Evidence) API Methods](#d-proof-evidence-api-methods)
    - [E) Chat Snapshot API Methods](#e-chat-snapshot-api-methods-v1013-alpha2)
    - [F) CIDR Subnet & GeoIP API Methods](#f-cidr-subnet--geoip-api-methods)
-   - [G) Punishment Templates API Methods](#g-punishment-templates-api-methods)
-   - [H) Warn-Action Escalation API Methods](#h-warn-action-escalation-api-methods)
-   - [I) Command Alias Methods](#i-command-alias-methods)
-   - [J) Message Placeholders & Duration Formatting](#j-message-placeholders--duration-formatting)
-   - [K) Smart Player & Active Punishment Lookup](#k-smart-player--active-punishment-lookup)
+   - [G) Punishment Templates & Quick-Punish API Methods](#g-punishment-templates--quick-punish-api-methods-v1013-alpha3)
+   - [H) AltExempt Extended API Methods](#h-altexempt-extended-api-methods-v1013-alpha3)
+   - [I) Extensible Importer API Methods](#i-extensible-importer-api-methods-v1013-alpha3)
+   - [J) Warn-Action Escalation API Methods](#j-warn-action-escalation-api-methods)
+   - [K) Command Alias Methods](#k-command-alias-methods)
+   - [L) Message Placeholders & Duration Formatting](#l-message-placeholders--duration-formatting)
+   - [M) Smart Player & Active Punishment Lookup](#m-smart-player--active-punishment-lookup)
 4. [Bukkit Custom Events](#4-bukkit-custom-events)
 5. [Cross-Server & Velocity Architecture](#5-cross-server--velocity-architecture)
 6. [In-Game Commands & Proof Flags](#6-in-game-commands--proof-flags)
@@ -27,6 +29,7 @@ This documentation provides a comprehensive guide to the **wapeB** Minecraft pun
    - [Example 2: Discord Bot (SyncCord / DiscordSRV) Executor Override](#example-2-discord-bot-synccord--discordsrv-override)
    - [Example 3: Punishing with Proof from Code](#example-3-punishing-with-proof-from-code)
    - [Example 4: Chat Listener & Mute Notice](#example-4-chat-listener--mute-notice)
+   - [Example 5: Custom Punishment Importer Registration](#example-5-custom-punishment-importer-registration-v1013-alpha3)
 8. [HTTP REST Web API Reference](#8-http-rest-web-api-reference)
 
 ---
@@ -43,7 +46,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'com.github.lftkraft:wapeB:v1.0.13-alpha.2'
+    compileOnly 'com.github.lftkraft:wapeB:v1.0.13-alpha.3'
 }
 ```
 
@@ -55,7 +58,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("com.github.lftkraft:wapeB:v1.0.13-alpha.2")
+    compileOnly("com.github.lftkraft:wapeB:v1.0.13-alpha.3")
 }
 ```
 
@@ -72,7 +75,7 @@ dependencies {
     <dependency>
         <groupId>com.github.lftkraft</groupId>
         <artifactId>wapeB</artifactId>
-        <version>v1.0.13-alpha.2</version>
+        <version>v1.0.13-alpha.3</version>
         <scope>provided</scope>
     </dependency>
 </dependencies>
@@ -366,28 +369,112 @@ String location = geo.getFormatted(); // e.g. "Australia (AU) | City: Sydney | I
 
 ---
 
-### G) Punishment Templates API Methods
+### G) Punishment Templates & Quick-Punish API Methods (v1.0.13-alpha.3+)
 
-Query and apply pre-defined punishment templates from `templates.yml`:
+Query, create, delete, and apply pre-defined punishment templates and fast `#shortcut` codes programmatically:
 
 ```java
-// Fetch a specific template (e.g., category: "ban", key: "cheat")
-PunishmentTemplate template = api.getTemplate("ban", "cheat");
+// 1. Fetch a specific template by category and key (e.g., category: "ban", key: "cheating")
+PunishmentTemplate template = api.getTemplate("ban", "cheating");
 String reason = template.getReason();
 String duration = template.getDuration();
+boolean isSilent = template.isSilent();
+String shortcut = template.getShortcut(); // e.g., "#1"
 
-// Fetch all templates or category templates
+// 2. Global template lookup by name or shortcut (e.g. "#1", "$spam", "cheating")
+PunishmentTemplate found = api.findTemplate("#1");
+
+// 3. Fetch all templates or category templates
 Map<String, Map<String, PunishmentTemplate>> allTemplates = api.getAllTemplates();
 List<PunishmentTemplate> banTemplates = api.getTemplatesForCategory("ban");
 
-// Execute punishment directly using a template
-api.punishWithTemplate(playerUuid, "ban", "cheat", "AdminName", false);
+// 4. Create or update a template dynamically at runtime
+boolean saved = api.saveTemplate("ban", "flyhack", "Using illegal flight modifications", "30d", true, "#fly");
+
+// 5. Delete a template dynamically
+boolean deleted = api.deleteTemplate("ban", "flyhack");
+
+// 6. Execute punishment directly using a template
+api.punishWithTemplate(playerUuid, "ban", "cheating", "AdminName", false);
 api.punishWithTemplate("PlayerName", "mute", "spam", "ModName", false);
 ```
 
 ---
 
-### H) Warn-Action Escalation API Methods
+### H) AltExempt Extended API Methods (v1.0.13-alpha.3+)
+
+Full Java API access to manage and query alt-exemption audit details:
+
+```java
+// 1. Check if a player is alt-exempt
+boolean exempt = api.isAltExempt(playerUuid);
+
+// 2. Set alt-exempt state with custom issuer audit metadata
+api.setAltExempt(playerUuid, true, "SeniorAdmin");
+
+// 3. Fetch full audit details for a specific player (who exempted them and when)
+AltExemptInfo details = api.getAltExemptDetails(playerUuid);
+if (details != null) {
+    String name = details.getPlayerName();
+    String exemptBy = details.getExemptBy();
+    long exemptDate = details.getExemptDate();
+}
+
+// 4. Query all currently alt-exempted players across the server
+List<AltExemptInfo> allExempts = api.getAllAltExempts();
+for (AltExemptInfo info : allExempts) {
+    System.out.println(info.getPlayerName() + " (" + info.getPlayerUuid() + ") exempt by " + info.getExemptBy());
+}
+```
+
+---
+
+### I) Extensible Importer API Methods (v1.0.13-alpha.3+)
+
+wapeB provides an open, extensible framework for registering custom punishment importers and executing batch migrations:
+
+```java
+// 1. Register a custom plugin/format importer:
+api.registerImporter(new PunishmentImporter() {
+    @Override
+    public String getName() {
+        return "mycustompunish";
+    }
+
+    @Override
+    public String getDescription() {
+        return "Imports punishments from MyCustomPunish plugin database.";
+    }
+
+    @Override
+    public CompletableFuture<ImportResult> executeImport(Map<String, Object> options) {
+        return CompletableFuture.supplyAsync(() -> {
+            ImportResult result = new ImportResult(getName(), true);
+            // Read source data and save via plugin
+            return result;
+        });
+    }
+});
+
+// 2. Query registered importers
+List<PunishmentImporter> importers = api.getRegisteredImporters();
+
+// 3. Trigger an importer asynchronously
+api.executeImport("litebans", Map.of("file", "plugins/LiteBans/litebans.sqlite"))
+   .thenAccept(result -> {
+       System.out.println("Imported: " + result.getImportedCount() + ", Failed: " + result.getFailedCount());
+   });
+
+// 4. Batch import a List of Punishment objects directly into database
+List<Punishment> batch = List.of(new Punishment(...));
+api.importPunishments(batch).thenAccept(res -> {
+    System.out.println("Batch import finished: " + res.getImportedCount() + " records saved.");
+});
+```
+
+---
+
+### J) Warn-Action Escalation API Methods
 
 Query warning thresholds and trigger automated escalation actions:
 
@@ -404,7 +491,7 @@ api.triggerWarnActionCheck(playerUuid);
 
 ---
 
-### I) Command Alias Methods
+### K) Command Alias Methods
 
 Register dynamic command aliases at runtime:
 ```java
@@ -417,7 +504,7 @@ List<String> aliases = api.getCommandAliases("ban");
 
 ---
 
-### J) Message Placeholders & Duration Formatting
+### L) Message Placeholders & Duration Formatting
 
 wapeB provides rich placeholder replacement across all in-game messages, kick screens, broadcast messages, and Discord webhooks.
 
@@ -442,9 +529,9 @@ Remaining seconds are rounded **upward** `((millis + 999) / 1000)` so that newly
 
 ---
 
-### K) Smart Player & Active Punishment Lookup
+### M) Smart Player & Active Punishment Lookup
 
-wapeB commands (`/unban`, `/unmute`, `/checkban`, `/checkmute`, `/history`, `/warnings`, `/unwarn`, `/ban`, `/mute`, `/banip`, `/muteip`, `/warn`, `/proof`) and Java API methods resolve players and active punishments using multi-criteria queries:
+wapeB commands (`/unban`, `/unmute`, `/checkban`, `/checkmute`, `/history`, `/warnings`, `/unwarn`, `/ban`, `/mute`, `/banip`, `/muteip`, `/warn`, `/proof`, `/wapeb import`) and Java API methods resolve players and active punishments using multi-criteria queries:
 - **Case-Insensitive Username Resolution**: Matches player names regardless of capitalization.
 - **UUID & IP Resolution**: Automatically resolves offline player UUIDs and recorded IP addresses.
 - **Alt Account Linkage**: Queries linked alt accounts when evaluating active bans/mutes.
@@ -631,11 +718,48 @@ public void onChat(AsyncPlayerChatEvent event) {
 
 ---
 
+### Example 5: Custom Punishment Importer Registration (v1.0.13-alpha.3+)
+Register an external database migration pipeline directly from your add-on plugin:
+
+```java
+public class MyBanMigrationPlugin extends JavaPlugin {
+    @Override
+    public void onEnable() {
+        WapeBAPI api = WapeB.getApi();
+        if (api != null) {
+            api.registerImporter(new PunishmentImporter() {
+                @Override
+                public String getName() {
+                    return "customsql";
+                }
+
+                @Override
+                public String getDescription() {
+                    return "Custom legacy MySQL ban table importer";
+                }
+
+                @Override
+                public CompletableFuture<ImportResult> executeImport(Map<String, Object> options) {
+                    return CompletableFuture.supplyAsync(() -> {
+                        ImportResult result = new ImportResult(getName(), true);
+                        // Query external DB and add records
+                        result.incrementImported();
+                        return result;
+                    });
+                }
+            });
+        }
+    }
+}
+```
+
+---
+
 ## 8. HTTP REST Web API Reference
 
-wapeB includes a built-in HTTP REST server for remote management (e.g., Web Dashboards, Discord bots).
+wapeB includes a high-performance built-in HTTP REST server for remote management (e.g., Web Dashboards, Discord bots, Webhooks).
 
-- **Header**: `X-API-Key: YOUR_API_KEY_HERE`
+- **Authentication Header**: `X-API-Key: YOUR_API_KEY_HERE`
 
 ### Endpoints Overview:
 
@@ -654,25 +778,121 @@ wapeB includes a built-in HTTP REST server for remote management (e.g., Web Dash
 | `/api/punish/remove` | GET/POST | `id=105` | Remove punishment by ID |
 | `/api/stats` | GET | - | Daily and hourly punishment statistics |
 | `/api/lockdown` | GET/POST | `action=on&reason=Maintenance` | Manage server lockdown state |
+| `/api/import/sources` | GET | - | List all available registered punishment importers *(v1.0.13-alpha.3+)* |
+| `/api/import/execute` | POST | JSON: `{ "source": "litebans", "options": { "file": "path" } }` | Execute punishment import asynchronously *(v1.0.13-alpha.3+)* |
+| `/api/altexempt/list` | GET | - | Query all currently alt-exempted accounts with timestamps and audit records *(v1.0.13-alpha.3+)* |
+| `/api/altexempt/check` | GET | `player=Name` or `uuid=UUID` | Check alt-exemption state and issuer metadata *(v1.0.13-alpha.3+)* |
+| `/api/altexempt/set` | POST | JSON: `{ "player": "Name", "exempt": true, "executor": "Admin" }` | Toggle alt exemption status programmatically *(v1.0.13-alpha.3+)* |
+| `/api/templates/list` | GET | `category=ban` (optional) | Query all punishment templates and `#shortcut` codes *(v1.0.13-alpha.3+)* |
+| `/api/templates/get` | GET | `key=cheating` or `shortcut=#1` | Fetch template details *(v1.0.13-alpha.3+)* |
+| `/api/templates/save` | POST | JSON: `{ "category": "ban", "key": "cheating", "reason": "Hacking", "duration": "30d", "silent": true, "shortcut": "#1" }` | Create or update punishment template *(v1.0.13-alpha.3+)* |
+| `/api/templates/delete` | POST | JSON: `{ "category": "ban", "key": "cheating" }` | Delete template *(v1.0.13-alpha.3+)* |
 
-#### `/api/punish/proof` JSON Examples:
+---
 
-**GET /api/punish/proof?id=12**
+### REST JSON Examples:
+
+#### 1. AltExempt Check (`GET /api/altexempt/check?player=Steve`)
 ```json
 {
-  "id": 12,
-  "player": "Cheater99",
-  "type": "BAN",
-  "proof": "https://imgur.com/evidence.png"
+  "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
+  "player": "Steve",
+  "exempt": true,
+  "exemptBy": "SeniorAdmin",
+  "exemptDate": 1728054000000
 }
 ```
 
-**POST /api/punish/proof?id=12&action=set&proof=https://imgur.com/evidence.png**
+#### 2. AltExempt Set (`POST /api/altexempt/set`)
+**Request Body:**
+```json
+{
+  "player": "Steve",
+  "exempt": true,
+  "executor": "WebDashboard"
+}
+```
+**Response:**
 ```json
 {
   "success": true,
-  "id": 12,
-  "proof": "https://imgur.com/evidence.png"
+  "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
+  "exempt": true,
+  "exemptBy": "WebDashboard"
+}
+```
+
+#### 3. Execute Importer (`POST /api/import/execute`)
+**Request Body:**
+```json
+{
+  "source": "litebans",
+  "options": {
+    "file": "plugins/LiteBans/litebans.sqlite"
+  }
+}
+```
+**Response:**
+```json
+{
+  "source": "litebans",
+  "success": true,
+  "imported": 1420,
+  "failed": 0,
+  "durationMs": 350,
+  "errors": [],
+  "details": [
+    "Processed 1420 punishment records from LiteBans SQLite database."
+  ]
+}
+```
+
+#### 4. Templates List (`GET /api/templates/list?category=ban`)
+```json
+{
+  "templates": [
+    {
+      "key": "cheating",
+      "category": "ban",
+      "reason": "Unfair Advantage / Cheat modifications",
+      "duration": "30d",
+      "silent": false,
+      "shortcut": "#1"
+    },
+    {
+      "key": "botting",
+      "category": "ban",
+      "reason": "Botnet / Automation",
+      "duration": "perm",
+      "silent": true,
+      "shortcut": "#2"
+    }
+  ]
+}
+```
+
+#### 5. Save Template (`POST /api/templates/save`)
+**Request Body:**
+```json
+{
+  "category": "ban",
+  "key": "xray",
+  "reason": "X-Ray / Mining Automation",
+  "duration": "14d",
+  "silent": false,
+  "shortcut": "#xray"
+}
+```
+**Response:**
+```json
+{
+  "success": true,
+  "category": "ban",
+  "key": "xray",
+  "reason": "X-Ray / Mining Automation",
+  "duration": "14d",
+  "silent": false,
+  "shortcut": "#xray"
 }
 ```
 
@@ -681,3 +901,4 @@ wapeB includes a built-in HTTP REST server for remote management (e.g., Web Dash
 ## 📜 License & Support
 Developed for Spigot / Paper 1.18.2 - 1.21.x Minecraft servers.  
 GitHub Repository: [https://github.com/lftkraft/wapeB](https://github.com/lftkraft/wapeB)
+
