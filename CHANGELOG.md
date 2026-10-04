@@ -6,20 +6,47 @@ All notable changes to **wapeB** will be documented in this file.
 
 ## [v1.0.13-alpha.2] - alpha.2-1.0.13-aiupdate (2026-10-04)
 
-### 🤖 Sentinel AI & Performance Enhancements
+### 📸 1. Automatic Chat Snapshot System
+- **In-Memory Rolling Buffer:** Automatically tracks the last 300 chat messages globally with nanosecond precision and player context.
+- **Incident Snapshot Creation:** Automatically captures and persists relevant chat history upon punishment execution into formatted, human-readable JSON files (`plugins/wapeB/snapshots/<id>.json`).
+- **Human-Readable Formatting:** Snapshots now include formatted dates (`created_date`), per-message timestamps (`time`, `date`), and a direct `chat_log` string array for effortless staff inspection.
+- **Flexible Retention Policy:** Added hour and day retention cleanup (`retention: "1h"`, `"12h"`, `"7d"`, `"30d"`), running asynchronously every 15 minutes with zero server tick impact.
+- **Offline Delivery Queue:** If backend servers issue punishments while empty, snapshots are safely queued in `pending_snapshots/` and automatically flushed to Velocity upon player join.
 
-* **🔄 Multi-API Key Pool & Round-Robin Rotation:**
-  * Added support for `groq-api-keys` list in `config.yml`. The plugin automatically balances chat analysis requests across multiple Groq API keys in a round-robin rotation.
-  * Instant failover on `429 Too Many Requests`: automatically switches to the next available API key in the pool with zero delay.
-* **⚡ Intelligent Local Heuristic Pre-Filtering:**
-  * Added `sentinel.ai.pre-filter` to intercept and skip trivial messages locally with 0 ms overhead (saving 50–70% of API quotas).
-  * Automatically filters out short chatter (< 3 chars like `k`, `xd`, `?`), coordinates/numbers (`100 64 -200`, `500k`), punctuation/emojis (`???`, `:)`, `:D`, `^^`), and common harmless gaming terms (`gg`, `wp`, `ez`, `szia`, `oks`, `ty`, etc.).
-* **🛡️ Prompt Injection & Jailbreak Protection:**
-  * Hardened system prompt instructions to completely ignore user-injected instructions (e.g. `ignore previous instructions`, `do not mute`, JSON overrides), preventing LLM manipulation.
-* **🧠 Context-Aware Chat Analysis:**
-  * Added `sentinel.ai.context-lines` (default: 5) to supply recent conversation history from `ChatSnapshotManager`, allowing the AI to understand multi-line context, ongoing arguments, and contextual toxicity.
-* **🚀 Default Model & Parameter Optimization:**
-  * Defaulted to `llama-3.1-8b-instant` for ultra-fast latency and high free-tier daily rate limits (14,400 RPD).
+### 🔗 2. Comprehensive Proof (Evidence) System
+- **New `/proof` Command:** Added `/proof <set|remove|reset|check> <id> [url]` with full tab-completion.
+- **Punishment Command Flag:** All punishment commands (`/ban`, `/mute`, `/kick`, `/warn`, `/banip`, `/muteip`) now accept `-proof:<url>` directly (e.g., `/mute Player 1h Toxicity -proof:https://imgur.com/...`).
+- **Clean Clickable Links:** Proof URLs in chat (`/checkban`, `/checkmute`, `/proof check`) are cleanly clickable with browser opening support without intrusive hover text.
+- **Full Ecosystem Integration:** Proof links seamlessly display across GUI menus, Discord Webhooks, Java API, and the REST Web API (`/api/punish/proof`).
+
+### 🔄 3. Automatic Config & Language File Synchronization (Auto-Sync)
+- **Seamless Upgrades:** Updating the plugin jar now automatically scans and merges all newly introduced configuration sections and message keys into existing files on disk.
+- **Preserves Custom Settings:** Existing customized messages, prefixes, and database credentials remain 100% untouched while new features are added seamlessly.
+- **Missing Key Fallback:** Safe fallback to default language strings prevents any `Missing message` errors.
+
+### 🌐 4. Multi-Server & Velocity Cross-Server Synchronization
+- **Server Identity:** Configurable `server-name` identifier per Spigot instance (`Lobby`, `szerver1`, `szerver2`, etc.).
+- **Broadcast Scoping:** Added `broadcast.show-remote-punishments` configuration to toggle whether punishments targeting external servers broadcast locally.
+- **Real-Time Network Sync:** Synchronized punishment broadcasts and chat snapshots across the network via the `wapeb:main` Plugin Messaging channel.
+
+### ⚡ 5. Asynchronous Event & Threading Fixes (Paper/Purpur)
+- **Async Event Compatibility:** `PlayerPunishEvent`, `PlayerUnpunishEvent`, `PlayerFreezeEvent`, `PlayerUnfreezeEvent`, and `LockdownToggleEvent` now dynamically detect and report their calling thread context (`super(!Bukkit.isPrimaryThread())`).
+- Completely resolves `IllegalStateException: Event may only be triggered synchronously` when executing punishments on asynchronous database worker threads.
+
+### 📜 6. Smart History Sorting & Pagination
+- **Guaranteed Newest-First Order:** Resolved query order reversal so the most recent punishments (e.g., #17, #16) always appear on Page 1.
+- **Page Header Indicators:** Added dynamic page tracking (`(%page%/%max_page%)`) and `%total%` placeholders in `/history`.
+
+### 🌍 7. Complete Localization & UTF-8 Refresh
+- Updated all 11 built-in language configurations (`hu`, `en`, `de`, `fr`, `es`, `pt`, `ru`, `ro`, `da`, `sv`, `custom`) with the latest Proof, Snapshot, and Console notification keys.
+- Enforced clean UTF-8 encoding across Hungarian and international message files.
+
+### 🤖 8. Sentinel AI Performance & Quota Optimization
+- **Multi-API Key Pool & Rotation:** Added `groq-api-keys` list support in `config.yml` with round-robin balancing and instant zero-delay failover on `429 Too Many Requests`.
+- **Intelligent Local Pre-Filtering:** Added `sentinel.ai.pre-filter` to skip trivial chatter (< 3 chars, coordinates, numbers, emojies, harmless gaming acronyms) locally with 0 ms overhead, saving 50–70% of API quotas.
+- **Prompt Injection & Jailbreak Protection:** Hardened system instructions to ignore user-injected commands and JSON overrides.
+- **Context-Aware Chat History Analysis:** Added `sentinel.ai.context-lines` (default: 5) to supply conversation context from `ChatSnapshotManager` for accurate evaluation of ongoing disputes.
+- **Optimized Model:** Defaulted to `llama-3.1-8b-instant` for ultra-low latency and 14,400 RPD free tier limit.
 
 ---
 
